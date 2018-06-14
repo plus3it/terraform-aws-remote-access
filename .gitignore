@@ -1,0 +1,9 @@
+# Terraform directories
+.terraform/
+
+# cfn templates
+cfn/
+
+# Terraform environment files
+*.tfvars
+*.tfstate*
