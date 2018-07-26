@@ -1,6 +1,7 @@
 resource "null_resource" "push-changeset" {
   provisioner "local-exec" {
-    command = "${join(" ", local.create_changeset_command)}"
+    command     = "${join(" ", local.create_changeset_command)}"
+    working_dir = ".."
   }
 
   provisioner "local-exec" {
