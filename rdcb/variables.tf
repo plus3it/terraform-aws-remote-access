@@ -1,6 +1,4 @@
-variable "region" {
-  default = "us-east-1"
-}
+#variable "region" {}
 
 variable "amiid" {
   default = "ami-0a792a70"
@@ -74,10 +72,6 @@ variable "VpcId" {
   default = "vpc-12345678"
 }
 
-variable "stackname" {
-  default = "rdsh-remote-stack-test-1234"
-}
+variable "stackname" {}
 
-variable "s3bucket" {
-  default = "s3-bucket"
-}
+variable "s3bucket" {}

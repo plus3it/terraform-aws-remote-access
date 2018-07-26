@@ -1,8 +1,3 @@
-provider "aws" {
-  #  use aws profile for iam access keys
-  region = "${var.region}"
-}
-
 resource "null_resource" "push-changeset" {
   provisioner "local-exec" {
     command = "${join(" ", local.create_changeset_command)}"
@@ -14,14 +9,45 @@ resource "null_resource" "push-changeset" {
   }
 }
 
+resource "null_resource" "check-changeset" {
+  provisioner "local-exec" {
+    command = "${join(" ", local.check_stack_progress)}"
+  }
+
+  triggers = {
+    instance_ids = "${join(",", null_resource.push-changeset.*.id)}"
+  }
+}
+
 locals {
   create_changeset_command = [
     "aws cloudformation deploy --template",
     "cfn/ra_rdcb_fileserver_standalone.template.cfn.json",
     " --stack-name ${var.stackname}",
     " --s3-bucket ${var.s3bucket}",
-    " --parameter-overrides AmiId=${var.amiid} AmiNameSearchString=${var.aminamesearchstring} DataVolumeSize=${var.datavolumesize} DataVolumeSnapshotid=${var.datavolumesnapshotid} DomainAccessUserGroup=\"${var.domainaccessusergroup}\" DomainDirectoryId=${var.domaindirectoryid} DomainDnsName=${var.domaindnsname} DomainNetbiosName=${var.DomainNetbiosName} Ec2SubnetAz=${var.ec2subnetaz} Ec2SubnetId=${var.Ec2SubnetId} ExtraSecurityGroupIds=${var.ExtraSecurityGroupIds} InstanceType=${var.InstanceType} KeyPairName=${var.KeyPairName} NoPublicIp=${var.NoPublicIp} NotificationEmail=${var.NotificationEmail} SsmKeyId=${var.SsmKeyId} SsmRdcbCredential=${var.SsmRdcbCredential} VpcId=${var.VpcId}",
+    " --parameter-overrides AmiId=${var.amiid}",
+    "AmiNameSearchString=${var.aminamesearchstring}",
+    "DataVolumeSize=${var.datavolumesize}",
+    "DataVolumeSnapshotid=${var.datavolumesnapshotid}",
+    "DomainAccessUserGroup=\"${var.domainaccessusergroup}\"",
+    "DomainDirectoryId=${var.domaindirectoryid}",
+    "DomainDnsName=${var.domaindnsname}",
+    "DomainNetbiosName=${var.DomainNetbiosName}",
+    "Ec2SubnetAz=${var.ec2subnetaz}",
+    "Ec2SubnetId=${var.Ec2SubnetId}",
+    "ExtraSecurityGroupIds=${var.ExtraSecurityGroupIds}",
+    "InstanceType=${var.InstanceType}",
+    "KeyPairName=${var.KeyPairName}",
+    "NoPublicIp=${var.NoPublicIp}",
+    "NotificationEmail=${var.NotificationEmail}",
+    "SsmKeyId=${var.SsmKeyId}",
+    "SsmRdcbCredential=${var.SsmRdcbCredential}",
+    "VpcId=${var.VpcId}",
     "--capabilities CAPABILITY_IAM",
+  ]
+
+  check_stack_progress = [
+    "aws cloudformation wait stack-create-complete --stack-name ${var.stackname}",
   ]
 
   destroy_changeset_command = [
@@ -32,9 +58,6 @@ locals {
 #data "template_file" "user_data" {
 #  template = "${file("${path.module}/../cfn/ra_rdcb_fileserver_standalone.template.cfn.json")}"
 #
-#  vars {
-#    #    git_repo            = "${var.git_repo}"  #    GUAC_ADMIN_PASSWORD = "${var.GUAC_ADMIN_PASSWORD}"  #    domain_name         = "${var.domain_name}"
-#  }
 #}
 
 

@@ -1,3 +1,8 @@
+provider "aws" {
+  #  use aws profile for iam access keys
+  region = "${var.region}"
+}
+
 module "rdcb" {
   source = "./rdcb"
   amiid  = "${var.amiid}"
@@ -30,14 +35,12 @@ module "rdcb" {
 
   NotificationEmail = "${var.NotificationEmail}"
 
+  #Region = "${var.region}"
+
   SsmKeyId = "${var.SsmKeyId}"
-
   SsmRdcbCredential = "${var.SsmRdcbCredential}"
-
   VpcId = "${var.VpcId}"
-
   stackname = "${var.stackname}"
-
   s3bucket = "${var.s3bucket}"
 }
 
