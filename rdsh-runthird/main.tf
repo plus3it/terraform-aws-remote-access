@@ -1,0 +1,36 @@
+provider "aws" {
+  #  use aws profile for iam access keys
+  region = "${var.region}"
+}
+
+module "rdsh" {
+  source                   = "./rdsh"
+  stackname                = "${var.stackname}"
+  s3bucket                 = "${var.s3bucket}"
+  AmiId                    = "${var.AmiId}"
+  AmiNameSearchString      = "${var.AmiNameSearchString}"
+  ConnectionBrokerFqdn     = "${var.ConnectionBrokerFqdn}"
+  DesiredCapacity          = "${var.DesiredCapacity}"
+  DomainAccessUserGroup    = "${var.DomainAccessUserGroup}"
+  DomainDirectoryId        = "${var.DomainDirectoryId}"
+  DomainDnsName            = "${var.DomainDnsName}"
+  DomainNetbiosName        = "${var.DomainNetbiosName}"
+  DomainSvcAccount         = "${var.DomainSvcAccount}"
+  DomainSvcPassword        = "${var.DomainSvcPassword}"
+  ExtraSecurityGroupIds    = "${var.ExtraSecurityGroupIds}"
+  ForceUpdateToggle        = "${var.ForceUpdateToggle}"
+  InstanceType             = "${var.InstanceType}"
+  KeyPairName              = "${var.KeyPairName}"
+  LdapContainerOU          = "${var.LdapContainerOU}"
+  MaxCapacity              = "${var.MaxCapacity}"
+  MinCapacity              = "${var.MinCapacity}"
+  RdpPrivateKeyPassword    = "${var.RdpPrivateKeyPassword}"
+  RdpPrivateKeyPfx         = "${var.RdpPrivateKeyPfx}"
+  RdpPrivateKeyS3Endpoint  = "${var.RdpPrivateKeyS3Endpoint}"
+  ScaleDownDesiredCapacity = "${var.ScaleDownDesiredCapacity}"
+  ScaleDownSchedule        = "${var.ScaleDownSchedule}"
+  ScaleUpSchedule          = "${var.ScaleUpSchedule}"
+  SubnetIDs                = "${var.SubnetIDs}"
+  UserProfileDiskPath      = "${var.UserProfileDiskPath}"
+  VPC                      = "${var.VPC}"
+}

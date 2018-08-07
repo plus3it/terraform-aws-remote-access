@@ -8,68 +8,80 @@ variable "aminamesearchstring" {
   default = "Windows_Server-2016-English-Full-Base-*"
 }
 
-variable "datavolumesize" {
-  default = "50"
-}
-
-variable "datavolumesnapshotid" {
-  default = ""
-}
-
-variable "domainaccessusergroup" {
-  default = "yourgroupname"
+variable "desiredcapacity" {
+  default = "1"
 }
 
 variable "domaindirectoryid" {
-  default = "d-xxxxxxxxxx"
-}
-
-variable "domaindnsname" {
-  default = "ad.example.com"
-}
-
-variable "DomainNetbiosName" {
-  default = "example"
-}
-
-variable "ec2subnetaz" {
-  default = "us-east-1a"
-}
-
-variable "Ec2SubnetId" {
-  default = "subnet-xxxxxxxx"
-}
-
-variable "ExtraSecurityGroupIds" {
-  default = "sg-xxxxxxxx"
-}
-
-variable "InstanceType" {
-  default = "t2.medium"
-}
-
-variable "KeyPairName" {
-  default = "yourkeypair"
-}
-
-variable "NoPublicIp" {
-  default = "true"
-}
-
-variable "NotificationEmail" {
   default = ""
 }
 
-variable "SsmKeyId" {
-  default = "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+variable "domaindnsname" {
+  default = ""
 }
 
-variable "SsmRdcbCredential" {
-  default = "/your-path/rdcb/credential"
+variable "domainnetbiosname" {
+  default = ""
 }
 
-variable "VpcId" {
-  default = "vpc-12345678"
+variable "forceupdatetoggle" {
+  default = "B"
+}
+
+variable "InstanceType" {
+  default = "m5.large"
+}
+
+variable "KeyPairName" {
+  default = ""
+}
+
+variable "maxcapacity" {
+  default = "3"
+}
+
+variable "mincapacity" {
+  default = "0"
+}
+
+variable "privatesubnetids" {
+  default = "subnet-xxxxxxxx,subnet-yyyyyyyy,subnet-zzzzzzzz"
+}
+
+variable "publicsubnetids" {
+  default = "subnet-xxxxxxxx,subnet-yyyyyyyy,subnet-zzzzzzzz"
+}
+
+variable "remoteaccessusergroup" {
+  default = "Remote Access User Group"
+}
+
+variable "scaledowndesiredcapacity" {
+  default = "1"
+}
+
+variable "scaledownschedule" {
+  default = "0 1 * * *"
+}
+
+variable "scaleupschedule" {
+  default = "0 10 * * Mon-Fri"
+}
+
+variable "SslCertificateName" {
+  default = ""
+}
+
+variable "SslCertificateService" {
+  default = ""
+}
+
+variable "UpdateSchedule" {
+  default = "cron(30 5 ? * Sun *)"
+}
+
+variable "VPC" {
+  default = ""
 }
 
 variable "stackname" {}

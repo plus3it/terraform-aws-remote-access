@@ -3,56 +3,51 @@ provider "aws" {
   region = "${var.region}"
 }
 
-module "rdcb" {
-  source = "./rdcb"
+module "rdgw" {
+  source = "./rdgw"
   amiid  = "${var.amiid}"
 
   aminamesearchstring = "${var.aminamesearchstring}"
 
-  datavolumesize = "${var.datavolumesize}"
-
-  datavolumesnapshotid = "${var.datavolumesnapshotid}"
-
-  domainaccessusergroup = "${var.domainaccessusergroup}"
+  desiredcapacity = "${var.desiredcapacity}"
 
   domaindirectoryid = "${var.domaindirectoryid}"
 
   domaindnsname = "${var.domaindnsname}"
 
-  DomainNetbiosName = "${var.DomainNetbiosName}"
+  domainnetbiosname = "${var.domainnetbiosname}"
 
-  ec2subnetaz = "${var.ec2subnetaz}"
-
-  Ec2SubnetId = "${var.Ec2SubnetId}"
-
-  ExtraSecurityGroupIds = "${var.ExtraSecurityGroupIds}"
+  forceupdatetoggle = "${var.forceupdatetoggle}"
 
   InstanceType = "${var.InstanceType}"
 
   KeyPairName = "${var.KeyPairName}"
 
-  NoPublicIp = "${var.NoPublicIp}"
+  maxcapacity = "${var.maxcapacity}"
 
-  NotificationEmail = "${var.NotificationEmail}"
+  mincapacity = "${var.mincapacity}"
 
-  #Region = "${var.region}"
+  privatesubnetids = "${var.privatesubnetids}"
 
-  SsmKeyId = "${var.SsmKeyId}"
-  SsmRdcbCredential = "${var.SsmRdcbCredential}"
-  VpcId = "${var.VpcId}"
+  publicsubnetids = "${var.publicsubnetids}"
+
+  remoteaccessusergroup = "${var.remoteaccessusergroup}"
+
+  scaledowndesiredcapacity = "${var.scaledowndesiredcapacity}"
+
+  scaledownschedule = "${var.scaledownschedule}"
+
+  scaleupschedule = "${var.scaleupschedule}"
+
+  SslCertificateName = "${var.SslCertificateName}"
+
+  SslCertificateService = "${var.SslCertificateService}"
+
+  UpdateSchedule = "${var.UpdateSchedule}"
+
+  VPC = "${var.VPC}"
+
   stackname = "${var.stackname}"
+
   s3bucket = "${var.s3bucket}"
 }
-
-#output "rdcb_snsarn" {
-#  value = "${module.rdcb.outputs.rdcb_snsarn}"
-#}
-#
-#output "rdcb_instanceip" {
-#  value = "${module.rdcb.outputs.RdcbEc2InstanceIp}"
-#}
-#
-#output "rdcb_instanceid" {
-#  value = "${module.rdcb.outputs.RdcbEc2InstanceId}"
-#}
-
