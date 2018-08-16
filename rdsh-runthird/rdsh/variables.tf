@@ -15,6 +15,7 @@ variable "AmiNameSearchString" {
   default = "Windows_Server-2016-English-Full-Base-*"
 }
 
+# RDCB instance.  MUST be the actual computer name of the connection broker, not an alias/cname of any kind
 variable "ConnectionBrokerFqdn" {
   default = "hostarecord.example.com"
 }
@@ -102,6 +103,8 @@ variable "ScaleUpSchedule" {
 variable "SubnetIDs" {
   default = "subnet-xxxxxxxx,subnet-yyyyyyyy,subnet-zzzzzzzz"
 }
+
+# RDCB instance.  Must point to YOUR connection broker, and CAN be an alias
 
 variable "UserProfileDiskPath" {
   default = "\\\\\\home.example.com\\Profile$"
