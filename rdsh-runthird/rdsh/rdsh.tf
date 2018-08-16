@@ -1,3 +1,7 @@
+data "aws_cloudformation_stack" "rdsh" {
+  name = "${var.stackname}"
+  depends_on = ["null_resource.push-changeset"]
+}
 resource "null_resource" "push-changeset" {
   provisioner "local-exec" {
     command     = "${join(" ", local.create_changeset_command)}"
@@ -63,56 +67,3 @@ locals {
     "aws cloudformation delete-stack --stack-name ${var.stackname}",
   ]
 }
-
-#data "template_file" "user_data" {
-#  template = "${file("${path.module}/../cfn/ra_rdcb_fileserver_standalone.template.cfn.json")}"
-#
-#}
-
-
-#resource "aws_cloudformation_stack" "rdcb" {
-#  name = "${var.stack_name}"
-#
-#  parameters {
-#    amiid = "${var.amiid}"
-#
-#    aminamesearchstring = "${var.aminamesearchstring}"
-#
-#    datavolumesize = "${var.datavolumesize}"
-#
-#    datavolumesnapshotid = "${var.datavolumesnapshotid}"
-#
-#    domainaccessusergroup = "${var.domainaccessusergroup}"
-#
-#    domaindirectoryid = "${var.domaindirectoryid}"
-#
-#    domaindnsname = "${var.domaindnsname}"
-#
-#    DomainNetbiosName = "${var.DomainNetbiosName}"
-#
-#    ec2subnetaz = "${var.ec2subnetaz}"
-#
-#    Ec2SubnetId = "${var.Ec2SubnetId}"
-#
-#    ExtraSecurityGroupIds = "${var.ExtraSecurityGroupIds}"
-#
-#    InstanceType = "${var.InstanceType}"
-#
-#    KeyPairName = "${var.KeyPairName}"
-#
-#    NoPublicIp = "${var.NoPublicIp}"
-#
-#    NotificationEmail = "${var.NotificationEmail}"
-#
-#    SsmKeyId = "${var.SsmKeyId}"
-#
-#    SsmRdcbCredential = "${var.SsmRdcbCredential}"
-#
-#    VpcId = "${var.VpcId}"
-#  }
-#
-#  template_body = "${data.template_file.user_data.rendered}"
-#
-#  #template_url = "https://s3.amazonaws.com/app-chemistry/templates/ra_rdcb_fileserver_standalone.template.json"
-#}
-

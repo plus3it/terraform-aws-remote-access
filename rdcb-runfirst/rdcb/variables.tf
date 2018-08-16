@@ -75,3 +75,7 @@ variable "VpcId" {
 variable "stackname" {}
 
 variable "s3bucket" {}
+
+variable "rdcb_dnszone_id" {
+  default = ""
+}

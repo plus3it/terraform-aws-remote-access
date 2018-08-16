@@ -35,13 +35,17 @@ module "rdcb" {
 
   NotificationEmail = "${var.NotificationEmail}"
 
-  #Region = "${var.region}"
-
   SsmKeyId = "${var.SsmKeyId}"
+
   SsmRdcbCredential = "${var.SsmRdcbCredential}"
+
   VpcId = "${var.VpcId}"
+
   stackname = "${var.stackname}"
+
   s3bucket = "${var.s3bucket}"
+
+  rdcb_dnszone_id = "${var.rdcb_dnszone_id}"
 }
 
 #output "rdcb_snsarn" {
