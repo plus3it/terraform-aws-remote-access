@@ -12,16 +12,76 @@ resource "aws_route53_record" "private_dns_record" {
  depends_on = ["data.aws_cloudformation_stack.rdcb"]
 }
 
+resource "aws_security_group" "rdcb-sg1" {
+  name_prefix = "${var.stackname}"
+  description = "Security group for accessing rdcb"
+
+  vpc_id = "${var.VpcId}"
+
+  ingress {
+    from_port   = 3389
+    to_port     = 3389
+    protocol    = "tcp"
+    cidr_blocks = ["10.0.0.0/8"]
+  }
+  ingress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "tcp"
+    security_groups = ["${aws_security_group.rdsh-sg1.id}"]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags {
+    Name      = "${var.stackname}"
+    Terraform = "True"
+  }
+}
+
+resource "aws_security_group" "rdsh-sg1" {
+  name_prefix = "${var.stackname}"
+  description = "Security group for accessing rdsh"
+
+  vpc_id = "${var.VpcId}"
+
+  ingress {
+    from_port   = 3389
+    to_port     = 3389
+    protocol    = "tcp"
+    cidr_blocks = ["10.0.0.0/8"]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags {
+    Name      = "${var.stackname}"
+    Terraform = "True"
+  }
+}
+
 resource "null_resource" "push-changeset" {
   provisioner "local-exec" {
     command     = "${join(" ", local.create_changeset_command)}"
     working_dir = ".."
+    
   }
 
   provisioner "local-exec" {
     command = "${join(" ", local.destroy_changeset_command)}"
     when    = "destroy"
   }
+  #depends_on = ["resource.aws_security_group.rdcb-sg1"]
 }
 
 resource "null_resource" "check-changeset" {
@@ -50,7 +110,7 @@ locals {
     "DomainNetbiosName=${var.DomainNetbiosName}",
     "Ec2SubnetAz=${var.ec2subnetaz}",
     "Ec2SubnetId=${var.Ec2SubnetId}",
-    "ExtraSecurityGroupIds=${var.ExtraSecurityGroupIds}",
+    "ExtraSecurityGroupIds=${aws_security_group.rdcb-sg1.id},${var.ExtraSecurityGroupIds}",
     "InstanceType=${var.InstanceType}",
     "KeyPairName=${var.KeyPairName}",
     "NoPublicIp=${var.NoPublicIp}",
