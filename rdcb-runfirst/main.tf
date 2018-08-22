@@ -27,3 +27,19 @@ module "rdcb" {
   s3bucket = "${var.s3bucket}"
   rdcb_dnszone_id = "${var.rdcb_dnszone_id}"
 }
+
+output "rdcb_snsarn" {
+ value = "${module.rdcb.rdcb_snsarn}"
+}
+
+output "rdcb_instanceip" {
+ value = "${module.rdcb.rdcb_instanceip}"}
+
+output "rdcb_instanceid" {
+ value = "${module.rdcb.rdcb_instanceid}"}
+
+output "rdcb_sg_id" {
+ value = "${module.rdcb.rdcb_sg_id}"}
+
+output "rdsh_sg_id" {
+ value = "${module.rdcb.rdsh_sg_id}"}

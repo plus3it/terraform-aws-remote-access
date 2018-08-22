@@ -13,7 +13,7 @@ resource "aws_route53_record" "private_dns_record" {
 }
 
 resource "aws_security_group" "rdcb-sg1" {
-  name_prefix = "${var.stackname}"
+  name_prefix = "${var.stackname}-"
   description = "Security group for accessing rdcb"
 
   vpc_id = "${var.VpcId}"
@@ -45,7 +45,7 @@ resource "aws_security_group" "rdcb-sg1" {
 }
 
 resource "aws_security_group" "rdsh-sg1" {
-  name_prefix = "${var.stackname}"
+  name_prefix = "${var.stackname}-"
   description = "Security group for accessing rdsh"
 
   vpc_id = "${var.VpcId}"
@@ -81,7 +81,8 @@ resource "null_resource" "push-changeset" {
     command = "${join(" ", local.destroy_changeset_command)}"
     when    = "destroy"
   }
-  #depends_on = ["resource.aws_security_group.rdcb-sg1"]
+  depends_on = ["aws_security_group.rdcb-sg1"]
+  depends_on = ["aws_security_group.rdsh-sg1"]
 }
 
 resource "null_resource" "check-changeset" {
