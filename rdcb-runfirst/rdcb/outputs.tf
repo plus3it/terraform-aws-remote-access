@@ -20,3 +20,7 @@ output "rdcb_sg_id" {
 output "rdsh_sg_id" {
  value = "${aws_security_group.rdsh-sg1.id}"
 }
+
+output "rdcb_hostname" {
+ value = "${format("%s.%s", data.local_file.rdcb_hostname.content, var.domaindnsname)}"
+}

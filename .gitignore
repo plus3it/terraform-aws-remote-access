@@ -4,6 +4,8 @@
 # cfn templates
 *.template.cfn.json
 
+# file data
+*.txt
 
 # Terraform environment files
 *.tfvars
