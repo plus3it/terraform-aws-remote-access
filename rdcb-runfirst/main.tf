@@ -46,3 +46,7 @@ output "rdsh_sg_id" {
 
  output "rdcb_hostname" {
  value = "${module.rdcb.rdcb_hostname}"}
+
+ output "rdcb_fqdn" {
+   value = "${module.rdcb.rdcb_fqdn}"
+ }
