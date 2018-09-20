@@ -32,6 +32,6 @@ module "rdsh" {
   ScaleUpSchedule          = "${var.ScaleUpSchedule}"
   SubnetIDs                = "${var.SubnetIDs}"
   UserProfileDiskPath      = "${var.UserProfileDiskPath}"
-  VPC                      = "${var.VPC}"
+  VpcId                    = "${var.VpcId}"
   CloudWatchAgentUrl       = "${var.CloudWatchAgentUrl}"
-}
+  }
