@@ -7,23 +7,11 @@ resource "null_resource" "push-changeset" {
     command     = "${join(" ", local.create_changeset_command)}"
     working_dir = ".."
   }
-
   provisioner "local-exec" {
     command = "${join(" ", local.destroy_changeset_command)}"
     when    = "destroy"
   }
 }
-
-#resource "null_resource" "check-changeset" {
-#  provisioner "local-exec" {
-#    command = "${join(" ", local.check_stack_progress)}"
-#  }
-#
-#  triggers = {
-#    instance_ids = "${join(",", null_resource.push-changeset.*.id)}"
-#  }
-#}
-
 locals {
   create_changeset_command = [
     "aws cloudformation deploy --template",
@@ -55,15 +43,13 @@ locals {
     "\"ScaleUpSchedule=${var.ScaleUpSchedule}\"",
     "\"SubnetIDs=${var.SubnetIDs}\"",
     "\"UserProfileDiskPath=${var.UserProfileDiskPath}\"",
-    "\"VPC=${var.VPC}\"",
+    "\"VPC=${var.VpcId}\"",
     "\"CloudWatchAgentUrl=${var.CloudWatchAgentUrl}\"",
     "--capabilities CAPABILITY_IAM",
   ]
-
   check_stack_progress = [
     "aws cloudformation wait stack-create-complete --stack-name ${var.stackname}",
   ]
-
   destroy_changeset_command = [
     "aws cloudformation delete-stack --stack-name ${var.stackname}",
   ]

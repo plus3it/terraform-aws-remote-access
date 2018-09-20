@@ -112,7 +112,7 @@ variable "UserProfileDiskPath" {
   default = "\\\\\\home.example.com\\Profile$"
 }
 
-variable "VPC" {
+variable "VpcId" {
   default = "vpc-xxxxxxxx"
 }
 
