@@ -80,10 +80,18 @@ variable "UpdateSchedule" {
   default = "cron(30 5 ? * Sun *)"
 }
 
-variable "VPC" {
+variable "VpcId" {
   default = ""
 }
 
 variable "stackname" {}
 
 variable "s3bucket" {}
+
+# DNS record
+variable "dns_name" {
+  default = ""
+}
+variable "public_dnszone_id" {
+  default = ""
+}

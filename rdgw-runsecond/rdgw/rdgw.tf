@@ -2,7 +2,10 @@ data "aws_cloudformation_stack" "rdgw" {
   name = "${var.stackname}"
   depends_on = ["null_resource.push-changeset"]
 }
-
+data "aws_lb" "rdgw" {
+  arn = "${data.aws_cloudformation_stack.rdgw.outputs["LoadBalancerName"]}"
+  depends_on = ["null_resource.push-changeset"]
+}
 resource "null_resource" "push-changeset" {
   provisioner "local-exec" {
     command     = "${join(" ", local.create_changeset_command)}"
@@ -14,17 +17,6 @@ resource "null_resource" "push-changeset" {
     when    = "destroy"
   }
 }
-
-#resource "null_resource" "check-changeset" {
-#  provisioner "local-exec" {
-#    command = "${join(" ", local.check_stack_progress)}"
-#  }
-#
-#  triggers = {
-#    instance_ids = "${join(",", null_resource.push-changeset.*.id)}"
-#  }
-#}
-
 locals {
   create_changeset_command = [
     "aws cloudformation deploy --template",
@@ -51,7 +43,7 @@ locals {
     "SslCertificateName=${var.SslCertificateName}",
     "SslCertificateService=${var.SslCertificateService}",
     "\"UpdateSchedule=${var.UpdateSchedule}\"",
-    "VPC=${var.VPC}",
+    "VPC=${var.VpcId}",
     "--capabilities CAPABILITY_IAM",
   ]
 
@@ -62,4 +54,14 @@ locals {
   destroy_changeset_command = [
     "aws cloudformation delete-stack --stack-name ${var.stackname}",
   ]
+}
+resource "aws_route53_record" "lb_pub_dns" {
+  zone_id = "${var.public_dnszone_id}"
+  name    = "${var.dns_name}"
+  type    = "A"
+  alias {
+    name                   = "${data.aws_lb.rdgw.dns_name}"
+    zone_id                = "${data.aws_lb.rdgw.zone_id}"
+    evaluate_target_health = true
+  }
 }
