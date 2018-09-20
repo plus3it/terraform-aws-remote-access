@@ -1,5 +1,5 @@
 variable "amiid" {
-  default = "ami-0a792a70"
+  default = ""
 }
 
 variable "aminamesearchstring" {

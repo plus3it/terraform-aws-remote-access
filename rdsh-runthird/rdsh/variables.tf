@@ -113,3 +113,9 @@ variable "UserProfileDiskPath" {
 variable "VPC" {
   default = "vpc-xxxxxxxx"
 }
+
+variable "CloudWatchAgentUrl" {
+  type        = "string"
+  description = "(Optional) S3 URL to CloudWatch Agent installer. Example: s3://amazoncloudwatch-agent/windows/amd64/latest/AmazonCloudWatchAgent.zip"
+  default     = ""
+}

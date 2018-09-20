@@ -33,4 +33,5 @@ module "rdsh" {
   SubnetIDs                = "${var.SubnetIDs}"
   UserProfileDiskPath      = "${var.UserProfileDiskPath}"
   VPC                      = "${var.VPC}"
+  CloudWatchAgentUrl       = "${var.CloudWatchAgentUrl}"
 }

@@ -35,7 +35,12 @@ resource "aws_security_group" "rdcb-sg1" {
     protocol    = "-1"
     security_groups = ["${aws_security_group.rdsh-sg1.id}"]
   }
-
+  ingress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    self = true
+  }
   egress {
     from_port   = 0
     to_port     = 0
