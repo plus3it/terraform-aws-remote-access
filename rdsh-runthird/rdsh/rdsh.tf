@@ -56,6 +56,7 @@ locals {
     "\"SubnetIDs=${var.SubnetIDs}\"",
     "\"UserProfileDiskPath=${var.UserProfileDiskPath}\"",
     "\"VPC=${var.VPC}\"",
+    "\"CloudWatchAgentUrl=${var.CloudWatchAgentUrl}\"",
     "--capabilities CAPABILITY_IAM",
   ]
 
