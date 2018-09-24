@@ -34,4 +34,6 @@ module "rdsh" {
   UserProfileDiskPath      = "${var.UserProfileDiskPath}"
   VpcId                    = "${var.VpcId}"
   CloudWatchAgentUrl       = "${var.CloudWatchAgentUrl}"
+  private_dnszone_id       = "${var.private_dnszone_id}"
+  dns_name                 = "${var.dns_name}"
   }
