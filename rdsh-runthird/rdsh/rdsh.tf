@@ -2,6 +2,11 @@ data "aws_cloudformation_stack" "rdsh" {
   name = "${var.stackname}"
   depends_on = ["null_resource.push-changeset"]
 }
+data "aws_elb" "rdsh" {
+  name = "${data.aws_cloudformation_stack.rdsh.outputs["LoadBalancerName"]}"
+  depends_on = ["data.aws_cloudformation_stack.rdsh"]
+}
+
 resource "null_resource" "push-changeset" {
   provisioner "local-exec" {
     command     = "${join(" ", local.create_changeset_command)}"
@@ -53,4 +58,14 @@ locals {
   destroy_changeset_command = [
     "aws cloudformation delete-stack --stack-name ${var.stackname}",
   ]
+}
+resource "aws_route53_record" "lb_pub_dns" {
+  zone_id = "${var.private_dnszone_id}"
+  name    = "${var.dns_name}"
+  type    = "A"
+  alias {
+    name                   = "${data.aws_elb.rdsh.dns_name}"
+    zone_id                = "${data.aws_elb.rdsh.zone_id}"
+    evaluate_target_health = true
+  }
 }

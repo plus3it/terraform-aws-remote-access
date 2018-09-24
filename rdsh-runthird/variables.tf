@@ -121,3 +121,10 @@ variable "CloudWatchAgentUrl" {
   description = "(Optional) S3 URL to CloudWatch Agent installer. Example: s3://amazoncloudwatch-agent/windows/amd64/latest/AmazonCloudWatchAgent.zip"
   default     = ""
 }
+# DNS Record vars
+variable "private_dnszone_id" {
+  default = ""
+}
+variable "dns_name" {
+  default = ""
+}
