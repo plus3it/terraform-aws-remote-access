@@ -2,9 +2,9 @@ data "aws_cloudformation_stack" "rdgw" {
   name = "${var.stackname}"
   depends_on = ["null_resource.push-changeset"]
 }
-data "aws_lb" "rdgw" {
-  arn = "${data.aws_cloudformation_stack.rdgw.outputs["LoadBalancerName"]}"
-  depends_on = ["null_resource.push-changeset"]
+data "aws_elb" "rdgw" {
+  name = "${data.aws_cloudformation_stack.rdgw.outputs["LoadBalancerName"]}"
+  depends_on = ["data.aws_cloudformation_stack.rdgw"]
 }
 resource "null_resource" "push-changeset" {
   provisioner "local-exec" {
@@ -20,7 +20,7 @@ resource "null_resource" "push-changeset" {
 locals {
   create_changeset_command = [
     "aws cloudformation deploy --template",
-    "cfn/ra_rdgw_autoscale_public_alb.template.cfn.json",
+    "cfn/ra_rdgw_autoscale_public_lb.template.cfn.json",
     " --stack-name ${var.stackname}",
     " --s3-bucket ${var.s3bucket}",
     " --parameter-overrides AmiId=${var.amiid}",
@@ -44,6 +44,7 @@ locals {
     "SslCertificateService=${var.SslCertificateService}",
     "\"UpdateSchedule=${var.UpdateSchedule}\"",
     "VPC=${var.VpcId}",
+    "\"CloudWatchAgentUrl=${var.CloudWatchAgentUrl}\"",
     "--capabilities CAPABILITY_IAM",
   ]
 
@@ -60,8 +61,8 @@ resource "aws_route53_record" "lb_pub_dns" {
   name    = "${var.dns_name}"
   type    = "A"
   alias {
-    name                   = "${data.aws_lb.rdgw.dns_name}"
-    zone_id                = "${data.aws_lb.rdgw.zone_id}"
+    name                   = "${data.aws_elb.rdgw.dns_name}"
+    zone_id                = "${data.aws_elb.rdgw.zone_id}"
     evaluate_target_health = true
   }
 }
