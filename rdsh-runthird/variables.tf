@@ -50,7 +50,7 @@ variable "DomainSvcAccount" {
 variable "DomainSvcPassword" {
   default = ""
 }
-
+#Do not leave a comma after the last security group
 variable "ExtraSecurityGroupIds" {
   default = "sg-xxxxxxxx,sg-yyyyyyyy"
 }

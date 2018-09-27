@@ -126,3 +126,10 @@ variable "private_dnszone_id" {
 variable "dns_name" {
   default = ""
 }
+#remote_state inputs
+variable "rdsh_sg_id" {
+  default = ""
+}
+variable "rdcb_fqdn" {
+  default = ""
+}
