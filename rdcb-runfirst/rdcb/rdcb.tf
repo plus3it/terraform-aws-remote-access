@@ -130,6 +130,7 @@ locals {
     "\"SsmKeyId=${var.SsmKeyId}\"",
     "\"SsmRdcbCredential=${var.SsmRdcbCredential}\"",
     "\"VpcId=${var.VpcId}\"",
+    "\"CloudWatchAgentUrl=${var.CloudWatchAgentUrl}\"",
     "--capabilities CAPABILITY_IAM",
   ]
 

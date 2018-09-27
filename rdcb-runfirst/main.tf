@@ -26,6 +26,7 @@ module "rdcb" {
   stackname = "${var.stackname}"
   s3bucket = "${var.s3bucket}"
   rdcb_dnszone_id = "${var.rdcb_dnszone_id}"
+  CloudWatchAgentUrl       = "${var.CloudWatchAgentUrl}"
 }
 
 output "rdcb_snsarn" {

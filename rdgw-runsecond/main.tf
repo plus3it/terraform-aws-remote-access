@@ -30,4 +30,5 @@ module "rdgw" {
   s3bucket = "${var.s3bucket}"
   dns_name = "${var.dns_name}"
   public_dnszone_id = "${var.public_dnszone_id}"
+  CloudWatchAgentUrl       = "${var.CloudWatchAgentUrl}"
 }
