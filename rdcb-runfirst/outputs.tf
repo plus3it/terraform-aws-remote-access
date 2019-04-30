@@ -25,5 +25,5 @@ output "rdsh_sg_id" {
 }
 
 output "rdcb_hostname" {
- value = "${format("%s.%s", data.local_file.rdcb_hostname.content, var.domaindnsname)}"
+ value = "${format("%s.%s", data.local_file.rdcb_hostname.content, var.DomainDnsName)}"
 }
