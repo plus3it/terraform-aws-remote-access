@@ -16,3 +16,4 @@
 # output "rdgw_Ec2SecurityGroupId" {
 #  value = "${lookup(data.aws_cloudformation_stack.rdgw.outputs, "Ec2SecurityGroupId", "")}"
 # }
+

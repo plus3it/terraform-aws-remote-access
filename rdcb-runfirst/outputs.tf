@@ -13,6 +13,10 @@ output "rdcb_instanceid" {
  value = "${lookup(data.aws_cloudformation_stack.rdcb.outputs, "RdcbEc2InstanceId", "")}"
 }
 
+output "rdcb_dns_zone_id" {
+ value = "${aws_route53_record.private_dns_record.zone_id}"
+}
+
 output "rdcb_sg_id" {
  value = "${aws_security_group.rdcb-sg1.id}"
 }
