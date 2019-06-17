@@ -1,7 +1,13 @@
-provider "aws" {
-  #  use aws profile for iam access keys
-  region = "${var.region}"
+data "aws_cloudformation_stack" "rdsh" {
+  name       = "${var.StackName}"
+  depends_on = ["null_resource.push-changeset"]
 }
+
+# data "aws_elb" "rdsh" {
+# name = "${data.aws_cloudformation_stack.rdsh.outputs["LoadBalancerName"]}"
+# depends_on = ["data.aws_cloudformation_stack.rdsh"]
+# }
+data "aws_region" "current" {}
 
 data "terraform_remote_state" "rdcb" {
   backend = "local"
@@ -11,40 +17,79 @@ data "terraform_remote_state" "rdcb" {
   }
 }
 
+data "terraform_remote_state" "rdgw" {
+  backend = "local"
 
-module "rdsh" {
-  source                   = "./rdsh"
-  stackname                = "${var.stackname}"
-  s3bucket                 = "${var.s3bucket}"
-  AmiId                    = "${var.AmiId}"
-  AmiNameSearchString      = "${var.AmiNameSearchString}"
-  ConnectionBrokerFqdn     = "${data.terraform_remote_state.rdcb.rdcb_hostname}"
-  DesiredCapacity          = "${var.DesiredCapacity}"
-  DomainAccessUserGroup    = "${var.DomainAccessUserGroup}"
-  DomainDirectoryId        = "${var.DomainDirectoryId}"
-  DomainDnsName            = "${var.DomainDnsName}"
-  DomainNetbiosName        = "${var.DomainNetbiosName}"
-  DomainSvcAccount         = "${var.DomainSvcAccount}"
-  DomainSvcPassword        = "${var.DomainSvcPassword}"
-  ExtraSecurityGroupIds    = "${var.ExtraSecurityGroupIds}"
-  ForceUpdateToggle        = "${var.ForceUpdateToggle}"
-  InstanceType             = "${var.InstanceType}"
-  KeyPairName              = "${var.KeyPairName}"
-  LdapContainerOU          = "${var.LdapContainerOU}"
-  MaxCapacity              = "${var.MaxCapacity}"
-  MinCapacity              = "${var.MinCapacity}"
-  RdpPrivateKeyPassword    = "${var.RdpPrivateKeyPassword}"
-  RdpPrivateKeyPfx         = "${var.RdpPrivateKeyPfx}"
-  RdpPrivateKeyS3Endpoint  = "${var.RdpPrivateKeyS3Endpoint}"
-  ScaleDownDesiredCapacity = "${var.ScaleDownDesiredCapacity}"
-  ScaleDownSchedule        = "${var.ScaleDownSchedule}"
-  ScaleUpSchedule          = "${var.ScaleUpSchedule}"
-  SubnetIDs                = "${var.SubnetIDs}"
-  UserProfileDiskPath      = "${var.UserProfileDiskPath}"
-  VpcId                    = "${var.VpcId}"
-  CloudWatchAgentUrl       = "${var.CloudWatchAgentUrl}"
-  private_dnszone_id       = "${var.private_dnszone_id}"
-  dns_name                 = "${var.dns_name}"
-  rdcb_fqdn                = "${data.terraform_remote_state.rdcb.rdcb_fqdn}"
-  rdsh_sg_id               = "${data.terraform_remote_state.rdcb.rdsh_sg_id}"
+  config {
+    path = "${path.module}/../rdgw-runsecond/terraform.tfstate"
   }
+}
+
+resource "null_resource" "push-changeset" {
+  provisioner "local-exec" {
+    command     = "${join(" ", local.create_changeset_command)}"
+    working_dir = ".."
+  }
+
+  provisioner "local-exec" {
+    command = "${join(" ", local.destroy_changeset_command)}"
+    when    = "destroy"
+  }
+}
+
+locals {
+  create_changeset_command = [
+    "aws cloudformation deploy --template",
+    "cfn/ra_rdsh_autoscale_internal_lb.template.cfn.json",
+    " --stack-name ${var.StackName}",
+    " --s3-bucket ${var.S3Bucket}",
+    " --parameter-overrides AmiId=${var.AmiId}",
+    "\"AmiNameSearchString=${var.AmiNameSearchString}\"",
+    "\"ConnectionBrokerFqdn=${data.terraform_remote_state.rdcb.rdcb_hostname}\"",
+    "\"DesiredCapacity=${var.DesiredCapacity}\"",
+    "\"DomainAccessUserGroup=${var.DomainAccessUserGroup}\"",
+    "\"DomainDirectoryId=${var.DomainDirectoryId}\"",
+    "\"DomainDnsName=${var.DomainDnsName}\"",
+    "\"DomainNetbiosName=${var.DomainNetbiosName}\"",
+    "\"DomainSvcAccount=${var.DomainSvcAccount}\"",
+    "\"DomainSvcPassword=${var.DomainSvcPassword}\"",
+    "\"ExtraSecurityGroupIds=${data.terraform_remote_state.rdcb.rdsh_sg_id}, ${var.ExtraSecurityGroupIds}\"",
+    "\"ForceUpdateToggle=${var.ForceUpdateToggle}\"",
+    "\"InstanceType=${var.InstanceType}\"",
+    "\"KeyPairName=${var.KeyPairName}\"",
+    "\"LdapContainerOU=${var.LdapContainerOU}\"",
+    "\"MaxCapacity=${var.MaxCapacity}\"",
+    "\"MinCapacity=${var.MinCapacity}\"",
+    "\"RdpPrivateKeyPassword=${var.RdpPrivateKeyPassword}\"",
+    "\"RdpPrivateKeyPfx=${var.RdpPrivateKeyPfx}\"",
+    "\"RdpPrivateKeyS3Endpoint=${var.RdpPrivateKeyS3Endpoint}\"",
+    "\"ScaleDownDesiredCapacity=${var.ScaleDownDesiredCapacity}\"",
+    "\"ScaleDownSchedule=${var.ScaleDownSchedule}\"",
+    "\"ScaleUpSchedule=${var.ScaleUpSchedule}\"",
+    "\"SubnetIDs=${var.SubnetIDs}\"",
+    "\"UserProfileDiskPath=\\\\\\\\${data.terraform_remote_state.rdcb.rdcb_hostname}\\\\${var.UserProfileDiskPath}\"",
+    "\"VPC=${var.VpcId}\"",
+    "\"CloudWatchAgentUrl=${var.CloudWatchAgentUrl}\"",
+    "--capabilities CAPABILITY_IAM",
+  ]
+
+  check_stack_progress = [
+    "aws cloudformation wait stack-create-complete --stack-name ${var.StackName}",
+  ]
+
+  destroy_changeset_command = [
+    "aws cloudformation delete-stack --stack-name ${var.StackName}",
+  ]
+}
+
+resource "aws_route53_record" "lb_dns" {
+  zone_id = "${var.Private_Dnszone_Id}"
+  name    = "${var.Dns_Name}"
+  type    = "A"
+
+  alias {
+    name = "${data.aws_cloudformation_stack.rdsh.outputs["LoadBalancerDns"]}"
+    zone_id                = "${var.nlb_zones["${data.aws_region.current.name}"]}"
+    evaluate_target_health = true
+  }
+}

@@ -1,53 +1,146 @@
-provider "aws" {
-  #  use aws profile for iam access keys
-  region = "${var.region}"
+data "aws_cloudformation_stack" "rdcb" {
+  name = "${var.StackName}"
+  depends_on = ["null_resource.push-changeset"]
 }
 
-module "rdcb" {
-  source = "./rdcb"
-  amiid  = "${var.amiid}"
-  aminamesearchstring = "${var.aminamesearchstring}"
-  datavolumesize = "${var.datavolumesize}"
-  datavolumesnapshotid = "${var.datavolumesnapshotid}"
-  domainaccessusergroup = "${var.domainaccessusergroup}"
-  domaindirectoryid = "${var.domaindirectoryid}"
-  domaindnsname = "${var.domaindnsname}"
-  DomainNetbiosName = "${var.DomainNetbiosName}"
-  ec2subnetaz = "${var.ec2subnetaz}"
-  Ec2SubnetId = "${var.Ec2SubnetId}"
-  ExtraSecurityGroupIds = "${var.ExtraSecurityGroupIds}"
-  InstanceType = "${var.InstanceType}"
-  KeyPairName = "${var.KeyPairName}"
-  NoPublicIp = "${var.NoPublicIp}"
-  NotificationEmail = "${var.NotificationEmail}"
-  SsmKeyId = "${var.SsmKeyId}"
-  SsmRdcbCredential = "${var.SsmRdcbCredential}"
-  VpcId = "${var.VpcId}"
-  stackname = "${var.stackname}"
-  s3bucket = "${var.s3bucket}"
-  rdcb_dnszone_id = "${var.rdcb_dnszone_id}"
-  CloudWatchAgentUrl       = "${var.CloudWatchAgentUrl}"
+data "local_file" "rdcb_hostname" {
+   filename = "rdcb-hostname.txt"
+    depends_on = ["null_resource.get_ec2_hostname"]
 }
 
-output "rdcb_snsarn" {
- value = "${module.rdcb.rdcb_snsarn}"
+resource "aws_route53_record" "private_dns_record" {
+ zone_id = "${var.Rdcb_Dnszone_Id}"
+ name    = "${var.StackName}"
+ type    = "A"
+ ttl = "300"
+ records = ["${data.aws_cloudformation_stack.rdcb.outputs["RdcbEc2InstanceIp"]}"]
+ depends_on = ["data.aws_cloudformation_stack.rdcb"]
 }
 
-output "rdcb_instanceip" {
- value = "${module.rdcb.rdcb_instanceip}"}
+resource "aws_security_group" "rdcb-sg1" {
+  name_prefix = "${var.StackName}-"
+  description = "Security group for accessing rdcb"
 
-output "rdcb_instanceid" {
- value = "${module.rdcb.rdcb_instanceid}"}
+  vpc_id = "${var.VpcId}"
 
-output "rdcb_sg_id" {
- value = "${module.rdcb.rdcb_sg_id}"}
+  ingress {
+    from_port   = 3389
+    to_port     = 3389
+    protocol    = "tcp"
+    cidr_blocks = ["10.0.0.0/8"]
+  }
+  ingress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    security_groups = ["${aws_security_group.rdsh-sg1.id}"]
+  }
+  ingress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    self = true
+  }
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
 
-output "rdsh_sg_id" {
- value = "${module.rdcb.rdsh_sg_id}"}
+  tags {
+    Name      = "${var.StackName}-rdcb-sg1"
+    Terraform = "True"
+  }
+}
 
- output "rdcb_hostname" {
- value = "${module.rdcb.rdcb_hostname}"}
+resource "aws_security_group" "rdsh-sg1" {
+  name_prefix = "${var.StackName}-"
+  description = "Security group for accessing rdsh"
 
- output "rdcb_fqdn" {
-   value = "${module.rdcb.rdcb_fqdn}"
- }
+  vpc_id = "${var.VpcId}"
+
+  ingress {
+    from_port   = 3389
+    to_port     = 3389
+    protocol    = "tcp"
+    cidr_blocks = ["10.0.0.0/8"]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags {
+    Name      = "${var.StackName}-rdsh-sg1"
+    Terraform = "True"
+  }
+}
+
+resource "null_resource" "push-changeset" {
+  provisioner "local-exec" {
+    command     = "${join(" ", local.create_changeset_command)}"
+    working_dir = ".."
+    
+  }
+
+  provisioner "local-exec" {
+    command = "${join(" ", local.destroy_changeset_command)}"
+    when    = "destroy"
+  }
+  depends_on = ["aws_security_group.rdcb-sg1"]
+  depends_on = ["aws_security_group.rdsh-sg1"]
+}
+
+resource "null_resource" "get_ec2_hostname" {
+  provisioner "local-exec" {
+    command = "${join(" ", local.get_ec2_hostname)}"
+  }
+
+  triggers = {
+    instance_ids = "${join(",", null_resource.push-changeset.*.id)}"
+  }
+}
+
+locals {
+  create_changeset_command = [
+    "aws cloudformation deploy --template",
+    "cfn/ra_rdcb_fileserver_standalone.template.cfn.json",
+    " --stack-name ${var.StackName}",
+    " --s3-bucket ${var.S3Bucket}",
+    " --parameter-overrides",
+    "\"AmiId=${var.AmiId}\"",
+    "\"AmiNameSearchString=${var.AmiNameSearchString}\"",
+    "\"DataVolumeSize=${var.DataVolumeSize}\"",
+    "\"DataVolumeSnapshotid=${var.DataVolumeSnapshotId}\"",
+    "\"DomainAccessUserGroup=${var.DomainAccessUserGroup}\"",
+    "\"DomainDirectoryId=${var.DomainDirectoryId}\"",
+    "\"DomainDnsName=${var.DomainDnsName}\"",
+    "\"DomainNetbiosName=${var.DomainNetbiosName}\"",
+    "\"Ec2SubnetAz=${var.Ec2SubnetAz}\"",
+    "\"Ec2SubnetId=${var.Ec2SubnetId}\"",
+    "\"ExtraSecurityGroupIds=${aws_security_group.rdcb-sg1.id},${var.ExtraSecurityGroupIds}\"",
+    "\"InstanceType=${var.InstanceType}\"",
+    "\"KeyPairName=${var.KeyPairName}\"",
+    "\"NoPublicIp=${var.NoPublicIp}\"",
+    "\"NotificationEmail=${var.NotificationEmail}\"",
+    "\"SsmKeyId=${var.SsmKeyId}\"",
+    "\"SsmRdcbCredential=${var.SsmRdcbCredential}\"",
+    "\"VpcId=${var.VpcId}\"",
+    "\"CloudWatchAgentUrl=${var.CloudWatchAgentUrl}\"",
+    "--capabilities CAPABILITY_IAM",
+  ]
+
+  get_ec2_hostname = [
+    "aws ec2 get-console-output --instance-id \"${data.aws_cloudformation_stack.rdcb.outputs["RdcbEc2InstanceId"]}\"",
+    " --output text | awk '/RDPCERTIFICATE-SUBJECTNAME: /{print $NF}' | sed 's/\r$//' | xargs echo -n > rdcb-hostname.txt"
+  ]
+
+  destroy_changeset_command = [
+    "aws cloudformation delete-stack --stack-name ${var.StackName}",
+  ]
+}
+
