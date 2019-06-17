@@ -9,21 +9,21 @@ data "aws_cloudformation_stack" "rdsh" {
 # }
 data "aws_region" "current" {}
 
-data "terraform_remote_state" "rdcb" {
-  backend = "local"
-
-  config {
-    path = "${path.module}/../rdcb-runfirst/terraform.tfstate"
-  }
-}
-
-data "terraform_remote_state" "rdgw" {
-  backend = "local"
-
-  config {
-    path = "${path.module}/../rdgw-runsecond/terraform.tfstate"
-  }
-}
+# data "terraform_remote_state" "rdcb" {
+  # backend = "local"
+# 
+  # config {
+    # path = "${path.module}/../rdcb-runfirst/terraform.tfstate"
+  # }
+# }
+# 
+# data "terraform_remote_state" "rdgw" {
+  # backend = "local"
+# 
+  # config {
+    # path = "${path.module}/../rdgw-runsecond/terraform.tfstate"
+  # }
+# }
 
 resource "null_resource" "push-changeset" {
   provisioner "local-exec" {
@@ -45,7 +45,7 @@ locals {
     " --s3-bucket ${var.S3Bucket}",
     " --parameter-overrides AmiId=${var.AmiId}",
     "\"AmiNameSearchString=${var.AmiNameSearchString}\"",
-    "\"ConnectionBrokerFqdn=${data.terraform_remote_state.rdcb.rdcb_hostname}\"",
+    "\"ConnectionBrokerFqdn=${var.ConnectionBrokerFqdn}\"",
     "\"DesiredCapacity=${var.DesiredCapacity}\"",
     "\"DomainAccessUserGroup=${var.DomainAccessUserGroup}\"",
     "\"DomainDirectoryId=${var.DomainDirectoryId}\"",
@@ -53,7 +53,7 @@ locals {
     "\"DomainNetbiosName=${var.DomainNetbiosName}\"",
     "\"DomainSvcAccount=${var.DomainSvcAccount}\"",
     "\"DomainSvcPassword=${var.DomainSvcPassword}\"",
-    "\"ExtraSecurityGroupIds=${data.terraform_remote_state.rdcb.rdsh_sg_id}, ${var.ExtraSecurityGroupIds}\"",
+    "\"ExtraSecurityGroupIds=${var.ExtraSecurityGroupIds}\"",
     "\"ForceUpdateToggle=${var.ForceUpdateToggle}\"",
     "\"InstanceType=${var.InstanceType}\"",
     "\"KeyPairName=${var.KeyPairName}\"",
@@ -67,7 +67,7 @@ locals {
     "\"ScaleDownSchedule=${var.ScaleDownSchedule}\"",
     "\"ScaleUpSchedule=${var.ScaleUpSchedule}\"",
     "\"SubnetIDs=${var.SubnetIDs}\"",
-    "\"UserProfileDiskPath=\\\\\\\\${data.terraform_remote_state.rdcb.rdcb_hostname}\\\\${var.UserProfileDiskPath}\"",
+    "\"UserProfileDiskPath=${var.UserProfileDiskPath}\"",
     "\"VPC=${var.VpcId}\"",
     "\"CloudWatchAgentUrl=${var.CloudWatchAgentUrl}\"",
     "--capabilities CAPABILITY_IAM",
