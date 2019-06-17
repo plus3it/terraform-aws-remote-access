@@ -4,7 +4,3 @@
 #then your terraform resource looks more or less like this: #https://github.com/plus3it/terraform-external-file-cache/blob/master/main.tf#L1-L11
 #this should be the python boto3 call, #https://boto3.readthedocs.io/en/latest/reference/services/ec2.html#EC2.Client.get_console_output
 
-[ ]Orchestrate deployment of the modules
-[ ]Update documentation
-[ ]Successful RDSH deployment
-
