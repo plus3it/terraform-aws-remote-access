@@ -58,8 +58,8 @@ locals {
   ]
 }
 resource "aws_route53_record" "this" {
-  zone_id = "${var.Public_Dnszone_Id}"
-  name    = "${var.Dns_Name}"
+  zone_id = "${var.PublicDnszoneId}"
+  name    = "${var.DnsName}"
   type    = "A"
   alias {
     name                   = "${data.aws_lb.this.dns_name}"
