@@ -11,7 +11,7 @@ output "rdcb-instance-id" {
 }
 
 output "rdcb-dns-zone-id" {
- value = "${aws_route53_record.private_dns_record.zone_id}"
+ value = "${aws_route53_record.this.zone_id}"
 }
 
 output "rdcb-sg-id" {
@@ -19,7 +19,7 @@ output "rdcb-sg-id" {
 }
 
 output "rdcb-fqdn" {
-value = "${aws_route53_record.private_dns_record.fqdn}"
+value = "${aws_route53_record.this.fqdn}"
 }
 
 output "rdsh-sg-id" {

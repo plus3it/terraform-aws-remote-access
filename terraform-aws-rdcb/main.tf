@@ -8,7 +8,7 @@ data "local_file" "rdcb_hostname" {
     depends_on = ["null_resource.get_ec2_hostname"]
 }
 
-resource "aws_route53_record" "private_dns_record" {
+resource "aws_route53_record" "this" {
  zone_id = "${var.RdcbDnszoneId}"
  name    = "${var.StackName}"
  type    = "A"
