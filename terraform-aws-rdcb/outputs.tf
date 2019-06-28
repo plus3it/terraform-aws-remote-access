@@ -1,5 +1,5 @@
 output "rdcb-sns-arn" {
- value = "${lookup(data.aws_cloudformation_stack.rdcb.outputs, "SnsArn", "")}"
+ value = "${lookup(data.aws_cloudformation_stack.this.outputs, "SnsArn", "")}"
 }
 
 output "rdcb-instance-ip" {
