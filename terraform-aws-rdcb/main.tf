@@ -108,7 +108,7 @@ resource "null_resource" "get_ec2_hostname" {
 locals {
   create_changeset_command = [
     "aws cloudformation deploy --template",
-    "ra_rdcb_fileserver_standalone.template.cfn.json",
+    "ra_rdcb_fileserver_standalone.template.cfn.yaml",
     " --stack-name ${var.StackName}",
     " --s3-bucket ${var.S3Bucket}",
     " --parameter-overrides",

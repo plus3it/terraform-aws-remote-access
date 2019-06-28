@@ -20,7 +20,7 @@ resource "null_resource" "push-changeset" {
 locals {
   create_changeset_command = [
     "aws cloudformation deploy --template",
-    "ra_rdgw_autoscale_public_lb.template.cfn.json",
+    "ra_rdgw_autoscale_public_lb.template.cfn.yaml",
     " --stack-name ${var.StackName}",
     " --s3-bucket ${var.S3Bucket}",
     " --parameter-overrides AmiId=${var.AmiId}",
