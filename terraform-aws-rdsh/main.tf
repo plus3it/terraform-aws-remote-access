@@ -1,34 +1,14 @@
-data "aws_cloudformation_stack" "rdsh" {
+data "aws_cloudformation_stack" "this" {
   name       = "${var.StackName}"
   depends_on = ["null_resource.push-changeset"]
 }
 
-# data "aws_elb" "rdsh" {
-# name = "${data.aws_cloudformation_stack.rdsh.outputs["LoadBalancerName"]}"
-# depends_on = ["data.aws_cloudformation_stack.rdsh"]
-# }
 data "aws_region" "current" {}
-
-# data "terraform_remote_state" "rdcb" {
-  # backend = "local"
-# 
-  # config {
-    # path = "${path.module}/../rdcb-runfirst/terraform.tfstate"
-  # }
-# }
-# 
-# data "terraform_remote_state" "rdgw" {
-  # backend = "local"
-# 
-  # config {
-    # path = "${path.module}/../rdgw-runsecond/terraform.tfstate"
-  # }
-# }
 
 resource "null_resource" "push-changeset" {
   provisioner "local-exec" {
     command     = "${join(" ", local.create_changeset_command)}"
-    working_dir = ".."
+    working_dir = "${path.module}"
   }
 
   provisioner "local-exec" {
@@ -40,7 +20,7 @@ resource "null_resource" "push-changeset" {
 locals {
   create_changeset_command = [
     "aws cloudformation deploy --template",
-    "cfn/ra_rdsh_autoscale_internal_lb.template.cfn.json",
+    "ra_rdsh_autoscale_internal_lb.template.cfn.yaml",
     " --stack-name ${var.StackName}",
     " --s3-bucket ${var.S3Bucket}",
     " --parameter-overrides AmiId=${var.AmiId}",
@@ -82,14 +62,14 @@ locals {
   ]
 }
 
-resource "aws_route53_record" "lb_dns" {
-  zone_id = "${var.Private_Dnszone_Id}"
-  name    = "${var.Dns_Name}"
+resource "aws_route53_record" "this" {
+  zone_id = "${var.PrivateDnszoneId}"
+  name    = "${var.DnsName}"
   type    = "A"
 
   alias {
-    name = "${data.aws_cloudformation_stack.rdsh.outputs["LoadBalancerDns"]}"
-    zone_id                = "${var.nlb_zones["${data.aws_region.current.name}"]}"
+    name = "${data.aws_cloudformation_stack.this.outputs["LoadBalancerDns"]}"
+    zone_id                = "${var.NlbZones["${data.aws_region.current.name}"]}"
     evaluate_target_health = true
   }
 }

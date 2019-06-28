@@ -103,7 +103,7 @@ variable "S3Bucket" {
   
 }
 
-variable "Rdcb_Dnszone_Id" {
+variable "RdcbDnszoneId" {
   default = ""
   description = "Zone to create DNS record for RDCB instance"
 }

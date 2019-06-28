@@ -151,15 +151,15 @@ variable "S3Bucket" {
 }
 
 # DNS Record vars
-variable "Private_Dnszone_Id" {
+variable "PrivateDnszoneId" {
   default = ""
 }
 
-variable "Dns_Name" {
+variable "DnsName" {
   default = ""
 }
 
-variable "nlb_zones" {
+variable "NlbZones" {
   type = "map"
 
   default = {
@@ -170,11 +170,12 @@ variable "nlb_zones" {
   }
 }
 
-#remote_state inputs
-variable "Rdsh_Sg_Id" {
-  default = ""
-}
-
-variable "Rdcb_Fqdn" {
-  default = ""
-}
+# remote_state inputs
+# variable "RdshSgId" {
+  # default = ""
+# }
+# 
+# variable "RdcbFqdn" {
+  # default = ""
+# }
+# 

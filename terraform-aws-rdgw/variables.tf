@@ -122,11 +122,11 @@ variable "S3Bucket" {
 }
 
 # DNS record
-variable "Dns_Name" {
+variable "DnsName" {
   default = ""
   description = "Hostname of A record created"
 }
-variable "Public_Dnszone_Id" {
+variable "PublicDnszoneId" {
   default = ""
   description = "Public DNS Zone where the RDGW record will be created"
 }
