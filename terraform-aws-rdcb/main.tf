@@ -83,7 +83,7 @@ resource "aws_security_group" "rdsh-sg1" {
 resource "null_resource" "push-changeset" {
   provisioner "local-exec" {
     command     = "${join(" ", local.create_changeset_command)}"
-    working_dir = ".."
+    # working_dir = ".."
 
   }
 

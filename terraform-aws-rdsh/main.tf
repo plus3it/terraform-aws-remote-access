@@ -8,7 +8,7 @@ data "aws_region" "current" {}
 resource "null_resource" "push-changeset" {
   provisioner "local-exec" {
     command     = "${join(" ", local.create_changeset_command)}"
-    working_dir = ".."
+    # working_dir = ".."
   }
 
   provisioner "local-exec" {
