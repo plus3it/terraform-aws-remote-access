@@ -1,4 +1,4 @@
-data "aws_cloudformation_stack" "rdcb" {
+data "aws_cloudformation_stack" "this" {
   name = "${var.StackName}"
   depends_on = ["null_resource.push-changeset"]
 }
@@ -9,12 +9,12 @@ data "local_file" "rdcb_hostname" {
 }
 
 resource "aws_route53_record" "private_dns_record" {
- zone_id = "${var.Rdcb_Dnszone_Id}"
+ zone_id = "${var.RdcbDnszoneId}"
  name    = "${var.StackName}"
  type    = "A"
  ttl = "300"
- records = ["${data.aws_cloudformation_stack.rdcb.outputs["RdcbEc2InstanceIp"]}"]
- depends_on = ["data.aws_cloudformation_stack.rdcb"]
+ records = ["${data.aws_cloudformation_stack.this.outputs["RdcbEc2InstanceIp"]}"]
+ depends_on = ["data.aws_cloudformation_stack.this"]
 }
 
 resource "aws_security_group" "rdcb-sg1" {
@@ -84,7 +84,7 @@ resource "null_resource" "push-changeset" {
   provisioner "local-exec" {
     command     = "${join(" ", local.create_changeset_command)}"
     working_dir = ".."
-    
+
   }
 
   provisioner "local-exec" {
@@ -108,7 +108,7 @@ resource "null_resource" "get_ec2_hostname" {
 locals {
   create_changeset_command = [
     "aws cloudformation deploy --template",
-    "cfn/ra_rdcb_fileserver_standalone.template.cfn.json",
+    "ra_rdcb_fileserver_standalone.template.cfn.json",
     " --stack-name ${var.StackName}",
     " --s3-bucket ${var.S3Bucket}",
     " --parameter-overrides",
@@ -135,7 +135,7 @@ locals {
   ]
 
   get_ec2_hostname = [
-    "aws ec2 get-console-output --instance-id \"${data.aws_cloudformation_stack.rdcb.outputs["RdcbEc2InstanceId"]}\"",
+    "aws ec2 get-console-output --instance-id \"${data.aws_cloudformation_stack.this.outputs["RdcbEc2InstanceId"]}\"",
     " --output text | awk '/RDPCERTIFICATE-SUBJECTNAME: /{print $NF}' | sed 's/\r$//' | xargs echo -n > rdcb-hostname.txt"
   ]
 

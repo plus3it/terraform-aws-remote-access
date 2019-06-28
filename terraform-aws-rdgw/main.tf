@@ -1,10 +1,10 @@
-data "aws_cloudformation_stack" "rdgw" {
+data "aws_cloudformation_stack" "this" {
   name = "${var.StackName}"
   depends_on = ["null_resource.push-changeset"]
 }
-data "aws_lb" "rdgw" {
-  arn = "${data.aws_cloudformation_stack.rdgw.outputs["LoadBalancerName"]}"
-  depends_on = ["data.aws_cloudformation_stack.rdgw"]
+data "aws_lb" "this" {
+  arn = "${data.aws_cloudformation_stack.this.outputs["LoadBalancerName"]}"
+  depends_on = ["data.aws_cloudformation_stack.this"]
 }
 resource "null_resource" "push-changeset" {
   provisioner "local-exec" {
@@ -20,7 +20,7 @@ resource "null_resource" "push-changeset" {
 locals {
   create_changeset_command = [
     "aws cloudformation deploy --template",
-    "cfn/ra_rdgw_autoscale_public_lb.template.cfn.json",
+    "ra_rdgw_autoscale_public_lb.template.cfn.json",
     " --stack-name ${var.StackName}",
     " --s3-bucket ${var.S3Bucket}",
     " --parameter-overrides AmiId=${var.AmiId}",
@@ -57,13 +57,13 @@ locals {
     "aws cloudformation delete-stack --stack-name ${var.StackName}",
   ]
 }
-resource "aws_route53_record" "lb_pub_dns" {
+resource "aws_route53_record" "this" {
   zone_id = "${var.Public_Dnszone_Id}"
   name    = "${var.Dns_Name}"
   type    = "A"
   alias {
-    name                   = "${data.aws_lb.rdgw.dns_name}"
-    zone_id                = "${data.aws_lb.rdgw.zone_id}"
+    name                   = "${data.aws_lb.this.dns_name}"
+    zone_id                = "${data.aws_lb.this.zone_id}"
     evaluate_target_health = true
   }
 }
