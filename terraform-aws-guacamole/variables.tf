@@ -104,3 +104,7 @@ variable "UpdateSchedule" {
 variable "VPC" {
   description = "AWS VPC"
   }
+
+variable "StackName" {
+  description = "CloudFormation Stack Name.  Must be less than 10 characters"
+}
