@@ -108,3 +108,8 @@ variable "VPC" {
 variable "StackName" {
   description = "CloudFormation Stack Name.  Must be less than 10 characters"
 }
+
+variable "Capabilities" {
+  default = "CAPABILITY_AUTO_EXPAND"
+  description = "Required IAM capabilities"
+}
