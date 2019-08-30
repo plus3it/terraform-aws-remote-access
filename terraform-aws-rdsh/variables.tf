@@ -59,7 +59,7 @@ variable "DomainSvcPassword" {
 variable "ExtraSecurityGroupIds" {
   default     = ""
   description = "Comma separated string of extra Security Group IDs to attach to the RDSH instances -- include _at least_ the SG allowing connectivity to the Connection Broker database"
-  type = "string"
+  type        = "string"
 }
 
 variable "ForceUpdateToggle" {
@@ -172,10 +172,11 @@ variable "NlbZones" {
 
 # remote_state inputs
 # variable "RdshSgId" {
-  # default = ""
+# default = ""
 # }
 # 
 # variable "RdcbFqdn" {
-  # default = ""
+# default = ""
 # }
 # 
+

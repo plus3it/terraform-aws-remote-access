@@ -1,11 +1,13 @@
 data "aws_cloudformation_stack" "this" {
-  name = "${var.StackName}"
+  name       = "${var.StackName}"
   depends_on = ["null_resource.push-changeset"]
 }
+
 data "aws_lb" "this" {
-  arn = "${data.aws_cloudformation_stack.this.outputs["LoadBalancerName"]}"
+  arn        = "${data.aws_cloudformation_stack.this.outputs["LoadBalancerName"]}"
   depends_on = ["data.aws_cloudformation_stack.this"]
 }
+
 resource "null_resource" "push-changeset" {
   provisioner "local-exec" {
     command     = "${join(" ", local.create_changeset_command)}"
@@ -17,6 +19,7 @@ resource "null_resource" "push-changeset" {
     when    = "destroy"
   }
 }
+
 locals {
   create_changeset_command = [
     "aws cloudformation deploy --template",
@@ -57,10 +60,12 @@ locals {
     "aws cloudformation delete-stack --stack-name ${var.StackName}",
   ]
 }
+
 resource "aws_route53_record" "this" {
   zone_id = "${var.PublicDnszoneId}"
   name    = "${var.DnsName}"
   type    = "A"
+
   alias {
     name                   = "${data.aws_lb.this.dns_name}"
     zone_id                = "${data.aws_lb.this.zone_id}"
