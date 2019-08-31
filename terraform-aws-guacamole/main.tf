@@ -2,7 +2,7 @@ resource "aws_cloudformation_stack" "this" {
   template_body = "${file("${path.module}/ra_guac_autoscale_public_alb.template.cfn.yaml")}"
 
   name               = "${var.StackName}"
-  capabilities       = "${join(",", var.Capabilities)}"
+  capabilities       = ["${join(",", var.Capabilities)}"]
   # disable_rollback   = "${var.DisableRollback}"
   # iam_role_arn       = "${var.IamRoleArn}"
   # notification_arns  = "${var.NotificationArns}"
