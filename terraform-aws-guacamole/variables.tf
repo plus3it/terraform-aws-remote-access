@@ -110,7 +110,7 @@ variable "StackName" {
 }
 
 variable "Capabilities" {
-  default = ["CAPABILITY_AUTO_EXPAND CAPABILITY_NAMED_IAM CAPABILITY_IAM"]
+  default = ["CAPABILITY_AUTO_EXPAND", "CAPABILITY_NAMED_IAM", "CAPABILITY_IAM"]
   description = "Required IAM capabilities"
   type = "list"
 }
