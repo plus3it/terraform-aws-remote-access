@@ -583,6 +583,7 @@ Resources:
           Ebs:
             DeleteOnTermination: true
             VolumeType: gp2
+            VolumeSize: 50
       EbsOptimized: !FindInMap [InstanceTypeMap, !Ref InstanceType, SupportsEbsOptimized]
       IamInstanceProfile: !Ref Ec2IamInstanceProfile
       ImageId: !If [UseAmiLookup, !Sub '${AmiIdLookup.Id}', !Ref AmiId]
