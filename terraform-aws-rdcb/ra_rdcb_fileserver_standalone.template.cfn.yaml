@@ -4,6 +4,10 @@ Conditions:
     - !Equals
       - !Ref NoPublicIp
       - 'true'
+  ConfigureBackups: !Not
+    - !Equals
+      - !Ref SnapshotFrequency
+      - ''
   CreateSnsSubscription: !Not
     - !Equals
       - !Ref NotificationEmail
@@ -31,6 +35,13 @@ Mappings:
       Name: 'AWS::Include'
       Parameters:
         Location: 's3://app-chemistry/snippets/shell_command_map.snippet.cfn.yaml'
+  CfnUtilsMap:
+    Init:
+      Launch: cfn-init.exe -v -c launch --resource RdCbFileServerInstance
+      Update: cfn-init.exe -v -c update --resource RdCbFileServerInstance
+    Signal:
+      Success: cfn-signal.exe -e 0 --resource RdCbFileServerInstance
+      Failure: cfn-signal.exe -e 1 --resource RdCbFileServerInstance
 Metadata:
   'AWS::CloudFormation::Interface':
     ParameterGroups:
@@ -71,7 +82,7 @@ Metadata:
     ParameterLabels:
       AmiNameSearchString:
         default: AMI Name Search Pattern
-  Version: 0.3.1
+  Version: 0.4.1
   cfn-lint:
     config:
       ignore_checks:
@@ -98,9 +109,9 @@ Parameters:
     Description: Search pattern to match against an AMI Name
     Type: String
   CloudWatchAgentUrl:
-    AllowedPattern: '^$|^s3://.*\.msi$'
+    AllowedPattern: '^$|^https://.*\.msi$'
     Default: ''
-    Description: '(Optional) S3 URL to CloudWatch Agent MSI. Example: s3://amazoncloudwatch-agent/windows/amd64/latest/amazon-cloudwatch-agent.msi'
+    Description: '(Optional) S3 URL to CloudWatch Agent MSI. Example: https://s3.amazonaws.com/amazoncloudwatch-agent/windows/amd64/latest/amazon-cloudwatch-agent.msi'
     Type: String
   DataVolumeSize:
     Default: '5'
@@ -145,6 +156,13 @@ Parameters:
   ExtraSecurityGroupIds:
     Description: List of extra Security Group IDs to attach to the RDCB EC2 instance
     Type: 'List<AWS::EC2::SecurityGroup::Id>'
+  ForceCfnInitUpdate:
+    AllowedValues:
+      - A
+      - B
+    Default: A
+    Description: Toggles a cfn-init metadata update even if nothing else changes
+    Type: String
   InstanceType:
     AllowedValues:
       - t2.micro
@@ -181,6 +199,15 @@ Parameters:
   NotificationEmail:
     AllowedPattern: '^$|.*[@].*'
     Description: (Optional) Email address to subscribe to notifications and alarms
+    Type: String
+  RepoBranchPrefixUrl:
+    Description: URL prefix where the repo scripts can be retrieved
+    Default: https://raw.githubusercontent.com/plus3it/cfn/master
+    Type: String
+    AllowedPattern: '^https:/.*'
+  SnapshotFrequency:
+    Description: '(Optional) Specify an interval in minutes to configure snapshots of the EBS fileshare volume. Set an empty value "" to skip configuring snapshots. Default interval is 60 minutes.'
+    Default: '60'
     Type: String
   SsmKeyId:
     AllowedPattern: '^[a-zA-Z0-9]{8}-([a-zA-Z0-9]{4}-){3}[a-zA-Z0-9]{12}$'
@@ -250,10 +277,6 @@ Resources:
             Effect: Allow
             Resource: '*'
             Sid: AllowRestrictedSnapshotActions
-          - Action:
-              - 's3:GetObject'
-            Effect: Allow
-            Resource: 'arn:aws:s3:::amazoncloudwatch-agent/*'
           - Action:
               - 'ec2:CreateSnapshot'
               - 'ec2:DeleteSnapshot'
@@ -377,22 +400,22 @@ Resources:
       'AWS::CloudFormation::Init':
         cfnsetup:
           commands:
-            a-set-execution-policy:
+            50-set-execution-policy:
               command: powershell.exe -command Set-ExecutionPolicy RemoteSigned -Force
               waitAfterCompletion: '0'
-            b-online-disks:
+            51-online-disks:
               command: powershell.exe "foreach ($disk in (Get-CimInstance -ClassName Win32_DiskDrive)) { Set-Disk -Number $disk.Index -IsOffline $false }"
               ignoreErrors: 'true'
               waitAfterCompletion: '0'
-            c-initialize-disks:
+            52-initialize-disks:
               command: powershell.exe C:\ProgramData\Amazon\EC2-Windows\Launch\Scripts\InitializeDisks.ps1
               ignoreErrors: 'true'
               waitAfterCompletion: '0'
-            d-extend-disks:
+            53-extend-disks:
               command: 'powershell.exe c:\cfn\scripts\extend-volumes.ps1 -verbose'
               ignoreErrors: 'true'
               waitAfterCompletion: '0'
-            e-unzip-pstools:
+            54-unzip-pstools:
               command: powershell.exe c:\cfn\scripts\unzip-archive.ps1 c:\cfn\files\pstools.zip c:\cfn\files\pstools
               ignoreErrors: 'true'
               waitAfterCompletion: '0'
@@ -407,17 +430,27 @@ Resources:
             'c:\cfn\files\pstools.zip':
               source: 'https://download.sysinternals.com/files/PSTools.zip'
             'c:\cfn\hooks.d\cfn-auto-reloader.conf':
-              content: !Sub |
-                [cfn-auto-reloader-hook]
-                triggers=post.update
-                path=Resources.RdCbFileServerInstance.Metadata
-                action=cfn-init.exe -v -c update --stack ${AWS::StackName} --resource RdCbFileServerInstance --region ${AWS::Region}
+              content: !Sub
+                - |
+                  [cfn-auto-reloader-hook]
+                  triggers=post.update
+                  path=Resources.RdCbFileServerInstance.Metadata
+                  action=${InitUpdate}
+                - InitUpdate: !Sub
+                    - ${Command} --stack ${AWS::StackName} --region ${AWS::Region}
+                    - Command: !FindInMap [CfnUtilsMap, Init, Update]
+            'c:\cfn\scripts\unzip-archive.ps1':
+              source: !Sub ${RepoBranchPrefixUrl}/scripts/unzip-archive.ps1
             'c:\cfn\scripts\configure-ebsbackups.ps1':
-              source: https://raw.githubusercontent.com/plus3it/cfn/master/scripts/configure-ebsbackups.ps1
+              source: !Sub ${RepoBranchPrefixUrl}/scripts/configure-ebsbackups.ps1
             'c:\cfn\scripts\configure-fileshares.ps1':
-              source: https://raw.githubusercontent.com/plus3it/cfn/master/scripts/configure-fileshares.ps1
+              source: !Sub ${RepoBranchPrefixUrl}/scripts/configure-fileshares.ps1
             'c:\cfn\scripts\configure-rdcb.ps1':
-              source: https://raw.githubusercontent.com/plus3it/cfn/master/scripts/configure-rdcb.ps1
+              source: !Sub ${RepoBranchPrefixUrl}/scripts/configure-rdcb.ps1
+            'c:\cfn\scripts\snap-by-group.ps1':
+              source: https://raw.githubusercontent.com/plus3it/WinEBSbackups/master/SnapByCgroup.ps1
+            'c:\cfn\scripts\snap-maintenance.ps1':
+              source: https://raw.githubusercontent.com/plus3it/WinEBSbackups/master/SnapMaint.ps1
             'c:\cfn\scripts\extend-volumes.ps1':
               content: |
                 [CmdLetBinding()]
@@ -434,12 +467,6 @@ Resources:
                     Write-Verbose "No change to disk $($disk.Number) partition 1"
                   }
                 }
-            'c:\cfn\scripts\snap-by-group.ps1':
-              source: https://raw.githubusercontent.com/plus3it/WinEBSbackups/master/SnapByCgroup.ps1
-            'c:\cfn\scripts\snap-maintenance.ps1':
-              source: https://raw.githubusercontent.com/plus3it/WinEBSbackups/master/SnapMaint.ps1
-            'c:\cfn\scripts\unzip-archive.ps1':
-              source: https://raw.githubusercontent.com/plus3it/cfn/master/scripts/unzip-archive.ps1
           services:
             windows:
               cfn-hup:
@@ -457,102 +484,163 @@ Resources:
             - install-roles
             - reboot
             - configure-fileshares
-            - configure-backups
+            - !If
+              - ConfigureBackups
+              - configure-backups
+              - !Ref "AWS::NoValue"
             - configure-admins
             - configure-rdcb
+            - configure-rdcb-cleanup
             - reboot
             - finalize
           update:
             - ps-modules
+            - install-cloudwatch-agent
             - cfnsetup
+            - configure-rdcb-cleanup
             - finalize
         configure-admins:
           commands:
             10-configure-admins:
               command: !Sub
                 - >-
-                  ${local_ShellCommandMap_powershell} -Command "Invoke-Command -ScriptBlock {
+                  ${PowershellCommand} -Command "Invoke-Command -ScriptBlock {
                   $ErrorActionPreference = 'Stop';
                   Import-Module RemoteDesktop,RemoteDesktopServices;
                   $admin = (Invoke-Expression ((Get-SSMParameterValue -Name ${SsmRdcbCredential} -WithDecryption $true).Parameters | ? {$_.Name -eq '${SsmRdcbCredential}' }).Value).Username + '@${DomainNetbiosName}';
                   if (-not ($admin -in [Microsoft.TerminalServices.PSEngine.UserGroupHelper]::ListMembers('Administrators'))) { [Microsoft.TerminalServices.PSEngine.UserGroupHelper]::AddMember('Administrators', $admin); }
-                  } -Verbose -ErrorAction Stop"
-                -
-                  local_ShellCommandMap_powershell: !FindInMap [ShellCommandMap, powershell, command]
+                  }
+                  -Verbose -ErrorAction Stop" || ${SignalFailure}
+                - PowershellCommand: !FindInMap [ShellCommandMap, powershell, command]
+                  SignalFailure: !Sub
+                    - (${Command} --stack ${AWS::StackName} --region ${AWS::Region} && exit /b 1)
+                    - Command: !FindInMap [CfnUtilsMap, Signal, Failure]
               waitAfterCompletion: '0'
         configure-backups:
           commands:
             10-configure-backups:
               command: !Sub
                 - >-
-                  ${local_ShellCommandMap_powershell} c:\cfn\scripts\configure-ebsbackups.ps1
+                  ${PowershellCommand} c:\cfn\scripts\configure-ebsbackups.ps1
                   -SnapshotScript 'C:\cfn\scripts\snap-by-group.ps1'
+                  -SnapshotFrequency (New-TimeSpan -Minutes ${SnapshotFrequency})
                   -MaintenanceScript 'C:\cfn\scripts\snap-maintenance.ps1'
                   -ConsistencyGroup 'BackupGroup01'
-                  -Verbose -ErrorAction Stop
-                -
-                  local_ShellCommandMap_powershell: !FindInMap [ShellCommandMap, powershell, command]
+                  -Verbose -ErrorAction Stop || ${SignalFailure}
+                - PowershellCommand: !FindInMap [ShellCommandMap, powershell, command]
+                  SignalFailure: !Sub
+                    - (${Command} --stack ${AWS::StackName} --region ${AWS::Region} && exit /b 1)
+                    - Command: !FindInMap [CfnUtilsMap, Signal, Failure]
               waitAfterCompletion: '0'
         configure-fileshares:
           commands:
             10-create-upd-folder:
               command: !Sub
                 - >-
-                  ${local_ShellCommandMap_powershell} -Command "New-Item -ItemType directory -Path 'D:\Shares\Profiles$' -Force -Verbose -ErrorAction Stop"
-                -
-                  local_ShellCommandMap_powershell: !FindInMap [ShellCommandMap, powershell, command]
+                  ${PowershellCommand} -Command "
+                  New-Item -ItemType directory -Path 'D:\Shares\Profiles$' -Force
+                  -Verbose -ErrorAction Stop" || ${SignalFailure}
+                - PowershellCommand: !FindInMap [ShellCommandMap, powershell, command]
+                  SignalFailure: !Sub
+                    - (${Command} --stack ${AWS::StackName} --region ${AWS::Region} && exit /b 1)
+                    - Command: !FindInMap [CfnUtilsMap, Signal, Failure]
               waitAfterCompletion: '0'
             20-configure-fileshares:
               command: !Sub
                 - >-
-                  ${local_ShellCommandMap_powershell} c:\cfn\scripts\configure-fileshares.ps1 -DomainNetbiosName '${DomainNetbiosName}' -GroupName '${DomainAccessUserGroup}' -Verbose -ErrorAction Stop
-                -
-                  local_ShellCommandMap_powershell: !FindInMap [ShellCommandMap, powershell, command]
+                  ${PowershellCommand} c:\cfn\scripts\configure-fileshares.ps1
+                  -DomainNetbiosName '${DomainNetbiosName}'
+                  -GroupName '${DomainAccessUserGroup}'
+                  -Verbose -ErrorAction Stop || ${SignalFailure}
+                - PowershellCommand: !FindInMap [ShellCommandMap, powershell, command]
+                  SignalFailure: !Sub
+                    - (${Command} --stack ${AWS::StackName} --region ${AWS::Region} && exit /b 1)
+                    - Command: !FindInMap [CfnUtilsMap, Signal, Failure]
               waitAfterCompletion: '0'
+        configure-rdcb-cleanup:
+          commands:
+            20-rdcb-cleanup:
+              command: !Sub
+                - >-
+                  ${PowershellCommand} -Command "${PsExecCommand}
+                  -u \"${DomainNetbiosName}\$((Invoke-Expression ((Get-SSMParameterValue -Name '${SsmRdcbCredential}' -WithDecryption $true).Parameters ^| ? {$_.Name -eq '${SsmRdcbCredential}' }).Value).Username)\"
+                  -p \"$((Invoke-Expression ((Get-SSMParameterValue -Name '${SsmRdcbCredential}' -WithDecryption $true).Parameters ^| ? {$_.Name -eq '${SsmRdcbCredential}'}).Value).Password)\"
+                  ${PowershellCommand} c:\cfn\scripts\cleanup-rdcb-schedule.ps1
+                  -Verbose -ErrorAction Stop" || ${SignalFailure}
+                - PowershellCommand: !FindInMap [ShellCommandMap, powershell, command]
+                  PsExecCommand: !FindInMap [ShellCommandMap, psexec, command]
+                  SignalFailure: !Sub
+                    - (${Command} --stack ${AWS::StackName} --region ${AWS::Region} && exit /b 1)
+                    - Command: !FindInMap [CfnUtilsMap, Signal, Failure]
+              waitAfterCompletion: '0'
+          files:
+            'c:\cfn\scripts\cleanup-rdcb.ps1':
+              source: !Sub ${RepoBranchPrefixUrl}/scripts/cleanup-rdcb.ps1
+            'c:\cfn\scripts\logit.cmd':
+              source: !Sub ${RepoBranchPrefixUrl}/scripts/logit.cmd
+            'c:\cfn\scripts\cleanup-rdcb-schedule.ps1':
+              content: !Sub |
+                [CmdLetBinding()]
+                Param()
+                Import-Module P3Utils
+                $Credential = Invoke-Expression ((Get-SSMParameterValue -Name '${SsmRdcbCredential}' -WithDecryption $true).Parameters | ? {$_.Name -eq '${SsmRdcbCredential}' }).Value
+                New-RepeatingTask `
+                  -Name 'RDCB Cleanup' `
+                  -Command 'c:\cfn\scripts\logit.cmd' `
+                  -Arguments 'powershell.exe C:\cfn\scripts\cleanup-rdcb.ps1 -UpdPath D:\Shares\Profiles$ -DomainNetbiosName ${DomainNetbiosName} -Verbose -ErrorAction Stop >> c:\cfn\log\cleanup-rdcb.log 2>&1' `
+                  -User $Credential.Username `
+                  -SecurePassword ($Credential.Password | ConvertTo-SecureString -AsPlainText -Force) `
+                  -StartTime (Get-Date -Hour 20 -Minute 0 -Second 0).AddDays(1) `
+                  -RepetitionInterval (New-TimeSpan -Hours 24) `
+                  -Force
         configure-rdcb:
           commands:
             20-configure-rdcb:
               command: !Sub
                 - >-
-                  ${local_ShellCommandMap_powershell} -Command "${local_ShellCommandMap_psexec}
+                  ${PowershellCommand} -Command "${PsExecCommand}
                   -u \"${DomainNetbiosName}\$((Invoke-Expression ((Get-SSMParameterValue -Name '${SsmRdcbCredential}' -WithDecryption $true).Parameters ^| ? {$_.Name -eq '${SsmRdcbCredential}' }).Value).Username)\"
                   -p \"$((Invoke-Expression ((Get-SSMParameterValue -Name '${SsmRdcbCredential}' -WithDecryption $true).Parameters ^| ? {$_.Name -eq '${SsmRdcbCredential}'}).Value).Password)\"
-                  ${local_ShellCommandMap_powershell} c:\cfn\scripts\configure-rdcb.ps1 -Verbose -ErrorAction Stop"
-                -
-                  local_ShellCommandMap_powershell: !FindInMap [ShellCommandMap, powershell, command]
-                  local_ShellCommandMap_psexec: !FindInMap [ShellCommandMap, psexec, command]
+                  ${PowershellCommand} c:\cfn\scripts\configure-rdcb.ps1
+                  -Verbose -ErrorAction Stop" || ${SignalFailure}
+                - PowershellCommand: !FindInMap [ShellCommandMap, powershell, command]
+                  PsExecCommand: !FindInMap [ShellCommandMap, psexec, command]
+                  SignalFailure: !Sub
+                    - (${Command} --stack ${AWS::StackName} --region ${AWS::Region} && exit /b 1)
+                    - Command: !FindInMap [CfnUtilsMap, Signal, Failure]
               waitAfterCompletion: '0'
         finalize:
           commands:
             10-signal-success:
-              command: !Sub cfn-signal.exe -e 0 --stack ${AWS::StackName} --resource RdCbFileServerInstance --region ${AWS::Region}
+              command: !Sub
+                - ${SignalSuccess}
+                - SignalSuccess: !Sub
+                    - ${Command} --stack ${AWS::StackName} --region ${AWS::Region}
+                    - Command: !FindInMap [CfnUtilsMap, Signal, Success]
               ignoreErrors: 'true'
               waitAfterCompletion: '0'
         install-cloudwatch-agent:
           commands:
-            10-install-cloudwatch-agent:
+            10-configure-cloudwatch-agent:
               command: !Sub
                 - >-
-                  ${local_ShellCommandMap_powershell} -Command "
+                  ${PowershellCommand} -Command "
                   Invoke-Command -ScriptBlock {
                   $ErrorActionPreference = 'Stop';
                   Import-Module P3Utils;
-                  $CloudWatchAgentUri = [System.Uri]'${CloudWatchAgentUrl}';
-                  $CloudWatchAgentScriptDir = 'c:\cfn\scripts\AmazonCloudWatchAgent';
-                  $CloudWatchAgentInstaller = Join-Path $CloudWatchAgentScriptDir $CloudWatchAgentUri.Segments[($CloudWatchAgentUri.Segments.Length-1)];
-                  $Null = New-Item $CloudWatchAgentScriptDir -Type Directory -Force;
-                  Read-S3Object -BucketName $CloudWatchAgentUri.Host -Key ($CloudWatchAgentUri.Segments[1..($CloudWatchAgentUri.Segments.Length-1)] -Join '') -File $CloudWatchAgentInstaller -Region ${AWS::Region};
-                  $CloudWatchAgentConfig = $CloudWatchAgentScriptDir + '\aws-cloudwatch-agent-config.json';
-                  Invoke-RetryCommand -Command Start-Process -ArgList @{ FilePath='msiexec.exe'; ArgumentList = @('/i', $CloudWatchAgentInstaller, '/qn'); NoNewWindow = $true; PassThru = $true; Wait = $true } -CheckExpression '$Return.Result.ExitCode -eq 0' -InitialDelay 17 -MaxDelay 59 -Verbose;
+                  $CloudWatchAgentConfig = 'c:\cfn\files\aws-cloudwatch-agent-config.json';
                   $CloudWatchAgentCtl = \"${!Env:ProgramFiles}\Amazon\AmazonCloudWatchAgent\amazon-cloudwatch-agent-ctl.ps1\";
                   & $CloudWatchAgentCtl -Action cond-restart;
                   & $CloudWatchAgentCtl -a fetch-config -m ec2 -c file:$CloudWatchAgentConfig -s;
-                  } -Verbose -ErrorAction Stop"
-                -
-                  local_ShellCommandMap_powershell: !FindInMap [ShellCommandMap, powershell, command]
+                  }
+                  -Verbose -ErrorAction Stop" || ${SignalFailure}
+                - PowershellCommand: !FindInMap [ShellCommandMap, powershell, command]
+                  SignalFailure: !Sub
+                    - (${Command} --stack ${AWS::StackName} --region ${AWS::Region} && exit /b 1)
+                    - Command: !FindInMap [CfnUtilsMap, Signal, Failure]
               waitAfterCompletion: '0'
           files:
-            'c:\cfn\scripts\AmazonCloudWatchAgent\aws-cloudwatch-agent-config.json':
+            'c:\cfn\files\aws-cloudwatch-agent-config.json':
               content: !Sub
                 - |-
                   {
@@ -563,13 +651,25 @@ Resources:
                             {
                               "file_path": "c:\\ProgramData\\Amazon\\AmazonCloudWatchAgent\\Logs\\amazon-cloudwatch-agent.log",
                               "log_group_name": "${local_InstanceLogGroup}",
-                              "log_stream_name": "cloudwatch_agent_logs_{instance_id}",
+                              "log_stream_name": "{instance_id}//c/ProgramData/Amazon/AmazonCloudWatchAgent/Logs/amazon-cloudwatch-agent.log",
                               "timestamp_format": "%H:%M:%S %y %b %-d"
                             },
                             {
                               "file_path": "c:\\cfn\\log\\cfn-init.log",
                               "log_group_name": "${local_InstanceLogGroup}",
-                              "log_stream_name": "cloudformation_init_logs_{instance_id}",
+                              "log_stream_name": "{instance_id}//c/cfn/log/cfn-init.log",
+                              "timestamp_format": "%H:%M:%S %y %b %-d"
+                            },
+                            {
+                              "file_path": "c:\\cfn\\log\\cfn-init-cmd.log",
+                              "log_group_name": "${local_InstanceLogGroup}",
+                              "log_stream_name": "{instance_id}//c/cfn/log/cfn-init-cmd.log",
+                              "timestamp_format": "%H:%M:%S %y %b %-d"
+                            },
+                            {
+                              "file_path": "c:\\cfn\\log\\cleanup-rdcb.log",
+                              "log_group_name": "${local_InstanceLogGroup}",
+                              "log_stream_name": "{instance_id}//c/cfn/log/cleanup-rdcb.log",
                               "timestamp_format": "%H:%M:%S %y %b %-d"
                             }
                           ]
@@ -578,37 +678,37 @@ Resources:
                           "collect_list" : [
                             {
                               "event_name": "System",
-                              "event_levels": ["WARNING","ERROR"],
+                              "event_levels": ["WARNING", "ERROR", "INFORMATION"],
                               "log_group_name": "${local_InstanceLogGroup}",
-                              "log_stream_name": "Windows_System_{instance_id}",
+                              "log_stream_name": "{instance_id}//EventLog/System",
                               "event_format": "text"
                             },
                             {
                               "event_name": "Application",
-                              "event_levels": ["WARNING","ERROR"],
+                              "event_levels": ["WARNING", "ERROR", "INFORMATION"],
                               "log_group_name": "${local_InstanceLogGroup}",
-                              "log_stream_name": "Windows_Application_{instance_id}",
+                              "log_stream_name": "{instance_id}//EventLog/Application",
                               "event_format": "text"
                             },
                             {
                               "event_name": "Microsoft-Rdms-UI/Operational",
-                              "event_levels": ["WARNING","ERROR", "INFORMATION"],
+                              "event_levels": ["WARNING", "ERROR", "INFORMATION"],
                               "log_group_name": "${local_InstanceLogGroup}",
-                              "log_stream_name": "MS-Rdms-UI/Oper_{instance_id}",
+                              "log_stream_name": "{instance_id}//EventLog/MS-Rdms-UI/Operational",
                               "event_format": "text"
                             },
                             {
                               "event_name": "Microsoft-Windows-TerminalServices-SessionBroker/Operational",
-                              "event_levels": ["WARNING","ERROR", "INFORMATION"],
+                              "event_levels": ["WARNING", "ERROR", "INFORMATION"],
                               "log_group_name": "${local_InstanceLogGroup}",
-                              "log_stream_name": "Microsoft-Windows-TerminalServices-SessionBroker/Operational_{instance_id}",
+                              "log_stream_name": "{instance_id}//EventLog/Microsoft-Windows-TerminalServices-SessionBroker/Operational",
                               "event_format": "text"
                             },
                             {
                               "event_name": "Microsoft-Rdms-UI/Admin",
-                              "event_levels": ["WARNING","ERROR", "INFORMATION"],
+                              "event_levels": ["WARNING", "ERROR", "INFORMATION"],
                               "log_group_name": "${local_InstanceLogGroup}",
-                              "log_stream_name": "MS-Rdms-UI/Admin_{instance_id}",
+                              "log_stream_name": "{instance_id}//EventLog/MS-Rdms-UI/Admin",
                               "event_format": "text"
                             }
                           ]
@@ -617,43 +717,63 @@ Resources:
                       "log_stream_name": "default_logs_{instance_id}"
                     }
                   }
-                -
-                  local_InstanceLogGroup: !If [InstallCloudWatchAgent, !Ref InstanceLogGroup, !Ref 'AWS::NoValue']
+                - local_InstanceLogGroup: !If [InstallCloudWatchAgent, !Ref InstanceLogGroup, !Ref 'AWS::NoValue']
+          packages:
+            msi:
+              cloudwatch-agent: !Ref CloudWatchAgentUrl
+          services:
+            windows:
+              AmazonCloudWatchAgent:
+                enabled: 'true'
+                ensureRunning: 'true'
+                files:
+                  - 'c:\cfn\files\aws-cloudwatch-agent-config.json'
         install-roles:
           commands:
             10-install-roles:
               command: !Sub
                 - >-
-                  ${local_ShellCommandMap_powershell} -Command "Install-WindowsFeature FS-FileServer,RDS-Connection-Broker,RDS-RD-Server,RDS-Licensing,RDS-Licensing-UI -Verbose"
-                -
-                  local_ShellCommandMap_powershell: !FindInMap [ShellCommandMap, powershell, command]
+                  ${PowershellCommand} -Command "
+                  Import-Module P3Utils;
+                  Invoke-RetryCommand
+                  -Command Install-WindowsFeature
+                  -ArgList @{Name=@(\"FS-FileServer\",\"RDS-Connection-Broker\",\"RDS-RD-Server\",\"RDS-Licensing\",\"RDS-Licensing-UI\")}
+                  -Verbose -ErrorAction Stop" || ${SignalFailure}
+                - PowershellCommand: !FindInMap [ShellCommandMap, powershell, command]
+                  SignalFailure: !Sub
+                    - (${Command} --stack ${AWS::StackName} --region ${AWS::Region} && exit /b 1)
+                    - Command: !FindInMap [CfnUtilsMap, Signal, Failure]
               waitAfterCompletion: '0'
         join-domain:
           commands:
             10-join-domain:
               command: !Sub
-                - >-
-                  ${local_ShellCommandMap_powershell} -Command Write-Verbose 'Waiting for SSM to complete domain join, which reboots the instance automatically' -Verbose
-                -
-                  local_ShellCommandMap_powershell: !FindInMap [ShellCommandMap, powershell, command]
+                - ${PowershellCommand} -Command Write-Verbose 'Waiting for SSM to complete domain join, which reboots the instance automatically' -Verbose
+                - PowershellCommand: !FindInMap [ShellCommandMap, powershell, command]
               waitAfterCompletion: forever
         ps-modules:
           files:
             'C:\Program Files\WindowsPowerShell\Modules\P3Utils\P3Utils.psd1':
-              source: https://raw.githubusercontent.com/plus3it/cfn/master/psmodules/P3Utils/P3Utils.psd1
+              source: !Sub ${RepoBranchPrefixUrl}/psmodules/P3Utils/P3Utils.psd1
             'C:\Program Files\WindowsPowerShell\Modules\P3Utils\P3Utils.psm1':
-              source: https://raw.githubusercontent.com/plus3it/cfn/master/psmodules/P3Utils/P3Utils.psm1
+              source: !Sub ${RepoBranchPrefixUrl}/psmodules/P3Utils/P3Utils.psm1
+            'C:\Program Files\WindowsPowerShell\Modules\P3RemoteAccess\P3RemoteAccess.psd1':
+              source: !Sub ${RepoBranchPrefixUrl}/psmodules/P3RemoteAccess/P3RemoteAccess.psd1
+            'C:\Program Files\WindowsPowerShell\Modules\P3RemoteAccess\P3RemoteAccess.psm1':
+              source: !Sub ${RepoBranchPrefixUrl}/psmodules/P3RemoteAccess/P3RemoteAccess.psm1
         reboot:
           commands:
             10-reboot:
               command: !Sub
-                - >-
-                  ${local_ShellCommandMap_powershell} "Restart-Computer -Force -Verbose"
-                -
-                  local_ShellCommandMap_powershell: !FindInMap [ShellCommandMap, powershell, command]
+                - ${PowershellCommand} -Command "Restart-Computer -Force -Verbose -ErrorAction Stop" || ${SignalFailure}
+                - PowershellCommand: !FindInMap [ShellCommandMap, powershell, command]
+                  SignalFailure: !Sub
+                    - (${Command} --stack ${AWS::StackName} --region ${AWS::Region} && exit /b 1)
+                    - Command: !FindInMap [CfnUtilsMap, Signal, Failure]
               waitAfterCompletion: forever
       CfnUpdateTriggers:
         EbsVolumeSize: !Ref DataVolumeSize
+        ForceCfnInitUpdate: !Ref ForceCfnInitUpdate
     Properties:
       BlockDeviceMappings:
         - DeviceName: /dev/sda1
@@ -676,8 +796,7 @@ Resources:
             - ','
             - !Sub
               - '${RdcbEc2SecurityGroup},${local_ExtraSecurityGroupIds}'
-              -
-                local_ExtraSecurityGroupIds: !Join [',', !Ref ExtraSecurityGroupIds]
+              - local_ExtraSecurityGroupIds: !Join [',', !Ref ExtraSecurityGroupIds]
           SubnetId: !Ref Ec2SubnetId
       SsmAssociations:
         - DocumentName: !Sub 'awsconfig_Domain_${DomainDirectoryId}_${DomainDnsName}'
@@ -685,18 +804,25 @@ Resources:
         - Key: Name
           Value: !Ref 'AWS::StackName'
       UserData:
-        Fn::Base64: !Sub |
-          <script>
-            cfn-init.exe -v -c launch --stack ${AWS::StackName} --resource RdCbFileServerInstance --region ${AWS::Region}
+        Fn::Base64: !Sub
+          - |
+            <script>
+            ${InitLaunch}
             if %ERRORLEVEL% equ 0 goto success
 
             :error
-            cfn-signal.exe -e 1 --stack ${AWS::StackName} --resource RdCbFileServerInstance --region ${AWS::Region}
+            ${SignalFailure}
             echo "ERROR: cfn-init failed! Aborting!"
             exit /b 1
 
             :success
-          </script>
+            </script>
+          - InitLaunch: !Sub
+              - ${Command} --stack ${AWS::StackName} --region ${AWS::Region}
+              - Command: !FindInMap [CfnUtilsMap, Init, Launch]
+            SignalFailure: !Sub
+              - ${Command} --stack ${AWS::StackName} --region ${AWS::Region}
+              - Command: !FindInMap [CfnUtilsMap, Signal, Failure]
       Volumes:
         - Device: /dev/xvdf
           VolumeId: !Ref DataVolume

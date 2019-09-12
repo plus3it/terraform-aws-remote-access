@@ -169,14 +169,3 @@ variable "NlbZones" {
     us-west-2 = "Z18D5FSROUN65G"
   }
 }
-
-# remote_state inputs
-# variable "RdshSgId" {
-# default = ""
-# }
-# 
-# variable "RdcbFqdn" {
-# default = ""
-# }
-# 
-
