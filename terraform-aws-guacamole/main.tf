@@ -3,14 +3,14 @@ resource "aws_cloudformation_stack" "this" {
 
   name               = "${var.StackName}"
   capabilities       = "${var.Capabilities}"
-  # disable_rollback   = "${var.DisableRollback}"
-  # iam_role_arn       = "${var.IamRoleArn}"
-  # notification_arns  = "${var.NotificationArns}"
-  # on_failure         = "${var.OnFailureAction}"
-  # policy_body        = "${var.PolicyBody}"
-  # policy_url         = "${var.PolicyUrl}"
-  # tags               = "${var.StackTags}"
-  # timeout_in_minutes = "${var.TimeoutInMinutes}"
+  disable_rollback   = "${var.DisableRollback}"
+  iam_role_arn       = "${var.IamRoleArn}"
+  notification_arns  = "${var.NotificationArns}"
+  on_failure         = "${var.OnFailureAction}"
+  policy_body        = "${var.PolicyBody}"
+  policy_url         = "${var.PolicyUrl}"
+  tags               = "${var.StackTags}"
+  timeout_in_minutes = "${var.TimeoutInMinutes}"
 
   parameters = {
 "AmiId" = "${var.AmiId}"
@@ -43,9 +43,9 @@ resource "aws_cloudformation_stack" "this" {
 "VPC" = "${var.VPC}"
   }
 
-  # timeouts {
-    # create = "${var.TimeoutInMinutes}m"
-    # delete = "${var.TimeoutInMinutes}m"
-    # update = "${var.TimeoutInMinutes}m"
-  # }
+  timeouts {
+    create = "${var.TimeoutInMinutes}m"
+    delete = "${var.TimeoutInMinutes}m"
+    update = "${var.TimeoutInMinutes}m"
+  }
 }
