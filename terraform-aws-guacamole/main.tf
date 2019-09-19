@@ -55,5 +55,5 @@ resource "aws_route53_record" "this" {
   name       = "${var.StackName}"
   type       = "A"
   ttl        = "300"
-  records    = ["${aws_cloudformation_stack.this.GuacAsgDnsName}"]
+  records    = ["${aws_cloudformation_stack.this.outputs["LoadBalancerDns"]}"]
 }
