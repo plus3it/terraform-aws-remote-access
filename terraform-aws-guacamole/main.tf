@@ -55,5 +55,10 @@ resource "aws_route53_record" "this" {
   name       = "${var.StackName}"
   type       = "A"
   ttl        = "300"
-  records    = ["${aws_cloudformation_stack.this.outputs["LoadBalancerDns"]}"]
+
+  alias {
+    name                   = ["${aws_cloudformation_stack.this.outputs["LoadBalancerDns"]}"]
+#    zone_id                = "${aws_lb.alb.zone_id}"
+    evaluate_target_health = true
+  }
 }
