@@ -58,7 +58,7 @@ resource "aws_route53_record" "this" {
   type    = "A"
 
   alias {
-    name                   = "${(join(",", aws_cloudformation_stack.this.outputs["LoadBalancerDns"]))}"
+    name                   = "${lookup(aws_cloudformation_stack.this.outputs, "LoadBalancerDns", "")}"
     zone_id                = "${var.NlbZones["${data.aws_region.current.name}"]}"
     evaluate_target_health = true
   }
