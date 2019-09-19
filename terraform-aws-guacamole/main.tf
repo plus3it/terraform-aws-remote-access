@@ -50,6 +50,8 @@ resource "aws_cloudformation_stack" "this" {
   }
 }
 
+data "aws_region" "current" {}
+
 resource "aws_route53_record" "this" {
   zone_id    = "${var.GuacDnsZoneId}"
   name       = "${var.StackName}"
@@ -57,7 +59,7 @@ resource "aws_route53_record" "this" {
 
   alias {
     name                   = "${(concat(aws_cloudformation_stack.this.outputs["LoadBalancerDns"]))}"
-#    zone_id                = "${aws_lb.alb.zone_id}"
+    zone_id                = "${var.NlbZones["${data.aws_region.current.name}"]}"
     evaluate_target_health = true
   }
 }

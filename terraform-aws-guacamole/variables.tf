@@ -167,3 +167,14 @@ variable "GuacDnsZoneId" {
   type = "string"
   description = "Id of DNS zone for Guac Load Balancer DNS Record"
 }
+
+variable "NlbZones" {
+  type = "map"
+
+  default = {
+    us-east-1 = "Z26RNL4JYFTOTI"
+    us-east-2 = "ZLMOA37VPKANP"
+    us-west-1 = "Z24FKFUX50B4VW"
+    us-west-2 = "Z18D5FSROUN65G"
+  }
+}
