@@ -187,7 +187,7 @@ variable "NotificationArns" {
 variable "OnFailureAction" {
   type        = "string"
   description = "Action to be taken if stack creation fails. This must be one of: DO_NOTHING, ROLLBACK, or DELETE. Conflicts with DisableRollback"
-  default     = "DO_NOTHING"
+  default     = "DELETE"
 }
 
 variable "GuacDnsZoneId" {
