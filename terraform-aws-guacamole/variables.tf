@@ -162,3 +162,8 @@ variable "OnFailureAction" {
   description = "Action to be taken if stack creation fails. This must be one of: DO_NOTHING, ROLLBACK, or DELETE. Conflicts with DisableRollback"
   default     = "DO_NOTHING"
 }
+
+variable "GuacDnsZoneId" {
+  type = "string"
+  description = "Id of DNS zone for Guac Load Balancer DNS Record"
+}

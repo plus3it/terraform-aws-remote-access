@@ -49,3 +49,11 @@ resource "aws_cloudformation_stack" "this" {
     update = "${var.TimeoutInMinutes}m"
   }
 }
+
+resource "aws_route53_record" "this" {
+  zone_id    = "${var.GuacDnsZoneId}"
+  name       = "${var.StackName}"
+  type       = "A"
+  ttl        = "300"
+  records    = ["${aws_cloudformation_stack.this.GuacAsgDnsName}"]
+}
