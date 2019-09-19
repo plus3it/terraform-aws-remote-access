@@ -54,7 +54,6 @@ resource "aws_route53_record" "this" {
   zone_id    = "${var.GuacDnsZoneId}"
   name       = "${var.StackName}"
   type       = "A"
-  ttl        = "300"
 
   alias {
     name                   = ["${aws_cloudformation_stack.this.outputs["LoadBalancerDns"]}"]
