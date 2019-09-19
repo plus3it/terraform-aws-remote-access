@@ -195,6 +195,12 @@ variable "GuacDnsZoneId" {
   description = "Id of DNS zone for Guac Load Balancer DNS Record"
 }
 
+variable GuacPublicDnsHostname {
+  type = "string"
+  description = "Hostname of DNS record used to reach Guac Elb"
+  default = "guacamole"
+}
+
 variable "ElbZones" {
   type = "map"
 

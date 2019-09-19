@@ -54,7 +54,7 @@ data "aws_region" "current" {}
 
 resource "aws_route53_record" "this" {
   zone_id = "${var.GuacDnsZoneId}"
-  name    = "${var.StackName}"
+  name    = "${var.GuacPublicDnsHostname}"
   type    = "A"
 
   alias {
