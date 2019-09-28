@@ -27,7 +27,7 @@ resource "aws_security_group" "rdcb-sg1" {
     from_port   = 3389
     to_port     = 3389
     protocol    = "tcp"
-    cidr_blocks = ["10.0.0.0/8"]
+    cidr_blocks = "${var.SecurityGroupIngress}"
   }
 
   ingress {
@@ -67,7 +67,7 @@ resource "aws_security_group" "rdsh-sg1" {
     from_port   = 3389
     to_port     = 3389
     protocol    = "tcp"
-    cidr_blocks = ["10.0.0.0/8"]
+    cidr_blocks = "${var.SecurityGroupIngress}"
   }
 
   egress {

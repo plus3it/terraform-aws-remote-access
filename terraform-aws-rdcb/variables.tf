@@ -98,6 +98,12 @@ variable "StackName" {
   description = "CloudFormation Stack Name.  Must be less than 10 characters"
 }
 
+variable "SecurityGroupIngress" {
+  default = []
+  description = "List of security group IPs to allow"
+  type = "list"
+}
+
 variable "S3Bucket" {}
 
 variable "RdcbDnszoneId" {
