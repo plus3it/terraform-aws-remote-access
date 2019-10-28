@@ -42,6 +42,7 @@ locals {
     "\"PrivateSubnetIDs=${var.PrivateSubnetIds}\"",
     "\"PublicSubnetIDs=${var.PublicSubnetIds}\"",
     "\"RemoteAccessUserGroup=${var.RemoteAccessUserGroup}\"",
+    "\"RepoBranchPrefixUrl=${var.RepoBranchPrefixUrl}\"",
     "\"ScaleDownDesiredCapacity=${var.ScaleDownDesiredCapacity}\"",
     "\"ScaleDownSchedule=${var.ScaleDownSchedule}\"",
     "\"ScaleUpSchedule=${var.ScaleUpSchedule}\"",

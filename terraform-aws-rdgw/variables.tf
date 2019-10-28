@@ -78,6 +78,12 @@ variable "RemoteAccessUserGroup" {
   description = "Domain group of users authorized to use the RDGW"
 }
 
+variable "RepoBranchPrefixUrl" {
+  default     = "https://raw.githubusercontent.com/plus3it/cfn/master"
+  description = "URL prefix where the repo scripts can be retrieved"
+  type        = "string"
+}
+
 variable "ScaleDownDesiredCapacity" {
   default     = "1"
   description = "(Optional) Desired number of instances during the Scale Down Scheduled Action; ignored if ScaleDownSchedule is unset"
