@@ -59,6 +59,12 @@ variable "ExtraSecurityGroupIds" {
   description = "List of extra Security Group IDs to attach to the RDCB EC2 instance"
 }
 
+variable "ForceCfnInitUpdate" {
+  default     = "A"
+  description = "Toggles a cfn-init metadata update even if nothing else changes"
+  type        = "string"
+}
+
 variable "InstanceType" {
   default     = "t2.medium"
   description = "Amazon EC2 instance type for the Remote Desktop Session Instance"
@@ -79,6 +85,43 @@ variable "NotificationEmail" {
   description = "(Optional) Email address to subscribe to notifications and alarms"
 }
 
+variable "PatchSchedule" {
+  default     = "cron(0 6 ? * Sat *)"
+  description = "Schedule used to apply patches to the instance"
+  type        = "string"
+}
+
+variable "PatchSnsTopicArn" {
+  default     = ""
+  description = "SNS Topic used for patch status notifications"
+  type        = "string"
+}
+
+variable "RdcbDnszoneId" {
+  default     = ""
+  description = "Zone to create DNS record for RDCB instance"
+}
+
+variable "RepoBranchPrefixUrl" {
+  default     = "https://raw.githubusercontent.com/plus3it/cfn/master"
+  description = "URL prefix where the repo scripts can be retrieved"
+  type        = "https://raw.githubusercontent.com/plus3it/cfn/master"
+}
+
+variable "S3Bucket" {}
+
+variable "SecurityGroupIngress" {
+  default     = []
+  description = "List of security group IPs to allow"
+  type        = "list"
+}
+
+variable "SnapshotFrequency" {
+  default     = "60"
+  description = "(Optional) Specify an interval in minutes to configure snapshots of the EBS fileshare volume. Set an empty value \"\" to skip configuring snapshots. Default interval is 60 minutes."
+  type        = ""
+}
+
 variable "SsmKeyId" {
   default     = "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
   description = "KMS Key ID used to encrypt/decrypt the SsmRdcbCredential"
@@ -89,24 +132,11 @@ variable "SsmRdcbCredential" {
   description = "SSM Parameter Name for a SecureString containing the domain credential for the RDCB service account. SSM Parameter Value format is '@{Username = \"<user>\"; Password = \"<password>\"}'"
 }
 
-variable "VpcId" {
-  default     = "vpc-12345678"
-  description = "VPC to deploy instance into"
-}
-
 variable "StackName" {
   description = "CloudFormation Stack Name.  Must be less than 10 characters"
 }
 
-variable "SecurityGroupIngress" {
-  default = []
-  description = "List of security group IPs to allow"
-  type = "list"
-}
-
-variable "S3Bucket" {}
-
-variable "RdcbDnszoneId" {
-  default     = ""
-  description = "Zone to create DNS record for RDCB instance"
+variable "VpcId" {
+  default     = "vpc-12345678"
+  description = "VPC to deploy instance into"
 }
