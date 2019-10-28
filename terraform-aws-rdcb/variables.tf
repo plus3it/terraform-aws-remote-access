@@ -105,7 +105,7 @@ variable "RdcbDnszoneId" {
 variable "RepoBranchPrefixUrl" {
   default     = "https://raw.githubusercontent.com/plus3it/cfn/master"
   description = "URL prefix where the repo scripts can be retrieved"
-  type        = "https://raw.githubusercontent.com/plus3it/cfn/master"
+  type        = "string"
 }
 
 variable "S3Bucket" {}
