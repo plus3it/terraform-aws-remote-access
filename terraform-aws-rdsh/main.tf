@@ -43,6 +43,7 @@ locals {
     "\"RdpPrivateKeyPassword=${var.RdpPrivateKeyPassword}\"",
     "\"RdpPrivateKeyPfx=${var.RdpPrivateKeyPfx}\"",
     "\"RdpPrivateKeyS3Endpoint=${var.RdpPrivateKeyS3Endpoint}\"",
+    "\"RepoBranchPrefixUrl=${var.RepoBranchPrefixUrl}\"",
     "\"ScaleDownDesiredCapacity=${var.ScaleDownDesiredCapacity}\"",
     "\"ScaleDownSchedule=${var.ScaleDownSchedule}\"",
     "\"ScaleUpSchedule=${var.ScaleUpSchedule}\"",
