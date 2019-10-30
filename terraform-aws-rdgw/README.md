@@ -7,7 +7,7 @@
 | AuthenticationMethod | Configures the RDGW for either Password or Smartcard authentication | string | `"Password"` | no |
 | CloudWatchAgentUrl | (Optional) S3 URL to CloudWatch Agent MSI. Example: s3://amazoncloudwatch-agent/windows/amd64/latest/amazon-cloudwatch-agent.msi | string | `""` | no |
 | DesiredCapacity | The number of instances the autoscale group will spin up initially | string | `"1"` | no |
-| Dns\_Name | Hostname of A record created | string | `""` | no |
+| DnsName | Hostname of A record created | string | `""` | no |
 | DomainDirectoryId | ID of the AWS Directory Service domain, e.g. d-xxxxxxxxxx | string | n/a | yes |
 | DomainDnsName | Fully qualified domain name (FQDN) of the forest root domain e.g. example.com | string | `"example.com"` | no |
 | DomainNetbiosName | NetBIOS name of the domain (e.g. EXAMPLE) | string | `"EXAMPLE"` | no |
@@ -16,10 +16,11 @@
 | KeyPairName | Public/private key pairs allow you to securely connect to your instance after it launches | string | `""` | no |
 | MaxCapacity | The maximum number of instances for the autoscale group | string | `"2"` | no |
 | MinCapacity | The minimum number of instances for the autoscale group | string | `"0"` | no |
-| PrivateSubnetIds | Comma separated string of Private Subnet IDs where the RDGW instances will run | string | n/a | yes |
-| PublicSubnetIds | Comma separated string of Public subnet IDs to attach to the load balancer | string | n/a | yes |
-| Public\_Dnszone\_Id | Public DNS Zone where the RDGW record will be created | string | `""` | no |
+| PrivateSubnetIds | Comma separated string of Private Subnet IDs where the RDGW instances will run | list | n/a | yes |
+| PublicDnszoneId | Public DNS Zone where the RDGW record will be created | string | `""` | no |
+| PublicSubnetIds | Comma separated string of Public subnet IDs to attach to the load balancer | list | n/a | yes |
 | RemoteAccessUserGroup | Domain group of users authorized to use the RDGW | string | `"Domain Admins"` | no |
+| RepoBranchPrefixUrl | URL prefix where the repo scripts can be retrieved | string | `"https://raw.githubusercontent.com/plus3it/cfn/master"` | no |
 | S3Bucket |  | string | n/a | yes |
 | ScaleDownDesiredCapacity | (Optional) Desired number of instances during the Scale Down Scheduled Action; ignored if ScaleDownSchedule is unset | string | `"1"` | no |
 | ScaleDownSchedule | (Optional) Scheduled Action in cron-format (UTC) to scale down the number of instances; ignored if empty or ScaleUpSchedule is unset (E.g. "0 0 * * *") | string | `""` | no |
@@ -34,8 +35,9 @@
 
 | Name | Description |
 |------|-------------|
-| rdgw\_AlbSecurityGroupId |  |
-| rdgw\_Ec2SecurityGroupId |  |
-| rdgw\_LoadBalancerDns |  |
-| rdgw\_LoadBalancerZoneId |  |
-| rdgw\_loadbalancername |  |
+| rdgw-alb-security-group-id |  |
+| rdgw-ec2-security-group-id |  |
+| rdgw-load-balancer-dns |  |
+| rdgw-load-balancer-name |  |
+| rdgw-load-balancer-zone-id |  |
+

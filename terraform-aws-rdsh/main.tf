@@ -33,7 +33,7 @@ locals {
     "\"DomainNetbiosName=${var.DomainNetbiosName}\"",
     "\"DomainSvcAccount=${var.DomainSvcAccount}\"",
     "\"DomainSvcPassword=${var.DomainSvcPassword}\"",
-    "\"ExtraSecurityGroupIds=${var.ExtraSecurityGroupIds}\"",
+    "\"ExtraSecurityGroupIds=${join(",", var.ExtraSecurityGroupIds)}\"",
     "\"ForceUpdateToggle=${var.ForceUpdateToggle}\"",
     "\"InstanceType=${var.InstanceType}\"",
     "\"KeyPairName=${var.KeyPairName}\"",
@@ -43,10 +43,11 @@ locals {
     "\"RdpPrivateKeyPassword=${var.RdpPrivateKeyPassword}\"",
     "\"RdpPrivateKeyPfx=${var.RdpPrivateKeyPfx}\"",
     "\"RdpPrivateKeyS3Endpoint=${var.RdpPrivateKeyS3Endpoint}\"",
+    "\"RepoBranchPrefixUrl=${var.RepoBranchPrefixUrl}\"",
     "\"ScaleDownDesiredCapacity=${var.ScaleDownDesiredCapacity}\"",
     "\"ScaleDownSchedule=${var.ScaleDownSchedule}\"",
     "\"ScaleUpSchedule=${var.ScaleUpSchedule}\"",
-    "\"SubnetIDs=${var.SubnetIDs}\"",
+    "\"SubnetIDs=${join(",", var.SubnetIDs)}\"",
     "\"UserProfileDiskPath=${var.UserProfileDiskPath}\"",
     "\"VPC=${var.VpcId}\"",
     "\"CloudWatchAgentUrl=${var.CloudWatchAgentUrl}\"",
@@ -68,7 +69,7 @@ resource "aws_route53_record" "this" {
   type    = "A"
 
   alias {
-    name = "${data.aws_cloudformation_stack.this.outputs["LoadBalancerDns"]}"
+    name                   = "${data.aws_cloudformation_stack.this.outputs["LoadBalancerDns"]}"
     zone_id                = "${var.NlbZones["${data.aws_region.current.name}"]}"
     evaluate_target_health = true
   }
