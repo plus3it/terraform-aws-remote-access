@@ -19,6 +19,7 @@ variable "CloudWatchAgentUrl" {
 
 # RDCB instance.  MUST be the actual computer name of the connection broker, not an alias/cname of any kind
 variable "ConnectionBrokerFqdn" {
+  default = ""
   description = "Fully qualified domain name (FQDN) of the primary Connection Broker, e.g. 'cb.example.com'"
   type        = "string"
 }
