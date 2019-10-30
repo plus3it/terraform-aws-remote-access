@@ -77,12 +77,12 @@ variable "MinCapacity" {
 
 variable "PrivateSubnetIds" {
   description = "Comma separated string of Private Subnet IDs where the RDGW instances will run"
-  type        = "string"
+  type        = "list"
 }
 
 variable "PublicSubnetIds" {
   description = "Comma separated string of Public subnet IDs to attach to the load balancer"
-  type        = "string"
+  type        = "list"
 }
 
 variable "RemoteAccessUserGroup" {
