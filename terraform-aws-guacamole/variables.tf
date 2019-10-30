@@ -1,139 +1,168 @@
 variable "AmiId" {
   default     = ""
   description = ""
+  type = "string"
 }
 
 variable "AmiNameSearchString" {
   default     = "amzn-ami-hvm-2018.03.*-x86_64-gp2"
   description = ""
+  type = "string"
 }
 
 variable "BrandText" {
   default     = "Remote Access"
   description = ""
+  type = "string"
 }
 
 variable "CloudWatchAgentUrl" {
   default     = "s3://amazoncloudwatch-agent/amazon_linux/amd64/latest/amazon-cloudwatch-agent.rpm"
   description = ""
+  type = "string"
 }
 
 variable "DesiredCapacity" {
   default     = "1"
   description = ""
+  type = "string"
 }
 
 variable "ForceUpdateToggle" {
   default     = "B"
   description = ""
+  type = "string"
 }
 
 variable "GuacBaseDN" {
   default     = "CN=GuacConfigGroups"
   description = ""
+  type = "string"
 }
 
 variable "GuacamoleVersion" {
   default     = "1.0.0"
   description = ""
+  type = "string"
 }
 
 variable "GuacdVersion" {
   default     = "1.0.0"
   description = ""
+  type = "string"
 }
 
 variable "InstanceType" {
   default     = "c5.large"
   description = ""
+  type = "string"
 }
 
 variable "KeyPairName" {
   default     = ""
   description = ""
+  type = "string"
 }
 
 variable "LdapDN" {
   description = "DC=domain,DC=com"
+  type = "string"
 }
 
 variable "LdapServer" {
   description = "domain.com"
+  type = "string"
 }
 
 variable "MaxCapacity" {
   default     = "1"
   description = ""
+  type = "string"
 }
 
 variable "MinCapacity" {
   default     = "0"
   description = ""
+  type = "string"
 }
 
 variable "PrivateSubnetIDs" {
-  description = "Comma separated string of subnets"
+  description = "List of private subnets"
+  type = "list"
 }
 
 variable "PublicSubnetIDs" {
-  description = "Comma separated string of subnets"
+  description = "List of public subnets"
+  type = "list"
 }
 
 variable "ScaleDownDesiredCapacity" {
   default     = "1"
   description = ""
+  type = "string"
 }
 
 variable "ScaleDownSchedule" {
   default     = ""
   description = ""
+  type = "string"
 }
 
 variable "ScaleUpSchedule" {
   default     = ""
   description = ""
+  type = "string"
 }
 
 variable "SslCertificateName" {
   description = "Name of AWS ACM Certificate"
+  type = "string"
 }
 
 variable "SslCertificateService" {
   default     = "ACM"
   description = ""
+  type = "string"
 }
 
 variable "URL1" {
   default     = "https://accounts.domain.com"
   description = ""
+  type = "string"
 }
 
 variable "URL2" {
   default     = "https://redmine.domain.com"
   description = ""
+  type = "string"
 }
 
 variable "URLText1" {
   default     = "Account Services"
   description = ""
+  type = "string"
 }
 
 variable "URLText2" {
   default     = "Redmine"
   description = ""
+  type = "string"
 }
 
 variable "UpdateSchedule" {
   default     = "cron(0 5 ? * Sun *)"
   description = ""
+  type = "string"
 }
 
 variable "VPC" {
   description = "AWS VPC"
+  type = "string"
 }
 
 variable "StackName" {
   description = "CloudFormation Stack Name.  Must be less than 10 characters"
+  type = "string"
 }
 
 variable "Capabilities" {
