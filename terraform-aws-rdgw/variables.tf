@@ -17,9 +17,9 @@ variable "AuthenticationMethod" {
 }
 
 variable "CloudWatchAgentUrl" {
-  type        = "string"
-  description = "(Optional) S3 URL to CloudWatch Agent MSI. Example: s3://amazoncloudwatch-agent/windows/amd64/latest/amazon-cloudwatch-agent.msi"
   default     = ""
+  description = "(Optional) S3 URL to CloudWatch Agent MSI. Example: s3://amazoncloudwatch-agent/windows/amd64/latest/amazon-cloudwatch-agent.msi"
+  type        = "string"
 }
 
 variable "DesiredCapacity" {

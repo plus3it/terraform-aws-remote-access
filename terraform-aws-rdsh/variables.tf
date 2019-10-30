@@ -12,14 +12,14 @@ variable "AmiNameSearchString" {
 }
 
 variable "CloudWatchAgentUrl" {
-  type        = "string"
-  description = "(Optional) S3 URL to CloudWatch Agent MSI. Example: s3://amazoncloudwatch-agent/windows/amd64/latest/amazon-cloudwatch-agent.msi"
   default     = ""
+  description = "(Optional) S3 URL to CloudWatch Agent MSI. Example: s3://amazoncloudwatch-agent/windows/amd64/latest/amazon-cloudwatch-agent.msi"
+  type        = "string"
 }
 
 # RDCB instance.  MUST be the actual computer name of the connection broker, not an alias/cname of any kind
 variable "ConnectionBrokerFqdn" {
-  default = ""
+  default     = ""
   description = "Fully qualified domain name (FQDN) of the primary Connection Broker, e.g. 'cb.example.com'"
   type        = "string"
 }
@@ -83,7 +83,7 @@ variable "InstanceType" {
 }
 
 variable "KeyPairName" {
-  default = ""
+  default     = ""
   description = "Public/private key pairs allow you to securely connect to your instance after it launches"
   type        = "string"
 }
@@ -181,19 +181,20 @@ variable "S3Bucket" {
 
 # DNS Record vars
 variable "PrivateDnszoneId" {
-  default = ""
+  default     = ""
   description = "ZoneId where DNS record will be created for the RDSH nodes"
   type        = "string"
 }
 
 variable "DnsName" {
-  default = ""
+  default     = ""
   description = "Name of Host A DNS Record"
   type        = "string"
 }
 
 variable "NlbZones" {
-  type = "map"
+  description = "Map of NLB Zones"
+  type        = "map"
 
   default = {
     us-east-1 = "Z26RNL4JYFTOTI"
