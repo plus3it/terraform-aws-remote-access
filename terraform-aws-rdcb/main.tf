@@ -126,7 +126,7 @@ locals {
     "\"DomainNetbiosName=${var.DomainNetbiosName}\"",
     "\"Ec2SubnetAz=${var.Ec2SubnetAz}\"",
     "\"Ec2SubnetId=${var.Ec2SubnetId}\"",
-    "\"ExtraSecurityGroupIds=${aws_security_group.rdcb-sg1.id},${var.ExtraSecurityGroupIds}\"",
+    "\"ExtraSecurityGroupIds=${aws_security_group.rdcb-sg1.id},${join(",", var.ExtraSecurityGroupIds)}\"",
     "\"ForceCfnInitUpdate=${var.ForceCfnInitUpdate}\"",
     "\"InstanceType=${var.InstanceType}\"",
     "\"KeyPairName=${var.KeyPairName}\"",
