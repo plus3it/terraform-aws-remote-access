@@ -1,3 +1,7 @@
+# rdsh
+
+Terraform module that deploys Remote Desktop Sessions Hosts.
+
 ## Inputs
 
 | Name | Description | Type | Default | Required |

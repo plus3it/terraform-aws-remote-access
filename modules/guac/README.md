@@ -1,3 +1,7 @@
+# guac
+
+Terraform module that deploys Apache Guacamole.
+
 ## Inputs
 
 | Name | Description | Type | Default | Required |
@@ -13,7 +17,6 @@
 | ForceUpdateToggle | A/B toggle that forces a change to a LaunchConfig property, triggering the AutoScale Update Policy | string | `"B"` | no |
 | GuacBaseDN | The base of the DN for all Guacamole configurations. | string | `"CN=GuacConfigGroups"` | no |
 | GuacDnsZoneId | Id of DNS zone for Guac Load Balancer DNS Record | string | n/a | yes |
-| GuacPublicDnsHostname | Hostname of DNS record used to reach Guac Elb | string | `"guacamole"` | no |
 | GuacamoleVersion | Guacamole version tag. Defaults to 1.0.0 | string | `"1.0.0"` | no |
 | GuacdVersion | Guacd version tag. Defaults to 1.0.0 | string | `"1.0.0"` | no |
 | IamRoleArn | The ARN of an IAM role that AWS CloudFormation assumes to create the stack. If you don't specify a value, AWS CloudFormation uses the role that was previously associated with the stack. If no role is available, AWS CloudFormation uses a temporary session that is generated from your user credentials | string | `""` | no |

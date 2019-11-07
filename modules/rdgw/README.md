@@ -1,3 +1,7 @@
+# rdgw
+
+Terraform module that deploys a Remote Desktop Gateway.
+
 ## Inputs
 
 | Name | Description | Type | Default | Required |
