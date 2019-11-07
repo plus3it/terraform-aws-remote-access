@@ -1,3 +1,7 @@
+# guac
+
+Terraform module that deploys Apache Guacamole.
+
 ## Inputs
 
 | Name | Description | Type | Default | Required |
@@ -43,3 +47,4 @@
 | URLText2 | Text/Label to display for the Second custom URL/link displayed on the Guac Login page | string | `"Redmine"` | no |
 | UpdateSchedule | (Optional) Time interval between auto stack updates. Refer to the AWS documentation for valid input syntax: https://docs.aws.amazon.com/AmazonCloudWatch/latest/events/ScheduledEvents.html | string | `"cron(0 5 ? * Sun *)"` | no |
 | VPC | VPC to deploy instance(s) into | string | n/a | yes |
+

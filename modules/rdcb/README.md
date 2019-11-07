@@ -1,3 +1,7 @@
+# rdcb
+
+Terraform module that deploys a Remote Desktop Connection Broker/File Server.
+
 ## Inputs
 
 | Name | Description | Type | Default | Required |
@@ -43,3 +47,4 @@
 | rdcb-sg-id |  |
 | rdcb-sns-arn |  |
 | rdsh-sg-id |  |
+

@@ -1,3 +1,7 @@
+# rdgw
+
+Terraform module that deploys a Remote Desktop Gateway.
+
 ## Inputs
 
 | Name | Description | Type | Default | Required |
@@ -40,3 +44,4 @@
 | rdgw-load-balancer-dns |  |
 | rdgw-load-balancer-name |  |
 | rdgw-load-balancer-zone-id |  |
+
