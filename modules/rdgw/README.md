@@ -40,4 +40,3 @@
 | rdgw-load-balancer-dns |  |
 | rdgw-load-balancer-name |  |
 | rdgw-load-balancer-zone-id |  |
-

@@ -43,4 +43,3 @@
 | rdcb-sg-id |  |
 | rdcb-sns-arn |  |
 | rdsh-sg-id |  |
-

@@ -36,4 +36,3 @@
 | UpdateSchedule | (Optional) Time interval between auto stack updates. Refer to the AWS documentation for valid input syntax: https://docs.aws.amazon.com/AmazonCloudWatch/latest/events/ScheduledEvents.html | string | `""` | no |
 | UserProfileDiskPath | Path to a CIFS share where User Profile Disks are stored, e.g. "\\home.example.com\Profiles$" | string | `"\\\\\\home.example.com\\Profile$"` | no |
 | VpcId | VPC to deploy instance(s) into | string | n/a | yes |
-
