@@ -18,14 +18,14 @@ Terraform module that deploys Remote Desktop Sessions Hosts.
 | DomainNetbiosName | Netbios name of the domain (e.g. EXAMPLE) | string | `"EXAMPLE"` | no |
 | DomainSvcAccount | User name for the account that will join the instance to the Connection Broker Cluster | string | n/a | yes |
 | DomainSvcPassword | Password for the Connection Broker service account. Must be at least 8 characters containing letters, numbers and symbols | string | n/a | yes |
-| ExtraSecurityGroupIds | Comma separated string of extra Security Group IDs to attach to the RDSH instances -- include _at least_ the SG allowing connectivity to the Connection Broker database | list | `<list>` | no |
+| ExtraSecurityGroupIds | Comma separated string of extra Security Group IDs to attach to the RDSH instances -- include _at least_ the SG allowing connectivity to the Connection Broker database | list(string) | `<list>` | no |
 | ForceUpdateToggle | A/B toggle that forces a change to a LaunchConfig property, triggering the AutoScale Update Policy | string | `"A"` | no |
 | InstanceType | Amazon EC2 instance type for the Remote Desktop Session Instance | string | `"t2.medium"` | no |
 | KeyPairName | Public/private key pairs allow you to securely connect to your instance after it launches | string | `""` | no |
 | LdapContainerOU | DN of the LDAP container or OU in which the RDSH instance will be placed | string | `"OU=Users,DC=example,DC=com"` | no |
 | MaxCapacity | The maximum number of instances for the autoscale group | string | `"2"` | no |
 | MinCapacity | The minimum number of instances for the autoscale group | string | `"0"` | no |
-| NlbZones | Map of NLB Zones | map | `<map>` | no |
+| NlbZones | Map of NLB Zones | map(string) | `<map>` | no |
 | PrivateDnszoneId | ZoneId where DNS record will be created for the RDSH nodes | string | `""` | no |
 | RdpPrivateKeyPassword | Password to the RDP certificate private key | string | n/a | yes |
 | RdpPrivateKeyPfx | S3 bucket and path to a private key for the RDP certificate, e.g. '<bucket>/path/to/key.pfx' | string | n/a | yes |
@@ -36,7 +36,7 @@ Terraform module that deploys Remote Desktop Sessions Hosts.
 | ScaleDownSchedule | (Optional) Scheduled Action in cron-format (UTC) to scale down the number of instances; ignored if empty or ScaleUpSchedule is unset (E.g. '0 0 * * *') | string | `""` | no |
 | ScaleUpSchedule | (Optional) Scheduled Action in cron-format (UTC) to scale up to the Desired Capacity; ignored if empty or ScaleDownSchedule is unset (E.g. '0 10 * * Mon-Fri') | string | `""` | no |
 | StackName | CloudFormation Stack Name.  Must be less than 10 characters | string | n/a | yes |
-| SubnetIDs | List of Subnet IDs where the RDSH instances and ELB will be launched | list | `<list>` | no |
+| SubnetIDs | List of Subnet IDs where the RDSH instances and ELB will be launched | list(string) | `<list>` | no |
 | UpdateSchedule | (Optional) Time interval between auto stack updates. Refer to the AWS documentation for valid input syntax: https://docs.aws.amazon.com/AmazonCloudWatch/latest/events/ScheduledEvents.html | string | `""` | no |
 | UserProfileDiskPath | Path to a CIFS share where User Profile Disks are stored, e.g. "\\home.example.com\Profiles$" | string | `"\\\\\\home.example.com\\Profile$"` | no |
 | VpcId | VPC to deploy instance(s) into | string | n/a | yes |

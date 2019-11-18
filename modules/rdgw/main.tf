@@ -1,22 +1,22 @@
 data "aws_cloudformation_stack" "this" {
-  name       = "${var.StackName}"
-  depends_on = ["null_resource.push-changeset"]
+  name       = var.StackName
+  depends_on = [null_resource.push-changeset]
 }
 
 data "aws_lb" "this" {
-  arn        = "${data.aws_cloudformation_stack.this.outputs["LoadBalancerName"]}"
-  depends_on = ["data.aws_cloudformation_stack.this"]
+  arn        = data.aws_cloudformation_stack.this.outputs["LoadBalancerName"]
+  depends_on = [data.aws_cloudformation_stack.this]
 }
 
 resource "null_resource" "push-changeset" {
   provisioner "local-exec" {
-    command     = "${join(" ", local.create_changeset_command)}"
-    working_dir = "${path.module}"
+    command     = join(" ", local.create_changeset_command)
+    working_dir = path.module
   }
 
   provisioner "local-exec" {
-    command = "${join(" ", local.destroy_changeset_command)}"
-    when    = "destroy"
+    command = join(" ", local.destroy_changeset_command)
+    when    = destroy
   }
 }
 
@@ -63,13 +63,16 @@ locals {
 }
 
 resource "aws_route53_record" "this" {
-  zone_id = "${var.PublicDnszoneId}"
-  name    = "${var.DnsName}"
+  zone_id = var.PublicDnszoneId
+  name    = var.DnsName
   type    = "A"
 
   alias {
-    name                   = "${data.aws_lb.this.dns_name}"
-    zone_id                = "${data.aws_lb.this.zone_id}"
+    name                   = data.aws_lb.this.dns_name
+    zone_id                = data.aws_lb.this.zone_id
     evaluate_target_health = true
   }
+  # depends_on = [data.aws_lb.this]
+
 }
+
