@@ -189,9 +189,19 @@ variable "StackTags" {
   type        = map(string)
 }
 
-variable "TimeoutInMinutes" {
+variable "StackCreateTimeout" {
   default     = "20"
-  description = "The amount of time that can pass before the stack status becomes CREATE_FAILED"
+  description = "The amount of time in minutes before the stack create fails"
+  type        = string
+}
+variable "StackUpdateTimeout" {
+  default     = "20"
+  description = "The amount of time in minutes before the stack update fails"
+  type        = string
+}
+variable "StackDeleteTimeout" {
+  default     = "20"
+  description = "The amount of time in minutes before the stack delete fails"
   type        = string
 }
 

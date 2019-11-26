@@ -12,7 +12,7 @@ resource "aws_cloudformation_stack" "this" {
   policy_body        = var.PolicyBody
   policy_url         = var.PolicyUrl
   tags               = var.StackTags
-  timeout_in_minutes = var.TimeoutInMinutes
+  timeout_in_minutes = var.StackCreateTimeout
 
   parameters = {
     "AmiId"                    = var.AmiId
@@ -46,9 +46,9 @@ resource "aws_cloudformation_stack" "this" {
   }
 
   timeouts {
-    create = "${var.TimeoutInMinutes}m"
-    delete = "${var.TimeoutInMinutes}m"
-    update = "${var.TimeoutInMinutes}m"
+    create = "${var.StackCreateTimeout}m"
+    delete = "${var.StackDeleteTimeout}m"
+    update = "${var.StackUpdateTimeout}m"
   }
 }
 
