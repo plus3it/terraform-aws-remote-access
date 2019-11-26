@@ -174,10 +174,10 @@ Parameters:
     Description: The minimum number of instances for the autoscale group
     MinLength: '1'
     Type: String
-  PrivateSubnetIDs:
+  PrivateSubnetIds:
     Description: List of Private Subnet IDs where the Guacamole instances will run
     Type: 'List<AWS::EC2::Subnet::Id>'
-  PublicSubnetIDs:
+  PublicSubnetIds:
     Description: A list of Public subnet IDs to attach to the Application Load Balancer
     Type: 'List<AWS::EC2::Subnet::Id>'
   RepoBranchPrefixUrl:
@@ -240,7 +240,7 @@ Resources:
       Scheme: internet-facing
       SecurityGroups:
         - !Ref AlbSecurityGroup
-      Subnets: !Ref PublicSubnetIDs
+      Subnets: !Ref PublicSubnetIds
       Tags:
         - Key: Name
           Value: !Ref 'AWS::StackName'
@@ -310,7 +310,7 @@ Resources:
           Value: !Ref 'AWS::StackName'
       TargetGroupARNs:
         - !Ref ALBTargetGroup
-      VPCZoneIdentifier: !Ref PrivateSubnetIDs
+      VPCZoneIdentifier: !Ref PrivateSubnetIds
     Type: 'AWS::AutoScaling::AutoScalingGroup'
     UpdatePolicy:
       AutoScalingReplacingUpdate:

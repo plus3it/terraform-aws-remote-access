@@ -86,12 +86,12 @@ variable "MinCapacity" {
   type        = string
 }
 
-variable "PrivateSubnetIDs" {
+variable "PrivateSubnetIds" {
   description = "List of Private Subnet IDs where the Guacamole instances will run"
   type        = list(string)
 }
 
-variable "PublicSubnetIDs" {
+variable "PublicSubnetIds" {
   description = "List of Public subnet IDs to attach to the Application Load Balancer"
   type        = list(string)
 }

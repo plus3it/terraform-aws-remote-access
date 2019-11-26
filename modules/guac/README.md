@@ -31,8 +31,8 @@ Terraform module that deploys Apache Guacamole.
 | OnFailureAction | Action to be taken if stack creation fails. This must be one of: DO_NOTHING, ROLLBACK, or DELETE. Conflicts with DisableRollback | string | `"ROLLBACK"` | no |
 | PolicyBody | String containing the stack policy body. Conflicts with PolicyUrl | string | `""` | no |
 | PolicyUrl | URL to a file containing the stack policy. Conflicts with PolicyBody | string | `""` | no |
-| PrivateSubnetIDs | List of Private Subnet IDs where the Guacamole instances will run | list(string) | n/a | yes |
-| PublicSubnetIDs | List of Public subnet IDs to attach to the Application Load Balancer | list(string) | n/a | yes |
+| PrivateSubnetIds | List of Private Subnet IDs where the Guacamole instances will run | list(string) | n/a | yes |
+| PublicSubnetIds | List of Public subnet IDs to attach to the Application Load Balancer | list(string) | n/a | yes |
 | ScaleDownDesiredCapacity | (Optional) Desired number of instances during the Scale Down Scheduled Action; ignored if ScaleDownSchedule is unset | string | `"1"` | no |
 | ScaleDownSchedule | (Optional) Scheduled Action in cron-format (UTC) to scale down the number of instances; ignored if empty or ScaleUpSchedule is unset (E.g. '0 0 * * *') | string | `""` | no |
 | ScaleUpSchedule | (Optional) Scheduled Action in cron-format (UTC) to scale up to the Desired Capacity; ignored if empty or ScaleDownSchedule is unset (E.g. '0 10 * * Mon-Fri') | string | `""` | no |

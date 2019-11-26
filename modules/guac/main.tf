@@ -30,8 +30,8 @@ resource "aws_cloudformation_stack" "this" {
     "LdapServer"               = var.LdapServer
     "MaxCapacity"              = var.MaxCapacity
     "MinCapacity"              = var.MinCapacity
-    "PrivateSubnetIDs"         = join(",", var.PrivateSubnetIDs)
-    "PublicSubnetIDs"          = join(",", var.PublicSubnetIDs)
+    "PrivateSubnetIds"         = join(",", var.PrivateSubnetIds)
+    "PublicSubnetIds"          = join(",", var.PublicSubnetIds)
     "ScaleDownDesiredCapacity" = var.ScaleDownDesiredCapacity
     "ScaleDownSchedule"        = var.ScaleDownSchedule
     "ScaleUpSchedule"          = var.ScaleUpSchedule
