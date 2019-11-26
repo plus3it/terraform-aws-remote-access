@@ -1,40 +1,40 @@
 data "aws_cloudformation_stack" "this" {
-  name       = "${var.StackName}"
-  depends_on = ["null_resource.push-changeset"]
+  name       = var.StackName
+  depends_on = [null_resource.push-changeset]
 }
 
 data "local_file" "rdcb_hostname" {
   filename   = "rdcb-hostname.txt"
-  depends_on = ["null_resource.get_ec2_hostname"]
+  depends_on = [null_resource.get_ec2_hostname]
 }
 
 resource "aws_route53_record" "this" {
-  zone_id    = "${var.RdcbDnszoneId}"
-  name       = "${var.StackName}"
+  zone_id    = var.RdcbDnszoneId
+  name       = var.StackName
   type       = "A"
   ttl        = "300"
-  records    = ["${data.aws_cloudformation_stack.this.outputs["RdcbEc2InstanceIp"]}"]
-  depends_on = ["data.aws_cloudformation_stack.this"]
+  records    = [data.aws_cloudformation_stack.this.outputs["RdcbEc2InstanceIp"]]
+  depends_on = [data.aws_cloudformation_stack.this]
 }
 
 resource "aws_security_group" "rdcb-sg1" {
   name_prefix = "${var.StackName}-"
   description = "Security group for accessing rdcb"
 
-  vpc_id = "${var.VpcId}"
+  vpc_id = var.VpcId
 
   ingress {
     from_port   = 3389
     to_port     = 3389
     protocol    = "tcp"
-    cidr_blocks = "${var.SecurityGroupIngress}"
+    cidr_blocks = var.SecurityGroupIngress
   }
 
   ingress {
     from_port       = 0
     to_port         = 0
     protocol        = "-1"
-    security_groups = ["${aws_security_group.rdsh-sg1.id}"]
+    security_groups = [aws_security_group.rdsh-sg1.id]
   }
 
   ingress {
@@ -51,7 +51,7 @@ resource "aws_security_group" "rdcb-sg1" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
-  tags {
+  tags = {
     Name      = "${var.StackName}-rdcb-sg1"
     Terraform = "True"
   }
@@ -61,13 +61,13 @@ resource "aws_security_group" "rdsh-sg1" {
   name_prefix = "${var.StackName}-"
   description = "Security group for accessing rdsh"
 
-  vpc_id = "${var.VpcId}"
+  vpc_id = var.VpcId
 
   ingress {
     from_port   = 3389
     to_port     = 3389
     protocol    = "tcp"
-    cidr_blocks = "${var.SecurityGroupIngress}"
+    cidr_blocks = var.SecurityGroupIngress
   }
 
   egress {
@@ -77,7 +77,7 @@ resource "aws_security_group" "rdsh-sg1" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
-  tags {
+  tags = {
     Name      = "${var.StackName}-rdsh-sg1"
     Terraform = "True"
   }
@@ -85,26 +85,23 @@ resource "aws_security_group" "rdsh-sg1" {
 
 resource "null_resource" "push-changeset" {
   provisioner "local-exec" {
-    command     = "${join(" ", local.create_changeset_command)}"
-    working_dir = "${path.module}"
+    command     = join(" ", local.create_changeset_command)
+    working_dir = path.module
   }
 
   provisioner "local-exec" {
-    command = "${join(" ", local.destroy_changeset_command)}"
-    when    = "destroy"
+    command = join(" ", local.destroy_changeset_command)
+    when    = destroy
   }
-
-  depends_on = ["aws_security_group.rdcb-sg1"]
-  depends_on = ["aws_security_group.rdsh-sg1"]
 }
 
 resource "null_resource" "get_ec2_hostname" {
   provisioner "local-exec" {
-    command = "${join(" ", local.get_ec2_hostname)}"
+    command = join(" ", local.get_ec2_hostname)
   }
 
   triggers = {
-    instance_ids = "${join(",", null_resource.push-changeset.*.id)}"
+    instance_ids = join(",", null_resource.push-changeset.*.id)
   }
 }
 

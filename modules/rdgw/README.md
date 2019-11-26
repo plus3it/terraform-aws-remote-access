@@ -20,9 +20,9 @@ Terraform module that deploys a Remote Desktop Gateway.
 | KeyPairName | Public/private key pairs allow you to securely connect to your instance after it launches | string | `""` | no |
 | MaxCapacity | The maximum number of instances for the autoscale group | string | `"2"` | no |
 | MinCapacity | The minimum number of instances for the autoscale group | string | `"0"` | no |
-| PrivateSubnetIds | Comma separated string of Private Subnet IDs where the RDGW instances will run | list | n/a | yes |
+| PrivateSubnetIds | Comma separated string of Private Subnet IDs where the RDGW instances will run | list(string) | n/a | yes |
 | PublicDnszoneId | Public DNS Zone where the RDGW record will be created | string | `""` | no |
-| PublicSubnetIds | Comma separated string of Public subnet IDs to attach to the load balancer | list | n/a | yes |
+| PublicSubnetIds | Comma separated string of Public subnet IDs to attach to the load balancer | list(string) | n/a | yes |
 | RemoteAccessUserGroup | Domain group of users authorized to use the RDGW | string | `"Domain Admins"` | no |
 | RepoBranchPrefixUrl | URL prefix where the repo scripts can be retrieved | string | `"https://raw.githubusercontent.com/plus3it/cfn/master"` | no |
 | S3Bucket |  | string | n/a | yes |
