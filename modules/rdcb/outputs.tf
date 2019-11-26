@@ -1,12 +1,12 @@
 output "rdcb-sns-arn" {
-  value = lookup(data.aws_cloudformation_stack.this.outputs, "SnsArn", "")
+  value = lookup(data.aws_cloudformation_stack.this.outputs, "SnsArn", null)
 }
 
 output "rdcb-instance-ip" {
   value = lookup(
     data.aws_cloudformation_stack.this.outputs,
     "RdcbEc2InstanceIp",
-    "",
+    null,
   )
 }
 
@@ -14,7 +14,7 @@ output "rdcb-instance-id" {
   value = lookup(
     data.aws_cloudformation_stack.this.outputs,
     "RdcbEc2InstanceId",
-    "",
+    null,
   )
 }
 
