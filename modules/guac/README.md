@@ -38,9 +38,11 @@ Terraform module that deploys Apache Guacamole.
 | ScaleUpSchedule | (Optional) Scheduled Action in cron-format (UTC) to scale up to the Desired Capacity; ignored if empty or ScaleDownSchedule is unset (E.g. '0 10 * * Mon-Fri') | string | `""` | no |
 | SslCertificateName | The name (for IAM) or identifier (for ACM) of the SSL certificate to associate with the ALB -- the cert must already exist in the service | string | n/a | yes |
 | SslCertificateService | The service hosting the SSL certificate | string | `"ACM"` | no |
+| StackCreateTimeout | The amount of time in minutes before the stack create fails | string | `"20"` | no |
+| StackDeleteTimeout | The amount of time in minutes before the stack delete fails | string | `"20"` | no |
 | StackName | CloudFormation Stack Name.  Must be less than 10 characters | string | n/a | yes |
 | StackTags | A map of tag keys/values to associate with this stack | map(string) | `<map>` | no |
-| TimeoutInMinutes | The amount of time that can pass before the stack status becomes CREATE_FAILED | string | `"20"` | no |
+| StackUpdateTimeout | The amount of time in minutes before the stack update fails | string | `"20"` | no |
 | URL1 | First custom URL/link to display on the Guac Login page | string | `"https://accounts.domain.com"` | no |
 | URL2 | Second custom URL/link to display on the Guac Login page | string | `"https://redmine.domain.com"` | no |
 | URLText1 | Text/Label to display for the First custom URL/link displayed on the Guac Login page | string | `"Account Services"` | no |
