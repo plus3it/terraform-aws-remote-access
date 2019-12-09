@@ -13,7 +13,6 @@ Terraform module that deploys Apache Guacamole.
 | CloudWatchAgentUrl | (Optional) S3 URL to CloudWatch Agent installer. Example: s3://amazoncloudwatch-agent/windows/amd64/latest/amazon-cloudwatch-agent.msi | string | `"s3://amazoncloudwatch-agent/amazon_linux/amd64/latest/amazon-cloudwatch-agent.rpm"` | no |
 | DesiredCapacity | The number of instances the autoscale group will spin up initially | string | `"1"` | no |
 | DisableRollback | Set to true to disable rollback of the stack if stack creation failed. Conflicts with OnFailure | string | `"false"` | no |
-| DomainDnsName | Name of LDAP server Guacamole will authenticate against.  E.g. domain.com | string | n/a | yes |
 | ElbZones | Map of ELB Zones | map(string) | `<map>` | no |
 | ForceUpdateToggle | A/B toggle that forces a change to a LaunchConfig property, triggering the AutoScale Update Policy | string | `"B"` | no |
 | GuacBaseDN | The base of the DN for all Guacamole configurations. | string | `"CN=GuacConfigGroups"` | no |
@@ -25,6 +24,7 @@ Terraform module that deploys Apache Guacamole.
 | InstanceType | Amazon EC2 instance type for the Remote Desktop Session Instance | string | `"c5.large"` | no |
 | KeyPairName | Public/private key pairs allow you to securely connect to your instance after it launches | string | `""` | no |
 | LdapDN | Distinguished Name (DN) of the LDAP directory.  E.g. DC=domain,DC=com | string | n/a | yes |
+| LdapServer | Name of LDAP server Guacamole will authenticate against.  E.g. domain.com | string | n/a | yes |
 | MaxCapacity | The maximum number of instances for the autoscale group | string | `"1"` | no |
 | MinCapacity | The minimum number of instances for the autoscale group | string | `"0"` | no |
 | NotificationArns | A list of SNS topic ARNs to publish stack related events | list(string) | `<list>` | no |
