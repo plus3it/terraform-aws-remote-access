@@ -231,7 +231,7 @@ Parameters:
     Default: ''
     Description: (Optional) Time interval between auto stack updates. Refer to the AWS documentation for valid input syntax:https://docs.aws.amazon.com/AmazonCloudWatch/latest/events/ScheduledEvents.html
     Type: String
-  VPC:
+  VpcId:
     Description: VPC ID
     Type: 'AWS::EC2::VPC::Id'
 Resources:
@@ -256,7 +256,7 @@ Resources:
       Port: 8080
       Protocol: HTTP
       UnhealthyThresholdCount: 10
-      VpcId: !Ref VPC
+      VpcId: !Ref VpcId
     Type: 'AWS::ElasticLoadBalancingV2::TargetGroup'
   AlbSecurityGroup:
     Properties:
@@ -264,7 +264,7 @@ Resources:
       Tags:
         - Key: Name
           Value: !Sub 'ra-guac-alb-${AWS::StackName}'
-      VpcId: !Ref VPC
+      VpcId: !Ref VpcId
     Type: 'AWS::EC2::SecurityGroup'
   AlbToGuacEgressTcp80:
     Properties:
@@ -442,7 +442,7 @@ Resources:
       Tags:
         - Key: Name
           Value: !Sub 'ra-guac-ec2-${AWS::StackName}'
-      VpcId: !Ref VPC
+      VpcId: !Ref VpcId
     Type: 'AWS::EC2::SecurityGroup'
   LaunchConfig:
     Metadata:

@@ -42,7 +42,7 @@ resource "aws_cloudformation_stack" "this" {
     "URLText1"                 = var.URLText1
     "URLText2"                 = var.URLText2
     "UpdateSchedule"           = var.UpdateSchedule
-    "VPC"                      = var.Vpc
+    "VpcId"                    = var.VpcId
   }
 
   timeouts {

@@ -155,7 +155,7 @@ variable "UpdateSchedule" {
   type        = string
 }
 
-variable "Vpc" {
+variable "VpcId" {
   description = "VPC to deploy instance(s) into"
   type        = string
 }
