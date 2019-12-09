@@ -69,7 +69,7 @@ variable "LdapDN" {
   type        = string
 }
 
-variable "DomainDnsName" {
+variable "LdapServer" {
   description = "Name of LDAP server Guacamole will authenticate against.  E.g. domain.com"
   type        = string
 }
