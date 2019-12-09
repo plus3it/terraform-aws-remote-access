@@ -20,6 +20,7 @@ resource "aws_cloudformation_stack" "this" {
     "BrandText"                = var.BrandText
     "CloudWatchAgentUrl"       = var.CloudWatchAgentUrl
     "DesiredCapacity"          = var.DesiredCapacity
+    "DomainDnsName"            = var.DomainDnsName
     "ForceUpdateToggle"        = var.ForceUpdateToggle
     "GuacBaseDN"               = var.GuacBaseDN
     "GuacamoleVersion"         = var.GuacamoleVersion
@@ -27,11 +28,10 @@ resource "aws_cloudformation_stack" "this" {
     "InstanceType"             = var.InstanceType
     "KeyPairName"              = var.KeyPairName
     "LdapDN"                   = var.LdapDN
-    "LdapServer"               = var.LdapServer
     "MaxCapacity"              = var.MaxCapacity
     "MinCapacity"              = var.MinCapacity
-    "PrivateSubnetIDs"         = join(",", var.PrivateSubnetIDs)
-    "PublicSubnetIDs"          = join(",", var.PublicSubnetIDs)
+    "PrivateSubnetIds"         = join(",", var.PrivateSubnetIds)
+    "PublicSubnetIds"          = join(",", var.PublicSubnetIds)
     "ScaleDownDesiredCapacity" = var.ScaleDownDesiredCapacity
     "ScaleDownSchedule"        = var.ScaleDownSchedule
     "ScaleUpSchedule"          = var.ScaleUpSchedule
@@ -42,7 +42,7 @@ resource "aws_cloudformation_stack" "this" {
     "URLText1"                 = var.URLText1
     "URLText2"                 = var.URLText2
     "UpdateSchedule"           = var.UpdateSchedule
-    "VPC"                      = var.Vpc
+    "VpcId"                    = var.VpcId
   }
 
   timeouts {

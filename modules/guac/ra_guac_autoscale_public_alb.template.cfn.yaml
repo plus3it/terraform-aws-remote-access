@@ -105,6 +105,11 @@ Parameters:
     Description: The number of instances the autoscale group will spin up initially
     MinLength: '1'
     Type: String
+  DomainDnsName:
+    Default: ad.example.com
+    Description: Name of LDAP server Guacamole will authenticate against
+    MinLength: '1'
+    Type: String
   ForceUpdateToggle:
     AllowedValues:
       - A
@@ -159,11 +164,6 @@ Parameters:
     Description: Distinguished Name (DN) of the LDAP directory
     MinLength: '1'
     Type: String
-  LdapServer:
-    Default: ad.example.com
-    Description: Name of LDAP server Guacamole will authenticate against
-    MinLength: '1'
-    Type: String
   MaxCapacity:
     Default: '2'
     Description: The maximum number of instances for the autoscale group
@@ -174,10 +174,10 @@ Parameters:
     Description: The minimum number of instances for the autoscale group
     MinLength: '1'
     Type: String
-  PrivateSubnetIDs:
+  PrivateSubnetIds:
     Description: List of Private Subnet IDs where the Guacamole instances will run
     Type: 'List<AWS::EC2::Subnet::Id>'
-  PublicSubnetIDs:
+  PublicSubnetIds:
     Description: A list of Public subnet IDs to attach to the Application Load Balancer
     Type: 'List<AWS::EC2::Subnet::Id>'
   RepoBranchPrefixUrl:
@@ -231,7 +231,7 @@ Parameters:
     Default: ''
     Description: (Optional) Time interval between auto stack updates. Refer to the AWS documentation for valid input syntax:https://docs.aws.amazon.com/AmazonCloudWatch/latest/events/ScheduledEvents.html
     Type: String
-  VPC:
+  VpcId:
     Description: VPC ID
     Type: 'AWS::EC2::VPC::Id'
 Resources:
@@ -240,7 +240,7 @@ Resources:
       Scheme: internet-facing
       SecurityGroups:
         - !Ref AlbSecurityGroup
-      Subnets: !Ref PublicSubnetIDs
+      Subnets: !Ref PublicSubnetIds
       Tags:
         - Key: Name
           Value: !Ref 'AWS::StackName'
@@ -256,7 +256,7 @@ Resources:
       Port: 8080
       Protocol: HTTP
       UnhealthyThresholdCount: 10
-      VpcId: !Ref VPC
+      VpcId: !Ref VpcId
     Type: 'AWS::ElasticLoadBalancingV2::TargetGroup'
   AlbSecurityGroup:
     Properties:
@@ -264,7 +264,7 @@ Resources:
       Tags:
         - Key: Name
           Value: !Sub 'ra-guac-alb-${AWS::StackName}'
-      VpcId: !Ref VPC
+      VpcId: !Ref VpcId
     Type: 'AWS::EC2::SecurityGroup'
   AlbToGuacEgressTcp80:
     Properties:
@@ -310,7 +310,7 @@ Resources:
           Value: !Ref 'AWS::StackName'
       TargetGroupARNs:
         - !Ref ALBTargetGroup
-      VPCZoneIdentifier: !Ref PrivateSubnetIDs
+      VPCZoneIdentifier: !Ref PrivateSubnetIds
     Type: 'AWS::AutoScaling::AutoScalingGroup'
     UpdatePolicy:
       AutoScalingReplacingUpdate:
@@ -442,7 +442,7 @@ Resources:
       Tags:
         - Key: Name
           Value: !Sub 'ra-guac-ec2-${AWS::StackName}'
-      VpcId: !Ref VPC
+      VpcId: !Ref VpcId
     Type: 'AWS::EC2::SecurityGroup'
   LaunchConfig:
     Metadata:
@@ -523,7 +523,7 @@ Resources:
               command: !Sub
                 - >-
                   /etc/cfn/scripts/make-guac.sh
-                  -H ${LdapServer}
+                  -H ${DomainDnsName}
                   -D ${LdapDN}
                   -V ${GuacamoleVersion}
                   -v ${GuacdVersion}

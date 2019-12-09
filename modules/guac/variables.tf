@@ -69,7 +69,7 @@ variable "LdapDN" {
   type        = string
 }
 
-variable "LdapServer" {
+variable "DomainDnsName" {
   description = "Name of LDAP server Guacamole will authenticate against.  E.g. domain.com"
   type        = string
 }
@@ -86,12 +86,12 @@ variable "MinCapacity" {
   type        = string
 }
 
-variable "PrivateSubnetIDs" {
+variable "PrivateSubnetIds" {
   description = "List of Private Subnet IDs where the Guacamole instances will run"
   type        = list(string)
 }
 
-variable "PublicSubnetIDs" {
+variable "PublicSubnetIds" {
   description = "List of Public subnet IDs to attach to the Application Load Balancer"
   type        = list(string)
 }
@@ -155,7 +155,7 @@ variable "UpdateSchedule" {
   type        = string
 }
 
-variable "Vpc" {
+variable "VpcId" {
   description = "VPC to deploy instance(s) into"
   type        = string
 }
