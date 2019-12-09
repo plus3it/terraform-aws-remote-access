@@ -20,6 +20,7 @@ resource "aws_cloudformation_stack" "this" {
     "BrandText"                = var.BrandText
     "CloudWatchAgentUrl"       = var.CloudWatchAgentUrl
     "DesiredCapacity"          = var.DesiredCapacity
+    "DomainDnsName"            = var.DomainDnsName
     "ForceUpdateToggle"        = var.ForceUpdateToggle
     "GuacBaseDN"               = var.GuacBaseDN
     "GuacamoleVersion"         = var.GuacamoleVersion
@@ -27,7 +28,6 @@ resource "aws_cloudformation_stack" "this" {
     "InstanceType"             = var.InstanceType
     "KeyPairName"              = var.KeyPairName
     "LdapDN"                   = var.LdapDN
-    "LdapServer"               = var.LdapServer
     "MaxCapacity"              = var.MaxCapacity
     "MinCapacity"              = var.MinCapacity
     "PrivateSubnetIds"         = join(",", var.PrivateSubnetIds)

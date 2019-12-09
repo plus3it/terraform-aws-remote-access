@@ -105,6 +105,11 @@ Parameters:
     Description: The number of instances the autoscale group will spin up initially
     MinLength: '1'
     Type: String
+  DomainDnsName:
+    Default: ad.example.com
+    Description: Name of LDAP server Guacamole will authenticate against
+    MinLength: '1'
+    Type: String
   ForceUpdateToggle:
     AllowedValues:
       - A
@@ -157,11 +162,6 @@ Parameters:
   LdapDN:
     Default: 'DC=ad,DC=example,DC=com'
     Description: Distinguished Name (DN) of the LDAP directory
-    MinLength: '1'
-    Type: String
-  LdapServer:
-    Default: ad.example.com
-    Description: Name of LDAP server Guacamole will authenticate against
     MinLength: '1'
     Type: String
   MaxCapacity:
@@ -523,7 +523,7 @@ Resources:
               command: !Sub
                 - >-
                   /etc/cfn/scripts/make-guac.sh
-                  -H ${LdapServer}
+                  -H ${DomainDnsName}
                   -D ${LdapDN}
                   -V ${GuacamoleVersion}
                   -v ${GuacdVersion}
