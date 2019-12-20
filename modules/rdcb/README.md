@@ -33,6 +33,7 @@ Terraform module that deploys a Remote Desktop Connection Broker/File Server.
 | SsmKeyId | KMS Key ID used to encrypt/decrypt the SsmRdcbCredential | string | `"xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"` | no |
 | SsmRdcbCredential | SSM Parameter Name for a SecureString containing the domain credential for the RDCB service account. SSM Parameter Value format is '@{Username = "<user>"; Password = "<password>"}' | string | `"/your-path/rdcb/credential"` | no |
 | StackName | CloudFormation Stack Name.  Must be less than 10 characters | string | n/a | yes |
+| TerminationProtection | Enable or disable instance termination protection.  Protection is enabled by default. | string | `"true"` | no |
 | VpcId | VPC to deploy instance into | string | `"vpc-12345678"` | no |
 
 ## Outputs
