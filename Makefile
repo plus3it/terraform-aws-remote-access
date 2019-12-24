@@ -105,6 +105,15 @@ json/format: | guard/program/jq
 	$(FIND_JSON) | $(XARGS) bash -c 'echo "$$(jq --indent 4 -S . "{}")" > "{}"'
 	@ echo "[$@]: Successfully formatted JSON files!"
 
+cfn/%: FIND_CFN_JSON ?= find . -name '*.template.cfn.json' -type f
+cfn/%: FIND_CFN_YAML ?= find . -name '*.template.cfn.yaml' -type f
+cfn/lint: | guard/program/cfn-lint
+	$(FIND_CFN_JSON) | $(XARGS) cfn-lint -t {}
+	$(FIND_CFN_YAML) | $(XARGS) cfn-lint -t {}
+
+yaml/lint: | guard/program/yamllint
+	yamllint --strict .
+
 tfdocs-awk/install: $(BIN_DIR)
 tfdocs-awk/install: ARCHIVE := https://github.com/plus3it/tfdocs-awk/archive/0.0.0.tar.gz
 tfdocs-awk/install:
