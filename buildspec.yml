@@ -1,0 +1,69 @@
+version: 0.2
+
+phases:
+  pre_build:
+    commands:
+      - apk update
+      - apk add python3
+      - apk add python3-dev
+      - apk add py3-setuptools
+      - pip3 install awscli
+      - python3 --version
+      - terraform --version
+      - START_DIR=$(pwd)
+      - cd $START_DIR/modules/rdcb
+      - aws s3 cp s3://$AWS_S3_BUCKET/modules/rdcb/terraform.tfvars .
+      - terraform init -no-color -input=false
+      - cd $START_DIR/modules/rdsh
+      - aws s3 cp s3://$AWS_S3_BUCKET/modules/rdsh/terraform.tfvars .
+      - terraform init -no-color -input=false
+      - cd $START_DIR/modules/rdgw
+      - aws s3 cp s3://$AWS_S3_BUCKET/modules/rdgw/terraform.tfvars .
+      - terraform init -no-color -input=false
+      - cd $START_DIR/modules/guac
+      - aws s3 cp s3://$AWS_S3_BUCKET/modules/guac/terraform.tfvars .
+      - terraform init -no-color -input=false
+  build:
+    commands:
+      - cd $START_DIR/modules/rdcb
+      - terraform plan -no-color -out=tfplan -input=false
+      - terraform apply -no-color -input=false tfplan
+      - MY_VAR=$(terraform output rdcb-hostname -no-color)
+      - export TF_VAR_ConnectionBrokerFqdn=$MY_VAR
+      - echo $TF_VAR_ConnectionBrokerFqdn
+      - export TF_VAR_UserProfileDiskPath=\\\\\\\\$MY_VAR\\Profiles$
+      - echo $TF_VAR_UserProfileDiskPath
+      - export TF_VAR_ExtraSecurityGroupIds=[\"$(terraform output rdsh-sg-id -no-color)\"]
+      - echo $TF_VAR_ExtraSecurityGroupIds
+      - cd $START_DIR/modules/rdsh
+      - terraform plan -no-color -out=tfplan -input=false
+      - terraform apply -no-color -input=false tfplan
+      - cd $START_DIR/modules/rdgw
+      - terraform plan -no-color -out=tfplan -input=false
+      - terraform apply -no-color -input=false tfplan
+      - cd $START_DIR/tests/web_connectivity/ && python3 ./test-website.py --url $RDGW_URL --searchstring "IIS Windows Server"
+      - cd $START_DIR/modules/guac
+      - terraform plan -no-color -out=tfplan -input=false
+      - terraform apply -no-color -input=false tfplan
+      - cd $START_DIR/tests/web_connectivity/ && python3 ./test-website.py --url $GUAC_URL --searchstring "guac-login"
+  post_build:
+    commands:
+      - if [ "${DESTROY_AFTER_TEST}" = "true" ]; then cd $START_DIR/modules/guac && terraform destroy -no-color -input=false -force; fi
+      - if [ "${DESTROY_AFTER_TEST}" = "true" ]; then cd $START_DIR/modules/rdsh && terraform destroy -no-color -input=false -force; fi
+      - if [ "${DESTROY_AFTER_TEST}" = "true" ]; then cd $START_DIR/modules/rdgw && terraform destroy -no-color -input=false -force; fi
+      - if [ "${DESTROY_AFTER_TEST}" = "true" ]; then cd $START_DIR/modules/rdcb && terraform destroy -no-color -input=false -force; fi
+artifacts:
+  files:
+    - modules/rdcb/terraform.tfstate
+    - modules/rdcb/terraform.log
+    - modules/rdcb/terraform_output.log
+    - modules/rdgw/terraform.tfstate
+    - modules/rdgw/terraform.log
+    - modules/rdgw/terraform_output.log
+    - modules/rdsh/terraform.tfstate
+    - modules/rdsh/terraform.log
+    - modules/rdsh/terraform_output.log
+    - modules/guac/terraform.tfstate
+    - modules/guac/terraform.log
+    - modules/guac/terraform_output.log
+  discard-paths: no
