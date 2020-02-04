@@ -1,0 +1,80 @@
+version: 0.2
+
+env:
+  variables:
+    DEPLOYORDER: "rdcb rdsh rdgw guac"
+    DESTROYORDER: "guac rdgw rdsh rdcb"
+
+phases:
+  pre_build:
+    commands:
+      - apk update
+      - apk add python3
+      - apk add python3-dev
+      - apk add py3-setuptools
+      - pip3 install awscli
+      - python3 --version
+      - terraform --version
+      - START_DIR=$(pwd)
+      - |
+        for module in $DEPLOYORDER; do
+          cd $START_DIR/modules/${module}
+          aws s3 cp s3://$AWS_S3_BUCKET/modules/${module}/terraform.tfvars .
+          terraform init -no-color -input=false
+        done
+
+  build:
+    commands:
+      - |
+        for module in $DEPLOYORDER; do
+          cd $START_DIR/modules/${module}
+          terraform plan -no-color -out=tfplan -input=false
+          terraform apply -no-color -input=false tfplan
+          case ${module} in
+
+            rdcb)
+              RDCBHOSTNAME=$(terraform output rdcb-hostname -no-color)
+              export TF_VAR_ConnectionBrokerFqdn=$RDCBHOSTNAME
+              echo $TF_VAR_ConnectionBrokerFqdn
+              export TF_VAR_UserProfileDiskPath=\\\\\\\\$RDCBHOSTNAME\\Profiles$
+              echo $TF_VAR_UserProfileDiskPath
+              export TF_VAR_ExtraSecurityGroupIds=[\"$(terraform output rdsh-sg-id -no-color)\"]
+              echo $TF_VAR_ExtraSecurityGroupIds
+              ;;
+
+            rdgw)
+              cd $START_DIR/tests/web_connectivity/ && python3 ./test-website.py --url $RDGW_URL --searchstring "IIS Windows Server"
+              ;;
+
+            guac)
+              cd $START_DIR/tests/web_connectivity/ && python3 ./test-website.py --url $GUAC_URL --searchstring "guac-login"
+              ;;
+
+            *)
+              echo -n "No match"
+              ;;
+          esac
+        done
+
+  post_build:
+    commands:
+      - |
+        for module in $DESTROYORDER; do
+          if [ "${DESTROY_AFTER_TEST}" = "true" ]; then cd $START_DIR/modules/${module} && terraform destroy -no-color -input=false -force; fi
+        done
+
+artifacts:
+  files:
+    - modules/rdcb/terraform.tfstate
+    - modules/rdcb/terraform.log
+    - modules/rdcb/terraform_output.log
+    - modules/rdgw/terraform.tfstate
+    - modules/rdgw/terraform.log
+    - modules/rdgw/terraform_output.log
+    - modules/rdsh/terraform.tfstate
+    - modules/rdsh/terraform.log
+    - modules/rdsh/terraform_output.log
+    - modules/guac/terraform.tfstate
+    - modules/guac/terraform.log
+    - modules/guac/terraform_output.log
+  discard-paths: no
