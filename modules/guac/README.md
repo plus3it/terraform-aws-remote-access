@@ -22,11 +22,11 @@
 | AmiId | (Optional) AMI ID -- will supersede Lambda-based AMI lookup using AmiNameSearchString | `string` | `""` | no |
 | AmiNameSearchString | Search pattern to match against an AMI Name | `string` | `"amzn-ami-hvm-2018.03.*-x86_64-gp2"` | no |
 | BrandText | Text/Label to display branding for the Guac Login page | `string` | `"Remote Access"` | no |
-| Capabilities | Required IAM capabilities | `list(string)` | <pre>[<br>  "CAPABILITY_AUTO_EXPAND",<br>  "CAPABILITY_NAMED_IAM",<br>  "CAPABILITY_IAM"<br>]<br></pre> | no |
+| Capabilities | Required IAM capabilities | `list(string)` | <pre>[<br>  "CAPABILITY_AUTO_EXPAND",<br>  "CAPABILITY_NAMED_IAM",<br>  "CAPABILITY_IAM"<br>]</pre> | no |
 | CloudWatchAgentUrl | (Optional) S3 URL to CloudWatch Agent installer. Example: s3://amazoncloudwatch-agent/windows/amd64/latest/amazon-cloudwatch-agent.msi | `string` | `"s3://amazoncloudwatch-agent/amazon_linux/amd64/latest/amazon-cloudwatch-agent.rpm"` | no |
 | DesiredCapacity | The number of instances the autoscale group will spin up initially | `string` | `"1"` | no |
 | DisableRollback | Set to true to disable rollback of the stack if stack creation failed. Conflicts with OnFailure | `string` | `false` | no |
-| ElbZones | Map of ELB Zones | `map(string)` | <pre>{<br>  "us-east-1": "Z35SXDOTRQ7X7K",<br>  "us-east-2": "Z3AADJGX6KTTL2",<br>  "us-west-1": "Z368ELLRRE2KJ0",<br>  "us-west-2": "Z1H1FL5HABSF5"<br>}<br></pre> | no |
+| ElbZones | Map of ELB Zones | `map(string)` | <pre>{<br>  "us-east-1": "Z35SXDOTRQ7X7K",<br>  "us-east-2": "Z3AADJGX6KTTL2",<br>  "us-west-1": "Z368ELLRRE2KJ0",<br>  "us-west-2": "Z1H1FL5HABSF5"<br>}</pre> | no |
 | ForceUpdateToggle | A/B toggle that forces a change to a LaunchConfig property, triggering the AutoScale Update Policy | `string` | `"B"` | no |
 | GuacBaseDN | The base of the DN for all Guacamole configurations. | `string` | `"CN=GuacConfigGroups"` | no |
 | GuacPublicDnsHostname | Hostname of DNS record used to reach Guac Elb | `string` | `"guacamole"` | no |
@@ -42,8 +42,8 @@
 | PolicyBody | String containing the stack policy body. Conflicts with PolicyUrl | `string` | `""` | no |
 | PolicyUrl | URL to a file containing the stack policy. Conflicts with PolicyBody | `string` | `""` | no |
 | ScaleDownDesiredCapacity | (Optional) Desired number of instances during the Scale Down Scheduled Action; ignored if ScaleDownSchedule is unset | `string` | `"1"` | no |
-| ScaleDownSchedule | (Optional) Scheduled Action in cron-format (UTC) to scale down the number of instances; ignored if empty or ScaleUpSchedule is unset (E.g. '0 0 \* \* \*') | `string` | `""` | no |
-| ScaleUpSchedule | (Optional) Scheduled Action in cron-format (UTC) to scale up to the Desired Capacity; ignored if empty or ScaleDownSchedule is unset (E.g. '0 10 \* \* Mon-Fri') | `string` | `""` | no |
+| ScaleDownSchedule | (Optional) Scheduled Action in cron-format (UTC) to scale down the number of instances; ignored if empty or ScaleUpSchedule is unset (E.g. '0 0 * * *') | `string` | `""` | no |
+| ScaleUpSchedule | (Optional) Scheduled Action in cron-format (UTC) to scale up to the Desired Capacity; ignored if empty or ScaleDownSchedule is unset (E.g. '0 10 * * Mon-Fri') | `string` | `""` | no |
 | SslCertificateService | The service hosting the SSL certificate | `string` | `"ACM"` | no |
 | StackCreateTimeout | The amount of time in minutes before the stack create fails | `string` | `"20"` | no |
 | StackDeleteTimeout | The amount of time in minutes before the stack delete fails | `string` | `"20"` | no |

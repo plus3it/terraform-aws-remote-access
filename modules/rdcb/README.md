@@ -30,7 +30,7 @@
 | ForceCfnInitUpdate | Toggles a cfn-init metadata update even if nothing else changes | `string` | `"A"` | no |
 | InstanceType | Amazon EC2 instance type for the Remote Desktop Session Instance | `string` | `"t2.medium"` | no |
 | KeyPairName | Public/private key pairs allow you to securely connect to your instance after it launches | `string` | `"yourkeypair"` | no |
-| NoPublicIp | Controls whether to assign the instances a public IP. Recommended to leave at 'true' \_unless\_ launching in a public subnet | `string` | `"true"` | no |
+| NoPublicIp | Controls whether to assign the instances a public IP. Recommended to leave at 'true' _unless_ launching in a public subnet | `string` | `"true"` | no |
 | NotificationEmail | (Optional) Email address to subscribe to notifications and alarms | `string` | `""` | no |
 | PatchSchedule | Schedule used to apply patches to the instance | `string` | `"cron(0 6 ? * Sat *)"` | no |
 | PatchSnsTopicArn | SNS Topic used for patch status notifications | `string` | `""` | no |
