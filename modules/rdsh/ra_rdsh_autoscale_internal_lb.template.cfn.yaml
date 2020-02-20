@@ -404,6 +404,17 @@ Resources:
               - s3:ListBucket
             Effect: Allow
             Resource: arn:aws:s3:::amazon-ssm-packages-*
+          - Action:
+              - autoscaling:DescribeAutoScalingInstances
+            Effect: Allow
+            Resource: '*'
+          - Action:
+              - autoscaling:SuspendProcesses
+            Condition:
+              StringEquals:
+                'autoscaling:ResourceTag/aws:cloudformation:stack-id': !Ref AWS::StackId
+            Effect: Allow
+            Resource: '*'
         Version: 2012-10-17
       PolicyName: !Sub ra-rdsh-${AWS::StackName}
       Roles:
