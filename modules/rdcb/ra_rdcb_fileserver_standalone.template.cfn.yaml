@@ -445,7 +445,7 @@ Resources:
                 interval=1
                 verbose=true
             'c:\cfn\files\pstools.zip':
-              source: 'https://download.sysinternals.com/files/PSTools.zip'
+              source: https://download.sysinternals.com/files/PSTools.zip
             'c:\cfn\hooks.d\cfn-auto-reloader.conf':
               content: !Sub
                 - |
@@ -490,8 +490,8 @@ Resources:
                 enabled: 'true'
                 ensureRunning: 'true'
                 files:
-                  - 'c:\cfn\cfn-hup.conf'
-                  - 'c:\cfn\hooks.d\cfn-auto-reloader.conf'
+                  - c:\cfn\cfn-hup.conf
+                  - c:\cfn\hooks.d\cfn-auto-reloader.conf
         configSets:
           launch:
             - join-domain

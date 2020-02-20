@@ -27,14 +27,14 @@ Description: This template deploys Remote Desktop Gateway (RDGW) instances in an
 Mappings:
   InstanceTypeMap:
     'Fn::Transform':
-      Name: 'AWS::Include'
+      Name: AWS::Include
       Parameters:
-        Location: 's3://app-chemistry/snippets/instance_type_map.snippet.cfn.yaml'
+        Location: s3://app-chemistry/snippets/instance_type_map.snippet.cfn.yaml
   ShellCommandMap:
     'Fn::Transform':
-      Name: 'AWS::Include'
+      Name: AWS::Include
       Parameters:
-        Location: 's3://app-chemistry/snippets/shell_command_map.snippet.cfn.yaml'
+        Location: s3://app-chemistry/snippets/shell_command_map.snippet.cfn.yaml
   CfnUtilsMap:
     Init:
       Config: cfn-init.exe -v -c config --resource LaunchConfig
@@ -125,7 +125,7 @@ Parameters:
     Description: Configures the RDGW for either Password or Smartcard authentication
     Type: String
   CloudWatchAgentUrl:
-    AllowedPattern: '^$|^s3://.*\.msi$'
+    AllowedPattern: ^$|^s3://.*\.msi$
     Default: ''
     Description: '(Optional) S3 URL to CloudWatch Agent MSI. Example: s3://amazoncloudwatch-agent/windows/amd64/latest/amazon-cloudwatch-agent.msi'
     Type: String
@@ -135,8 +135,8 @@ Parameters:
     MinLength: '1'
     Type: String
   DomainDirectoryId:
-    AllowedPattern: 'd-[a-zA-Z0-9]{10}'
-    Description: 'ID of the AWS Directory Service domain, e.g. d-xxxxxxxxxx'
+    AllowedPattern: d-[a-zA-Z0-9]{10}
+    Description: ID of the AWS Directory Service domain, e.g. d-xxxxxxxxxx
     Type: String
   DomainDnsName:
     AllowedPattern: '[a-zA-Z0-9]+\..+'
@@ -188,7 +188,7 @@ Parameters:
     Type: String
   KeyPairName:
     Description: Public/private key pairs allow you to securely connect to your instance after it launches
-    Type: 'AWS::EC2::KeyPair::KeyName'
+    Type: AWS::EC2::KeyPair::KeyName
   MaxCapacity:
     Default: '2'
     Description: The maximum number of instances for the autoscale group
@@ -201,10 +201,10 @@ Parameters:
     Type: String
   PrivateSubnetIDs:
     Description: List of Private Subnet IDs where the RDGW instances will run
-    Type: 'List<AWS::EC2::Subnet::Id>'
+    Type: List<AWS::EC2::Subnet::Id>
   PublicSubnetIDs:
     Description: A list of Public subnet IDs to attach to the load balancer
-    Type: 'List<AWS::EC2::Subnet::Id>'
+    Type: List<AWS::EC2::Subnet::Id>
   RemoteAccessUserGroup:
     Default: Domain Admins
     Description: Domain group of users authorized to use the RDGW
@@ -214,7 +214,7 @@ Parameters:
     Description: URL prefix where the repo scripts can be retrieved
     Default: https://raw.githubusercontent.com/plus3it/cfn/master
     Type: String
-    AllowedPattern: '^https:/.*'
+    AllowedPattern: ^https:/.*
   ScaleDownDesiredCapacity:
     Default: '1'
     Description: (Optional) Desired number of instances during the Scale Down Scheduled Action; ignored if ScaleDownSchedule is unset
@@ -245,16 +245,16 @@ Parameters:
     Type: String
   VPC:
     Description: VPC ID
-    Type: 'AWS::EC2::VPC::Id'
+    Type: AWS::EC2::VPC::Id
 Resources:
   AmiIdLookup:
     Condition: UseAmiLookup
     Properties:
       AmiNameSearchString: !Ref AmiNameSearchString
       ForceUpdateToggle: !Ref ForceUpdateToggle
-      Region: !Ref 'AWS::Region'
-      ServiceToken: !Sub 'arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:cfn-look-up-ami-ids'
-    Type: 'Custom::AmiIdLookup'
+      Region: !Ref AWS::Region
+      ServiceToken: !Sub arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:cfn-look-up-ami-ids
+    Type: Custom::AmiIdLookup
   AutoScalingGroup:
     CreationPolicy:
       ResourceSignal:
@@ -272,40 +272,40 @@ Resources:
       Tags:
         - Key: Name
           PropagateAtLaunch: true
-          Value: !Ref 'AWS::StackName'
+          Value: !Ref AWS::StackName
       TargetGroupARNs:
         - !Ref TargetGroup
       TerminationPolicies:
         - OldestInstance
         - Default
       VPCZoneIdentifier: !Ref PrivateSubnetIDs
-    Type: 'AWS::AutoScaling::AutoScalingGroup'
+    Type: AWS::AutoScaling::AutoScalingGroup
     UpdatePolicy:
       AutoScalingReplacingUpdate:
         WillReplace: true
   AutoUpdateStack:
     Condition: UseAutoUpdateStack
     Properties:
-      ServiceToken: !Sub 'arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:cfn-update-scheduler-dev-cfn_auto_update_broker'
-      StackName: !Ref 'AWS::StackName'
+      ServiceToken: !Sub arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:cfn-update-scheduler-dev-cfn_auto_update_broker
+      StackName: !Ref AWS::StackName
       ToggleParameter: ForceUpdateToggle
       ToggleValues:
         - A
         - B
       UpdateSchedule: !Ref UpdateSchedule
-    Type: 'Custom::AutoUpdateStack'
+    Type: Custom::AutoUpdateStack
   Ec2IamInstanceProfile:
     Properties:
       Path: /
       Roles:
         - !Ref Ec2IamRole
-    Type: 'AWS::IAM::InstanceProfile'
+    Type: AWS::IAM::InstanceProfile
   Ec2IamRole:
     Properties:
       AssumeRolePolicyDocument:
         Statement:
           - Action:
-              - 'sts:AssumeRole'
+              - sts:AssumeRole
             Effect: Allow
             Principal:
               Service:
@@ -313,80 +313,80 @@ Resources:
                 - ssm.amazonaws.com
         Version: 2012-10-17
       Path: /
-    Type: 'AWS::IAM::Role'
+    Type: AWS::IAM::Role
   Ec2IamRolePolicy:
     Properties:
       PolicyDocument:
         Statement:
           - Action:
-              - 'ssm:DescribeAssociation'
-              - 'ssm:GetDeployablePatchSnapshotForInstance'
-              - 'ssm:GetDocument'
-              - 'ssm:ListAssociations'
-              - 'ssm:ListInstanceAssociations'
-              - 'ssm:PutInventory'
-              - 'ssm:UpdateAssociationStatus'
-              - 'ssm:UpdateInstanceAssociationStatus'
-              - 'ssm:UpdateInstanceInformation'
+              - ssm:DescribeAssociation
+              - ssm:GetDeployablePatchSnapshotForInstance
+              - ssm:GetDocument
+              - ssm:ListAssociations
+              - ssm:ListInstanceAssociations
+              - ssm:PutInventory
+              - ssm:UpdateAssociationStatus
+              - ssm:UpdateInstanceAssociationStatus
+              - ssm:UpdateInstanceInformation
             Effect: Allow
             Resource: '*'
           - Action:
-              - 'ec2messages:AcknowledgeMessage'
-              - 'ec2messages:DeleteMessage'
-              - 'ec2messages:FailMessage'
-              - 'ec2messages:GetEndpoint'
-              - 'ec2messages:GetMessages'
-              - 'ec2messages:SendReply'
+              - ec2messages:AcknowledgeMessage
+              - ec2messages:DeleteMessage
+              - ec2messages:FailMessage
+              - ec2messages:GetEndpoint
+              - ec2messages:GetMessages
+              - ec2messages:SendReply
             Effect: Allow
             Resource: '*'
           - Action:
-              - 'cloudwatch:PutMetricData'
+              - cloudwatch:PutMetricData
             Effect: Allow
             Resource: '*'
           - Action:
-              - 'ec2:DescribeInstanceStatus'
+              - ec2:DescribeInstanceStatus
             Effect: Allow
             Resource: '*'
           - Action:
-              - 'ds:CreateComputer'
-              - 'ds:DescribeDirectories'
+              - ds:CreateComputer
+              - ds:DescribeDirectories
             Effect: Allow
             Resource: '*'
           - Action:
-              - 'logs:CreateLogGroup'
-              - 'logs:CreateLogStream'
-              - 'logs:DescribeLogGroups'
-              - 'logs:DescribeLogStreams'
-              - 'logs:PutLogEvents'
+              - logs:CreateLogGroup
+              - logs:CreateLogStream
+              - logs:DescribeLogGroups
+              - logs:DescribeLogStreams
+              - logs:PutLogEvents
             Effect: Allow
             Resource: '*'
           - Action:
-              - 's3:GetObject'
+              - s3:GetObject
             Effect: Allow
             Resource:
-              - 'arn:aws:s3:::amazon-ssm-*'
-              - 'arn:aws:s3:::amazoncloudwatch-agent/*'
+              - arn:aws:s3:::amazon-ssm-*
+              - arn:aws:s3:::amazoncloudwatch-agent/*
           - Action:
-              - 's3:ListBucket'
+              - s3:ListBucket
             Effect: Allow
-            Resource: 'arn:aws:s3:::amazon-ssm-packages-*'
+            Resource: arn:aws:s3:::amazon-ssm-packages-*
           - Action:
-              - 'autoscaling:DescribeAutoScalingInstances'
+              - autoscaling:DescribeAutoScalingInstances
             Effect: Allow
             Resource: '*'
         Version: 2012-10-17
-      PolicyName: !Sub 'ra-rdgw-${AWS::StackName}'
+      PolicyName: !Sub ra-rdgw-${AWS::StackName}
       Roles:
         - !Ref Ec2IamRole
-    Type: 'AWS::IAM::Policy'
+    Type: AWS::IAM::Policy
   Ec2SecurityGroup:
     Properties:
       GroupDescription: Enable RDGW access from the Load Balancer
       Tags:
         - Key: Name
-          Value: !Sub 'ra-rdgw-ec2-${AWS::StackName}'
+          Value: !Sub ra-rdgw-ec2-${AWS::StackName}
       VpcId: !Ref VPC
-    Type: 'AWS::EC2::SecurityGroup'
+    Type: AWS::EC2::SecurityGroup
   LaunchConfig:
     Metadata:
       'AWS::CloudFormation::Init':
@@ -441,7 +441,7 @@ Resources:
           files:
             'c:\cfn\scripts\AmazonCloudWatchAgent\aws-cloudwatch-agent-config.json':
               content: !Sub
-                - |-
+                - |
                   {
                     "logs": {
                       "logs_collected" : {
@@ -634,19 +634,19 @@ Resources:
             SignalFailure: !Sub
               - ${Command} --stack ${AWS::StackName} --region ${AWS::Region}
               - Command: !FindInMap [CfnUtilsMap, Signal, Failure]
-    Type: 'AWS::AutoScaling::LaunchConfiguration'
+    Type: AWS::AutoScaling::LaunchConfiguration
   LaunchConfigLogGroup:
     Condition: InstallCloudWatchAgent
     Properties:
-      LogGroupName: !Sub '/aws/ec2/win/${AWS::StackName}'
-    Type: 'AWS::Logs::LogGroup'
+      LogGroupName: !Sub /aws/ec2/win/${AWS::StackName}
+    Type: AWS::Logs::LogGroup
   LoadBalancerListener443:
     Properties:
       Certificates:
         - CertificateArn: !If
             - UseACM
-            - !Sub 'arn:${AWS::Partition}:acm:${AWS::Region}:${AWS::AccountId}:certificate/${SslCertificateName}'
-            - !Sub 'arn:${AWS::Partition}:iam:${AWS::AccountId}:server-certificate/${SslCertificateName}'
+            - !Sub arn:${AWS::Partition}:acm:${AWS::Region}:${AWS::AccountId}:certificate/${SslCertificateName}
+            - !Sub arn:${AWS::Partition}:iam:${AWS::AccountId}:server-certificate/${SslCertificateName}
       DefaultActions:
         - TargetGroupArn: !Ref TargetGroup
           Type: forward
@@ -654,16 +654,16 @@ Resources:
       Port: 443
       Protocol: TLS
       SslPolicy: ELBSecurityPolicy-2016-08
-    Type: 'AWS::ElasticLoadBalancingV2::Listener'
+    Type: AWS::ElasticLoadBalancingV2::Listener
   LoadBalancerNlb:
     Properties:
       Scheme: internet-facing
       Subnets: !Ref PublicSubnetIDs
       Tags:
         - Key: Name
-          Value: !Ref 'AWS::StackName'
+          Value: !Ref AWS::StackName
       Type: network
-    Type: 'AWS::ElasticLoadBalancingV2::LoadBalancer'
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
   PublicToEc2IngressTcp443:
     Properties:
       CidrIp: 0.0.0.0/0
@@ -671,7 +671,7 @@ Resources:
       GroupId: !Ref Ec2SecurityGroup
       IpProtocol: tcp
       ToPort: 443
-    Type: 'AWS::EC2::SecurityGroupIngress'
+    Type: AWS::EC2::SecurityGroupIngress
   PublicToEc2IngressTcp8091:
     Properties:
       CidrIp: 0.0.0.0/0
@@ -679,31 +679,31 @@ Resources:
       GroupId: !Ref Ec2SecurityGroup
       IpProtocol: tcp
       ToPort: 8091
-    Type: 'AWS::EC2::SecurityGroupIngress'
+    Type: AWS::EC2::SecurityGroupIngress
   ScaleDownScheduledAction:
     Condition: UseScheduledAction
     Properties:
       AutoScalingGroupName: !Ref AutoScalingGroup
       DesiredCapacity: !Ref ScaleDownDesiredCapacity
       Recurrence: !Ref ScaleDownSchedule
-    Type: 'AWS::AutoScaling::ScheduledAction'
+    Type: AWS::AutoScaling::ScheduledAction
   ScaleUpScheduledAction:
     Condition: UseScheduledAction
     Properties:
       AutoScalingGroupName: !Ref AutoScalingGroup
       DesiredCapacity: !Ref MaxCapacity
       Recurrence: !Ref ScaleUpSchedule
-    Type: 'AWS::AutoScaling::ScheduledAction'
+    Type: AWS::AutoScaling::ScheduledAction
   SsmAssociationCloudWatchMetrics:
     'Fn::Transform':
-      Name: 'AWS::Include'
+      Name: AWS::Include
       Parameters:
-        Location: 's3://app-chemistry/snippets/ssm_cloudwatch_asg_memory_disk_c.snippet.cfn.yaml'
+        Location: s3://app-chemistry/snippets/ssm_cloudwatch_asg_memory_disk_c.snippet.cfn.yaml
   SsmAssociationJoinDomain:
     'Fn::Transform':
-      Name: 'AWS::Include'
+      Name: AWS::Include
       Parameters:
-        Location: 's3://app-chemistry/snippets/ssm_join_domain.snippet.cfn.yaml'
+        Location: s3://app-chemistry/snippets/ssm_join_domain.snippet.cfn.yaml
   TargetGroup:
     Properties:
       HealthCheckIntervalSeconds: 30
@@ -711,11 +711,11 @@ Resources:
       HealthCheckPort: '8091'
       HealthCheckProtocol: HTTP
       HealthyThresholdCount: 3
-      Name: !Ref 'AWS::StackName'
+      Name: !Ref AWS::StackName
       Port: 443
       Protocol: TLS
       Tags:
         - Key: Name
-          Value: !Ref 'AWS::StackName'
+          Value: !Ref AWS::StackName
       VpcId: !Ref VPC
-    Type: 'AWS::ElasticLoadBalancingV2::TargetGroup'
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
