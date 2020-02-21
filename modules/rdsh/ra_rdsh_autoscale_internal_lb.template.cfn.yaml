@@ -443,12 +443,17 @@ Resources:
             - install-cloudwatch-agent
             - setup
             - suspend-azrebalance
-            - installRDS
+            - install-features
+            - reboot
+            - install-updates
+            - reboot
+            - install-rdsh
+            - reboot
             - finalize
           update:
             - ps-modules
-            - suspend-azrebalance
             - setup
+            - suspend-azrebalance
             - finalize
         finalize:
           commands:
@@ -569,7 +574,7 @@ Resources:
                     }
                   }
                 - local_InstanceLogGroup: !If [InstallCloudWatchAgent, !Ref LaunchConfigLogGroup, !Ref 'AWS::NoValue']
-        installRDS:
+        install-features:
           commands:
             10-install-rds:
               command: !Sub
@@ -585,14 +590,32 @@ Resources:
                     - (${Command} --stack ${AWS::StackName} --region ${AWS::Region} && exit /b 1)
                     - Command: !FindInMap [CfnUtilsMap, Signal, Failure]
               waitAfterCompletion: '0'
-            15-reboot-rds:
+            15-restart-cwa:
               command: !Sub
-                - ${PowershellCommand} -Command "Restart-Computer -Force -Verbose -ErrorAction Stop" || ${SignalFailure}
+                - net stop AmazonCloudWatchAgent && net start AmazonCloudWatchAgent || ${SignalFailure}
+                - SignalFailure: !Sub
+                    - (${Command} --stack ${AWS::StackName} --region ${AWS::Region} && exit /b 1)
+                    - Command: !FindInMap [CfnUtilsMap, Signal, Failure]
+              waitAfterCompletion: '0'
+        install-updates:
+          commands:
+            10-install-updates:
+              command: !Sub
+                - >-
+                  ${PowershellCommand} -Command "
+                  $ErrorActionPreference = \"Stop\";
+                  $VerbosePreference = \"Continue\";
+                  Install-PackageProvider -Name NuGet -MinimumVersion 2.8.5.201 -Force;
+                  Install-Module PSWindowsUpdate -Confirm:$false -AllowClobber -Force;
+                  Get-WindowsUpdate -Install -AcceptAll -IgnoreReboot;
+                  " || ${SignalFailure}
                 - PowershellCommand: !FindInMap [ShellCommandMap, powershell, command]
                   SignalFailure: !Sub
                     - (${Command} --stack ${AWS::StackName} --region ${AWS::Region} && exit /b 1)
                     - Command: !FindInMap [CfnUtilsMap, Signal, Failure]
-              waitAfterCompletion: forever
+              waitAfterCompletion: '0'
+        install-rdsh:
+          commands:
             20-configure-admins:
               command: !Sub
                 - >-
@@ -629,14 +652,6 @@ Resources:
                     - Command: !FindInMap [CfnUtilsMap, Signal, Failure]
               # Pause a bit here to let services settle...
               waitAfterCompletion: '30'
-            40-reboot-rds:
-              command: !Sub
-                - ${PowershellCommand} -Command "Restart-Computer -Force -Verbose -ErrorAction Stop" || ${SignalFailure}
-                - PowershellCommand: !FindInMap [ShellCommandMap, powershell, command]
-                  SignalFailure: !Sub
-                    - (${Command} --stack ${AWS::StackName} --region ${AWS::Region} && exit /b 1)
-                    - Command: !FindInMap [CfnUtilsMap, Signal, Failure]
-              waitAfterCompletion: forever
         join-domain:
           commands:
             10-join-domain:
@@ -706,6 +721,16 @@ Resources:
                 files:
                   - c:\cfn\cfn-hup.conf
                   - c:\cfn\hooks.d\cfn-auto-reloader.conf
+        reboot:
+          commands:
+            10-reboot:
+              command: !Sub
+                - ${PowershellCommand} -Command "Restart-Computer -Force -Verbose -ErrorAction Stop" || ${SignalFailure}
+                - PowershellCommand: !FindInMap [ShellCommandMap, powershell, command]
+                  SignalFailure: !Sub
+                    - (${Command} --stack ${AWS::StackName} --region ${AWS::Region} && exit /b 1)
+                    - Command: !FindInMap [CfnUtilsMap, Signal, Failure]
+              waitAfterCompletion: forever
         suspend-azrebalance:
           'Fn::Transform':
             Name: AWS::Include
