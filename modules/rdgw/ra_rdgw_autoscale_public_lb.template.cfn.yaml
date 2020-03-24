@@ -259,7 +259,7 @@ Resources:
     CreationPolicy:
       ResourceSignal:
         Count: !Ref DesiredCapacity
-        Timeout: PT40M
+        Timeout: PT50M
     Properties:
       DesiredCapacity: !Ref DesiredCapacity
       HealthCheckGracePeriod: 3600
