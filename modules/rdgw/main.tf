@@ -20,6 +20,9 @@ resource "null_resource" "push-changeset" {
   }
 }
 
+# https://github.com/terraform-providers/terraform-provider-aws/issues/132#issuecomment-397707776
+# since the aws provider does not currently support cfn change sets cfn templates must be applied
+# via the aws cli
 locals {
   create_changeset_command = [
     "aws cloudformation deploy --template",
