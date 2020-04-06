@@ -1,6 +1,12 @@
 # guac
 
 <!-- BEGIN TFDOCS -->
+## Requirements
+
+| Name | Version |
+|------|---------|
+| terraform | >= 0.12 |
+
 ## Providers
 
 | Name | Version |
@@ -10,7 +16,7 @@
 ## Inputs
 
 | Name | Description | Type | Default | Required |
-|------|-------------|------|---------|:-----:|
+|------|-------------|------|---------|:--------:|
 | GuacDnsZoneId | Id of DNS zone for Guac Load Balancer DNS Record | `string` | n/a | yes |
 | LdapDN | Distinguished Name (DN) of the LDAP directory.  E.g. DC=domain,DC=com | `string` | n/a | yes |
 | LdapServer | Name of LDAP server Guacamole will authenticate against.  E.g. domain.com | `string` | n/a | yes |
@@ -42,8 +48,8 @@
 | PolicyBody | String containing the stack policy body. Conflicts with PolicyUrl | `string` | `""` | no |
 | PolicyUrl | URL to a file containing the stack policy. Conflicts with PolicyBody | `string` | `""` | no |
 | ScaleDownDesiredCapacity | (Optional) Desired number of instances during the Scale Down Scheduled Action; ignored if ScaleDownSchedule is unset | `string` | `"1"` | no |
-| ScaleDownSchedule | (Optional) Scheduled Action in cron-format (UTC) to scale down the number of instances; ignored if empty or ScaleUpSchedule is unset (E.g. '0 0 * * *') | `string` | `""` | no |
-| ScaleUpSchedule | (Optional) Scheduled Action in cron-format (UTC) to scale up to the Desired Capacity; ignored if empty or ScaleDownSchedule is unset (E.g. '0 10 * * Mon-Fri') | `string` | `""` | no |
+| ScaleDownSchedule | (Optional) Scheduled Action in cron-format (UTC) to scale down the number of instances; ignored if empty or ScaleUpSchedule is unset (E.g. '0 0 \* \* \*') | `string` | `""` | no |
+| ScaleUpSchedule | (Optional) Scheduled Action in cron-format (UTC) to scale up to the Desired Capacity; ignored if empty or ScaleDownSchedule is unset (E.g. '0 10 \* \* Mon-Fri') | `string` | `""` | no |
 | SslCertificateService | The service hosting the SSL certificate | `string` | `"ACM"` | no |
 | StackCreateTimeout | The amount of time in minutes before the stack create fails | `string` | `"20"` | no |
 | StackDeleteTimeout | The amount of time in minutes before the stack delete fails | `string` | `"20"` | no |

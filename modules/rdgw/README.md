@@ -1,6 +1,12 @@
 # rdgw
 
 <!-- BEGIN TFDOCS -->
+## Requirements
+
+| Name | Version |
+|------|---------|
+| terraform | >= 0.12 |
+
 ## Providers
 
 | Name | Version |
@@ -11,7 +17,7 @@
 ## Inputs
 
 | Name | Description | Type | Default | Required |
-|------|-------------|------|---------|:-----:|
+|------|-------------|------|---------|:--------:|
 | DomainDirectoryId | ID of the AWS Directory Service domain, e.g. d-xxxxxxxxxx | `string` | n/a | yes |
 | PrivateSubnetIds | Comma separated string of Private Subnet IDs where the RDGW instances will run | `list(string)` | n/a | yes |
 | PublicSubnetIds | Comma separated string of Public subnet IDs to attach to the load balancer | `list(string)` | n/a | yes |
@@ -34,8 +40,8 @@
 | RemoteAccessUserGroup | Domain group of users authorized to use the RDGW | `string` | `"Domain Admins"` | no |
 | RepoBranchPrefixUrl | URL prefix where the repo scripts can be retrieved | `string` | `"https://raw.githubusercontent.com/plus3it/cfn/master"` | no |
 | ScaleDownDesiredCapacity | (Optional) Desired number of instances during the Scale Down Scheduled Action; ignored if ScaleDownSchedule is unset | `string` | `"1"` | no |
-| ScaleDownSchedule | (Optional) Scheduled Action in cron-format (UTC) to scale down the number of instances; ignored if empty or ScaleUpSchedule is unset (E.g. "0 0 * * *") | `string` | `""` | no |
-| ScaleUpSchedule | (Optional) Scheduled Action in cron-format (UTC) to scale up to the Desired Capacity; ignored if empty or ScaleDownSchedule is unset (E.g. "0 10 * * Mon-Fri") | `string` | `""` | no |
+| ScaleDownSchedule | (Optional) Scheduled Action in cron-format (UTC) to scale down the number of instances; ignored if empty or ScaleUpSchedule is unset (E.g. "0 0 \* \* \*") | `string` | `""` | no |
+| ScaleUpSchedule | (Optional) Scheduled Action in cron-format (UTC) to scale up to the Desired Capacity; ignored if empty or ScaleDownSchedule is unset (E.g. "0 10 \* \* Mon-Fri") | `string` | `""` | no |
 | SslCertificateName | The name (for IAM) or identifier (for ACM) of the SSL certificate to associate with the LB -- the cert must already exist in the service | `string` | `""` | no |
 | SslCertificateService | The service hosting the SSL certificate.  ACM or IAM are allowed values | `string` | `"ACM"` | no |
 | UpdateSchedule | (Optional) Time interval between auto stack updates. Refer to the AWS documentation for valid input syntax: https://docs.aws.amazon.com/AmazonCloudWatch/latest/events/ScheduledEvents.html | `string` | `""` | no |

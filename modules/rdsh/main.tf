@@ -18,10 +18,14 @@ resource "null_resource" "push-changeset" {
   }
 }
 
+
+
 # https://github.com/terraform-providers/terraform-provider-aws/issues/132#issuecomment-397707776
 # since the aws provider does not currently support cfn change sets cfn templates must be applied
 # via the aws cli
 locals {
+  UserProfileDiskPath = format("\\\\%s", join(var.UserProfileDiskPath, "\\"))
+
   create_changeset_command = [
     "aws cloudformation deploy --template",
     "ra_rdsh_autoscale_internal_lb.template.cfn.yaml",
@@ -52,7 +56,7 @@ locals {
     "\"ScaleDownSchedule=${var.ScaleDownSchedule}\"",
     "\"ScaleUpSchedule=${var.ScaleUpSchedule}\"",
     "\"SubnetIDs=${join(",", var.SubnetIDs)}\"",
-    "\"UserProfileDiskPath=${var.UserProfileDiskPath}\"",
+    "\"UserProfileDiskPath=${local.UserProfileDiskPath}\"",
     "\"VPC=${var.VpcId}\"",
     "\"CloudWatchAgentUrl=${var.CloudWatchAgentUrl}\"",
     "--capabilities CAPABILITY_IAM",

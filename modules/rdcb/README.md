@@ -1,6 +1,12 @@
 # rdcb
 
 <!-- BEGIN TFDOCS -->
+## Requirements
+
+| Name | Version |
+|------|---------|
+| terraform | >= 0.12 |
+
 ## Providers
 
 | Name | Version |
@@ -12,7 +18,7 @@
 ## Inputs
 
 | Name | Description | Type | Default | Required |
-|------|-------------|------|---------|:-----:|
+|------|-------------|------|---------|:--------:|
 | S3Bucket | n/a | `any` | n/a | yes |
 | StackName | CloudFormation Stack Name.  Must be less than 10 characters | `string` | n/a | yes |
 | AmiId | (Optional) AMI ID -- will supersede Lambda-based AMI lookup using AmiNameSearchString | `string` | `""` | no |

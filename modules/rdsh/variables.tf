@@ -160,9 +160,9 @@ variable "UpdateSchedule" {
 
 # RDCB instance.  Must point to YOUR connection broker, and CAN be an alias
 variable "UserProfileDiskPath" {
-  default     = "\\\\\\home.example.com\\Profile$"
-  description = "Path to a CIFS share where User Profile Disks are stored, e.g. \"\\\\home.example.com\\Profiles$\""
-  type        = string
+  default     = ["home.example.com", "Profiles$"]
+  description = "Path to a CIFS share where User Profile Disks are stored, e.g. [ \"home.example.com\", \"Profiles$\" ] eq \"\\\\\\home.example.com\\Profiles$\""
+  type        = list(string)
 }
 
 variable "VpcId" {
