@@ -438,6 +438,7 @@ Resources:
         configSets:
           config:
             - join-domain
+            - setup-crypto
             - ps-modules
             - check-upd-path
             - install-cloudwatch-agent
@@ -678,6 +679,23 @@ Resources:
               source: !Sub ${RepoBranchPrefixUrl}/psmodules/P3Utils/P3Utils.psd1
             'C:\Program Files\WindowsPowerShell\Modules\P3Utils\P3Utils.psm1':
               source: !Sub ${RepoBranchPrefixUrl}/psmodules/P3Utils/P3Utils.psm1
+        setup-crypto:
+          commands:
+            10-setup-crypto:
+              command: !Sub
+                - >-
+                  ${PowershellCommand} -Command "
+                  $ErrorActionPreference = \"Stop\";
+                  $VerbosePreference = \"Continue\";
+                  [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12;
+                  Set-ItemProperty -Path HKLM:\SOFTWARE\Wow6432Node\Microsoft\.NetFramework\v4.0.30319 -Name SchUseStrongCrypto -Value 1 -Type DWord -Force;
+                  Set-ItemProperty -Path HKLM:\SOFTWARE\Microsoft\.NetFramework\v4.0.30319 -Name SchUseStrongCrypto -Value 1 -Type DWord -Force;
+                  " || ${SignalFailure}
+                - PowershellCommand: !FindInMap [ShellCommandMap, powershell, command]
+                  SignalFailure: !Sub
+                    - (${Command} --stack ${AWS::StackName} --region ${AWS::Region} && exit /b 1)
+                    - Command: !FindInMap [CfnUtilsMap, Signal, Failure]
+              waitAfterCompletion: '0'
         setup:
           commands:
             a-unzip-pstools:
