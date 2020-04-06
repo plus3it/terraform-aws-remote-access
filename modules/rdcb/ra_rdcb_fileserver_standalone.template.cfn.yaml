@@ -84,7 +84,7 @@ Metadata:
     ParameterLabels:
       AmiNameSearchString:
         default: AMI Name Search Pattern
-  Version: 0.5.0
+  Version: 0.5.2
   cfn-lint:
     config:
       ignore_checks:
@@ -495,6 +495,7 @@ Resources:
         configSets:
           launch:
             - join-domain
+            - setup-crypto
             - ps-modules
             - install-cloudwatch-agent
             - cfnsetup
@@ -812,6 +813,23 @@ Resources:
                     - (${Command} --stack ${AWS::StackName} --region ${AWS::Region} && exit /b 1)
                     - Command: !FindInMap [CfnUtilsMap, Signal, Failure]
               waitAfterCompletion: forever
+        setup-crypto:
+          commands:
+            10-setup-crypto:
+              command: !Sub
+                - >-
+                  ${PowershellCommand} -Command "
+                  $ErrorActionPreference = \"Stop\";
+                  $VerbosePreference = \"Continue\";
+                  [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12;
+                  Set-ItemProperty -Path HKLM:\SOFTWARE\Wow6432Node\Microsoft\.NetFramework\v4.0.30319 -Name SchUseStrongCrypto -Value 1 -Type DWord -Force;
+                  Set-ItemProperty -Path HKLM:\SOFTWARE\Microsoft\.NetFramework\v4.0.30319 -Name SchUseStrongCrypto -Value 1 -Type DWord -Force;
+                  " || ${SignalFailure}
+                - PowershellCommand: !FindInMap [ShellCommandMap, powershell, command]
+                  SignalFailure: !Sub
+                    - (${Command} --stack ${AWS::StackName} --region ${AWS::Region} && exit /b 1)
+                    - Command: !FindInMap [CfnUtilsMap, Signal, Failure]
+              waitAfterCompletion: '0'
       CfnUpdateTriggers:
         EbsVolumeSize: !Ref DataVolumeSize
         ForceCfnInitUpdate: !Ref ForceCfnInitUpdate
