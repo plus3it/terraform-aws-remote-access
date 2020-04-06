@@ -19,7 +19,7 @@ jobs:
       before_script:
         - |
           PRIOR_VERSION=$(git describe --abbrev=0 --tags)
-          RELEASE_VERSION=$(grep current_version $TRAVIS_BUILD_DIR/.bumpversion.cfg | sed 's/^.*= //' )
+          RELEASE_VERSION=$(grep "^current_version =" $TRAVIS_BUILD_DIR/.bumpversion.cfg | sed 's/^.*= //' )
           RELEASE_BODY="* [terraform-aws-remote-access v$RELEASE_VERSION CHANGELOG](https://github.com/plus3it/terraform-aws-remote-access/blob/$RELEASE_VERSION/CHANGELOG.md)"
           export PRIOR_VERSION RELEASE_VERSION RELEASE_BODY
       script: skip
