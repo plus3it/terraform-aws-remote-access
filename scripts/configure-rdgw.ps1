@@ -1,4 +1,4 @@
-﻿[CmdLetBinding()]
+[CmdLetBinding()]
 Param(
     [Parameter(Mandatory=$false,ValueFromPipeLine=$false,ValueFromPipeLineByPropertyName=$false)]
     [String] $ServerFQDN = "",
