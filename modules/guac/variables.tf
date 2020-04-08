@@ -4,10 +4,26 @@ variable "AmiId" {
   type        = string
 }
 
-variable "AmiNameSearchString" {
-  default     = "amzn-ami-hvm-2018.03.*-x86_64-gp2"
-  description = "Search pattern to match against an AMI Name"
-  type        = string
+variable "AmiFilters" {
+  type = list(object(
+    {
+      Name   = string,
+      Values = list(string)
+    }
+  ))
+  description = "List of maps with additional ami search filters"
+  default = [
+    {
+      "Name" : "name",
+      "Values" : ["amzn-ami-hvm-2018.03.*-x86_64-gp2"]
+    }
+  ]
+}
+
+variable "AmiOwners" {
+  type        = list(string)
+  description = "List of owners to filter ami search results against"
+  default     = ["amazon"]
 }
 
 variable "BrandText" {

@@ -25,8 +25,9 @@
 | SslCertificateName | The name (for IAM) or identifier (for ACM) of the SSL certificate to associate with the ALB -- the cert must already exist in the service | `string` | n/a | yes |
 | StackName | CloudFormation Stack Name.  Must be less than 10 characters | `string` | n/a | yes |
 | VpcId | VPC to deploy instance(s) into | `string` | n/a | yes |
+| AmiFilters | List of maps with additional ami search filters | <pre>list(object(<br>    {<br>      Name   = string,<br>      Values = list(string)<br>    }<br>  ))</pre> | <pre>[<br>  {<br>    "Name": "name",<br>    "Values": [<br>      "amzn-ami-hvm-2018.03.*-x86_64-gp2"<br>    ]<br>  }<br>]</pre> | no |
 | AmiId | (Optional) AMI ID -- will supersede Lambda-based AMI lookup using AmiNameSearchString | `string` | `""` | no |
-| AmiNameSearchString | Search pattern to match against an AMI Name | `string` | `"amzn-ami-hvm-2018.03.*-x86_64-gp2"` | no |
+| AmiOwners | List of owners to filter ami search results against | `list(string)` | <pre>[<br>  "amazon"<br>]</pre> | no |
 | BrandText | Text/Label to display branding for the Guac Login page | `string` | `"Remote Access"` | no |
 | Capabilities | Required IAM capabilities | `list(string)` | <pre>[<br>  "CAPABILITY_AUTO_EXPAND",<br>  "CAPABILITY_NAMED_IAM",<br>  "CAPABILITY_IAM"<br>]</pre> | no |
 | CloudWatchAgentUrl | (Optional) S3 URL to CloudWatch Agent installer. Example: s3://amazoncloudwatch-agent/windows/amd64/latest/amazon-cloudwatch-agent.msi | `string` | `"s3://amazoncloudwatch-agent/amazon_linux/amd64/latest/amazon-cloudwatch-agent.rpm"` | no |

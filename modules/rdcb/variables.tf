@@ -4,10 +4,26 @@ variable "AmiId" {
   type        = string
 }
 
-variable "AmiNameSearchString" {
-  default     = "Windows_Server-2016-English-Full-Base-*"
-  description = "Search pattern to match against an AMI Name"
-  type        = string
+variable "AmiFilters" {
+  type = list(object(
+    {
+      Name   = string,
+      Values = list(string)
+    }
+  ))
+  description = "List of maps with additional ami search filters"
+  default = [
+    {
+      "Name" : "name",
+      "Values" : ["Windows_Server-2016-English-Full-Base-*"]
+    }
+  ]
+}
+
+variable "AmiOwners" {
+  type        = list(string)
+  description = "List of owners to filter ami search results against"
+  default     = ["amazon"]
 }
 
 variable "CloudWatchAgentUrl" {
@@ -172,4 +188,3 @@ variable "VpcId" {
   description = "VPC to deploy instance into"
   type        = string
 }
-

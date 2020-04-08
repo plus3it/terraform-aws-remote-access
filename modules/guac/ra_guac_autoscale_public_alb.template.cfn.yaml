@@ -85,9 +85,13 @@ Parameters:
     Default: ''
     Description: (Optional) AMI ID -- will supersede Lambda-based AMI lookup using AmiNameSearchString
     Type: String
-  AmiNameSearchString:
-    Default: amzn-ami-hvm-2018.03*.2018*-x86_64-gp2
-    Description: Search pattern to match against an AMI Name
+  AmiFilters:
+    Default: '[{"Name": "name", "Values": ["amzn-ami-hvm-2018.03*.2018*-x86_64-gp2"]}]'
+    Description: Json string containing list of maps of ami search filters. refer to the boto3 docs for a complete filter list (https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/ec2.html#EC2.Client.describe_images)
+    Type: String
+  AmiOwners:
+    Default: '["amazon"]'
+    Description: Json string containing a list of owners to filter the ami search against
     Type: String
   BrandText:
     Default: ''
@@ -285,10 +289,10 @@ Resources:
   AmiIdLookup:
     Condition: UseAmiLookup
     Properties:
-      AmiNameSearchString: !Ref AmiNameSearchString
-      ForceUpdateToggle: !Ref ForceUpdateToggle
+      Filters: !Ref AmiFilters
+      Owners: !Ref AmiOwners
       Region: !Ref AWS::Region
-      ServiceToken: !Sub arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:cfn-look-up-ami-ids
+      ServiceToken: !Sub arn:${AWS::Partition}:lambda:${AWS::Region}:${AWS::AccountId}:function:cfn-lookup-ami-ids
     Type: Custom::AmiIdLookup
   AutoScalingGroup:
     CreationPolicy:
