@@ -41,12 +41,13 @@
 | PatchSchedule | Schedule used to apply patches to the instance | `string` | `"cron(0 6 ? * Sat *)"` | no |
 | PatchSnsTopicArn | SNS Topic used for patch status notifications | `string` | `""` | no |
 | RdcbDnszoneId | Zone to create DNS record for RDCB instance | `string` | `""` | no |
-| RepoBranchPrefixUrl | URL prefix where the repo scripts can be retrieved | `string` | `"https://raw.githubusercontent.com/plus3it/cfn/master"` | no |
+| RemoteAccessRepoBranchPrefixUrl | URL prefix where the repo scripts can be retrieved | `string` | `"https://raw.githubusercontent.com/terraform-aws-remote-access/master"` | no |
 | SecurityGroupIngress | List of security group IPs to allow | `list(string)` | `[]` | no |
 | SnapshotFrequency | (Optional) Specify an interval in minutes to configure snapshots of the EBS fileshare volume. Set an empty value "" to skip configuring snapshots. Default interval is 60 minutes. | `string` | `"60"` | no |
 | SsmKeyId | KMS Key ID used to encrypt/decrypt the SsmRdcbCredential | `string` | `"xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"` | no |
 | SsmRdcbCredential | SSM Parameter Name for a SecureString containing the domain credential for the RDCB service account. SSM Parameter Value format is '@{Username = "<user>"; Password = "<password>"}' | `string` | `"/your-path/rdcb/credential"` | no |
 | TerminationProtection | Enable or disable instance termination protection.  Protection is enabled by default. | `string` | `true` | no |
+| UtilitiesRepoBranchPrefixUrl | URL prefix where the repo scripts can be retrieved | `string` | `"https://raw.githubusercontent.com/utils/master"` | no |
 | VpcId | VPC to deploy instance into | `string` | `"vpc-12345678"` | no |
 
 ## Outputs

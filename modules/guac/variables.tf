@@ -252,3 +252,8 @@ variable "ElbZones" {
   }
 }
 
+variable "RemoteAccessRepoBranchPrefixUrl" {
+  default     = "https://raw.githubusercontent.com/plus3it/terraform-aws-remote-access/master"
+  description = "URL prefix where the remote access scripts can be retrieved"
+  type        = string
+}

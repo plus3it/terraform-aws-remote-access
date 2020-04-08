@@ -43,6 +43,7 @@ resource "aws_cloudformation_stack" "this" {
     "URLText2"                 = var.URLText2
     "UpdateSchedule"           = var.UpdateSchedule
     "VpcId"                    = var.VpcId
+    "RemoteAccess"             = var.RemoteAccessRepoBranchPrefixUrl
   }
 
   timeouts {

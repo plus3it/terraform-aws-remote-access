@@ -91,8 +91,14 @@ variable "RemoteAccessUserGroup" {
   type        = string
 }
 
-variable "RepoBranchPrefixUrl" {
-  default     = "https://raw.githubusercontent.com/plus3it/cfn/master"
+variable "RemoteAccessRepoBranchPrefixUrl" {
+  default     = "https://raw.githubusercontent.com/terraform-aws-remote-access/master"
+  description = "URL prefix where the repo scripts can be retrieved"
+  type        = string
+}
+
+variable "UtilitiesRepoBranchPrefixUrl" {
+  default     = "https://raw.githubusercontent.com/utils/master"
   description = "URL prefix where the repo scripts can be retrieved"
   type        = string
 }

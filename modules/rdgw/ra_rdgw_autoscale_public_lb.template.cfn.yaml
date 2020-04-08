@@ -210,9 +210,14 @@ Parameters:
     Description: Domain group of users authorized to use the RDGW
     MinLength: '1'
     Type: String
-  RepoBranchPrefixUrl:
-    Description: URL prefix where the repo scripts can be retrieved
-    Default: https://raw.githubusercontent.com/plus3it/cfn/master
+  RemoteAccessRepoBranchPrefixUrl:
+    Description: URL prefix where the remote access scripts can be retrieved
+    Default: https://raw.githubusercontent.com/plus3it/terraform-aws-remote-access/master
+    Type: String
+    AllowedPattern: ^https:/.*
+  UtilitiesRepoBranchPrefixUrl:
+    Description: URL prefix where the utility scripts can be retrieved
+    Default: https://raw.githubusercontent.com/plus3it/utils/master
     Type: String
     AllowedPattern: ^https:/.*
   ScaleDownDesiredCapacity:
@@ -588,7 +593,7 @@ Resources:
         ps-modules:
           files:
             'C:\Program Files\WindowsPowerShell\Modules\P3Utils\P3Utils.psd1':
-              source: !Sub ${RepoBranchPrefixUrl}/psmodules/P3Utils/P3Utils.psd1
+              source: !Sub ${UtilitiesRepoBranchPrefixUrl}/psmodules/P3Utils/P3Utils.psd1
             'C:\Program Files\WindowsPowerShell\Modules\P3Utils\P3Utils.psm1':
               source: !Sub ${RepoBranchPrefixUrl}/psmodules/P3Utils/P3Utils.psm1
         setup-crypto:
@@ -626,7 +631,7 @@ Resources:
                     - ${Command} --stack ${AWS::StackName} --region ${AWS::Region}
                     - Command: !FindInMap [CfnUtilsMap, Init, Update]
             'c:\cfn\scripts\configure-rdgw.ps1':
-              source: !Sub ${RepoBranchPrefixUrl}/scripts/configure-rdgw.ps1
+              source: !Sub ${RemoteAccessRepoBranchPrefixUrl}/scripts/configure-rdgw.ps1
           services:
             windows:
               cfn-hup:
