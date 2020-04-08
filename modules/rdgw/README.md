@@ -23,6 +23,7 @@
 | PublicSubnetIds | Comma separated string of Public subnet IDs to attach to the load balancer | `list(string)` | n/a | yes |
 | S3Bucket | n/a | `any` | n/a | yes |
 | StackName | CloudFormation Stack Name.  Must be less than 10 characters | `string` | n/a | yes |
+| VpcId | VPC to deploy instance into | `string` | n/a | yes |
 | AmiId | (Optional) AMI ID -- will supersede Lambda-based AMI lookup using AmiNameSearchString | `string` | `""` | no |
 | AmiNameSearchString | Search pattern to match against an AMI Name | `string` | `"Windows_Server-2016-English-Full-Base-*"` | no |
 | AuthenticationMethod | Configures the RDGW for either Password or Smartcard authentication | `string` | `"Password"` | no |
@@ -46,7 +47,6 @@
 | SslCertificateService | The service hosting the SSL certificate.  ACM or IAM are allowed values | `string` | `"ACM"` | no |
 | UpdateSchedule | (Optional) Time interval between auto stack updates. Refer to the AWS documentation for valid input syntax: https://docs.aws.amazon.com/AmazonCloudWatch/latest/events/ScheduledEvents.html | `string` | `""` | no |
 | UtilitiesRepoBranchPrefixUrl | URL prefix where the repo scripts can be retrieved | `string` | `"https://raw.githubusercontent.com/utils/master"` | no |
-| VpcId | VPC to deploy instance into | `string` | `"vpc-12345678"` | no |
 
 ## Outputs
 

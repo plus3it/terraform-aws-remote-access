@@ -169,7 +169,6 @@ variable "TerminationProtection" {
 }
 
 variable "VpcId" {
-  default     = "vpc-12345678"
   description = "VPC to deploy instance into"
   type        = string
 }

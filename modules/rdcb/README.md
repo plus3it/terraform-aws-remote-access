@@ -21,6 +21,7 @@
 |------|-------------|------|---------|:--------:|
 | S3Bucket | n/a | `any` | n/a | yes |
 | StackName | CloudFormation Stack Name.  Must be less than 10 characters | `string` | n/a | yes |
+| VpcId | VPC to deploy instance into | `string` | n/a | yes |
 | AmiId | (Optional) AMI ID -- will supersede Lambda-based AMI lookup using AmiNameSearchString | `string` | `""` | no |
 | AmiNameSearchString | Search pattern to match against an AMI Name | `string` | `"Windows_Server-2016-English-Full-Base-*"` | no |
 | CloudWatchAgentUrl | (Optional) HTTPS URL to CloudWatch Agent installer. Example: https://s3.amazonaws.com/amazoncloudwatch-agent/windows/amd64/latest/amazon-cloudwatch-agent.msi | `string` | `""` | no |
@@ -48,7 +49,6 @@
 | SsmRdcbCredential | SSM Parameter Name for a SecureString containing the domain credential for the RDCB service account. SSM Parameter Value format is '@{Username = "<user>"; Password = "<password>"}' | `string` | `"/your-path/rdcb/credential"` | no |
 | TerminationProtection | Enable or disable instance termination protection.  Protection is enabled by default. | `string` | `true` | no |
 | UtilitiesRepoBranchPrefixUrl | URL prefix where the repo scripts can be retrieved | `string` | `"https://raw.githubusercontent.com/utils/master"` | no |
-| VpcId | VPC to deploy instance into | `string` | `"vpc-12345678"` | no |
 
 ## Outputs
 
