@@ -245,12 +245,12 @@ Parameters:
     Default: https://s3.amazonaws.com
     Description: S3 endpoint URL hosting the bucket where the RDP certificate private key is stored
     Type: String
-  RemoteAccessRepoBranchPrefixUrl:
+  RemoteAccessScriptsUrl:
     Description: URL prefix where the remote access scripts can be retrieved
     Default: https://raw.githubusercontent.com/plus3it/terraform-aws-remote-access/master
     Type: String
     AllowedPattern: ^https:/.*
-  UtilitiesRepoBranchPrefixUrl:
+  UtilityScriptsUrl:
     Description: URL prefix where the utility scripts can be retrieved
     Default: https://raw.githubusercontent.com/plus3it/utils/master
     Type: String
@@ -685,9 +685,9 @@ Resources:
         ps-modules:
           files:
             'C:\Program Files\WindowsPowerShell\Modules\P3Utils\P3Utils.psd1':
-              source: !Sub ${UtilitiesRepoBranchPrefixUrl}/psmodules/P3Utils/P3Utils.psd1
+              source: !Sub ${UtilityScriptsUrl}/psmodules/P3Utils/P3Utils.psd1
             'C:\Program Files\WindowsPowerShell\Modules\P3Utils\P3Utils.psm1':
-              source: !Sub ${UtilitiesRepoBranchPrefixUrl}/psmodules/P3Utils/P3Utils.psm1
+              source: !Sub ${UtilityScriptsUrl}/psmodules/P3Utils/P3Utils.psm1
         setup-crypto:
           commands:
             10-setup-crypto:
@@ -737,9 +737,9 @@ Resources:
                     - ${Command} --stack ${AWS::StackName} --region ${AWS::Region}
                     - Command: !FindInMap [CfnUtilsMap, Init, Update]
             'c:\cfn\scripts\configure-rdsh.ps1':
-              source: !Sub ${RemoteAccessRepoBranchPrefixUrl}/scripts/configure-rdsh.ps1
+              source: !Sub ${RemoteAccessScriptsUrl}/scripts/configure-rdsh.ps1
             'c:\cfn\scripts\unzip-archive.ps1':
-              source: !Sub ${UtilitiesRepoBranchPrefixUrl}/scripts/unzip-archive.ps1
+              source: !Sub ${UtilityScriptsUrl}/scripts/unzip-archive.ps1
           services:
             windows:
               cfn-hup:

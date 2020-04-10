@@ -49,7 +49,7 @@
 | OnFailureAction | Action to be taken if stack creation fails. This must be one of: DO\_NOTHING, ROLLBACK, or DELETE. Conflicts with DisableRollback | `string` | `"ROLLBACK"` | no |
 | PolicyBody | String containing the stack policy body. Conflicts with PolicyUrl | `string` | `""` | no |
 | PolicyUrl | URL to a file containing the stack policy. Conflicts with PolicyBody | `string` | `""` | no |
-| RemoteAccessRepoBranchPrefixUrl | URL prefix where the remote access scripts can be retrieved | `string` | `"https://raw.githubusercontent.com/plus3it/terraform-aws-remote-access/master"` | no |
+| RemoteAccessScriptsUrl | URL prefix where the remote access scripts can be retrieved | `string` | `"https://raw.githubusercontent.com/plus3it/terraform-aws-remote-access/master"` | no |
 | ScaleDownDesiredCapacity | (Optional) Desired number of instances during the Scale Down Scheduled Action; ignored if ScaleDownSchedule is unset | `string` | `"1"` | no |
 | ScaleDownSchedule | (Optional) Scheduled Action in cron-format (UTC) to scale down the number of instances; ignored if empty or ScaleUpSchedule is unset (E.g. '0 0 \* \* \*') | `string` | `""` | no |
 | ScaleUpSchedule | (Optional) Scheduled Action in cron-format (UTC) to scale up to the Desired Capacity; ignored if empty or ScaleDownSchedule is unset (E.g. '0 10 \* \* Mon-Fri') | `string` | `""` | no |

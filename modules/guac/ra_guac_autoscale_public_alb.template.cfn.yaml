@@ -187,7 +187,7 @@ Parameters:
   PublicSubnetIds:
     Description: A list of Public subnet IDs to attach to the Application Load Balancer
     Type: List<AWS::EC2::Subnet::Id>
-  RemoteAccessRepoBranchPrefixUrl:
+  RemoteAccessScriptsUrl:
     Description: URL prefix where the remote access scripts can be retrieved
     Default: https://raw.githubusercontent.com/plus3it/terraform-aws-remote-access/master
     Type: String
@@ -574,7 +574,7 @@ Resources:
               group: root
               mode: '000700'
               owner: root
-              source: !Sub ${RemoteAccessRepoBranchPrefixUrl}/scripts/make-guac.sh
+              source: !Sub ${RemoteAccessScriptsUrl}/scripts/make-guac.sh
           services:
             sysvinit:
               cfn-hup:

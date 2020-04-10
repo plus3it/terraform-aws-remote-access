@@ -46,7 +46,7 @@
 | NlbZones | Map of NLB Zones | `map(string)` | <pre>{<br>  "us-east-1": "Z26RNL4JYFTOTI",<br>  "us-east-2": "ZLMOA37VPKANP",<br>  "us-west-1": "Z24FKFUX50B4VW",<br>  "us-west-2": "Z18D5FSROUN65G"<br>}</pre> | no |
 | PrivateDnszoneId | ZoneId where DNS record will be created for the RDSH nodes | `string` | `""` | no |
 | RdpPrivateKeyS3Endpoint | S3 endpoint URL hosting the bucket where the RDP certificate private key is stored | `string` | `"https://s3.amazonaws.com"` | no |
-| RemoteAccessRepoBranchPrefixUrl | URL prefix where the repo scripts can be retrieved | `string` | `"https://raw.githubusercontent.com/terraform-aws-remote-access/master"` | no |
+| RemoteAccessScriptsUrl | URL prefix where the repo scripts can be retrieved | `string` | `"https://raw.githubusercontent.com/terraform-aws-remote-access/master"` | no |
 | S3Bucket | n/a | `string` | `"your_bucket"` | no |
 | ScaleDownDesiredCapacity | (Optional) Desired number of instances during the Scale Down Scheduled Action; ignored if ScaleDownSchedule is unset | `string` | `"1"` | no |
 | ScaleDownSchedule | (Optional) Scheduled Action in cron-format (UTC) to scale down the number of instances; ignored if empty or ScaleUpSchedule is unset (E.g. '0 0 \* \* \*') | `string` | `""` | no |
@@ -54,7 +54,7 @@
 | SubnetIDs | List of Subnet IDs where the RDSH instances and ELB will be launched | `list(string)` | `[]` | no |
 | UpdateSchedule | (Optional) Time interval between auto stack updates. Refer to the AWS documentation for valid input syntax: https://docs.aws.amazon.com/AmazonCloudWatch/latest/events/ScheduledEvents.html | `string` | `""` | no |
 | UserProfileDiskPath | Path to a CIFS share where User Profile Disks are stored, e.g. [ "home.example.com", "Profiles$" ] eq "\\\home.example.com\Profiles$" | `list(string)` | <pre>[<br>  "home.example.com",<br>  "Profiles$"<br>]</pre> | no |
-| UtilitiesRepoBranchPrefixUrl | URL prefix where the repo scripts can be retrieved | `string` | `"https://raw.githubusercontent.com/utils/master"` | no |
+| UtilityScriptsUrl | URL prefix where the repo scripts can be retrieved | `string` | `"https://raw.githubusercontent.com/utils/master"` | no |
 
 ## Outputs
 

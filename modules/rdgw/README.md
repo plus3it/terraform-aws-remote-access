@@ -40,7 +40,7 @@
 | MaxCapacity | The maximum number of instances for the autoscale group | `string` | `"2"` | no |
 | MinCapacity | The minimum number of instances for the autoscale group | `string` | `"0"` | no |
 | PublicDnszoneId | Public DNS Zone where the RDGW record will be created | `string` | `""` | no |
-| RemoteAccessRepoBranchPrefixUrl | URL prefix where the repo scripts can be retrieved | `string` | `"https://raw.githubusercontent.com/terraform-aws-remote-access/master"` | no |
+| RemoteAccessScriptsUrl | URL prefix where the repo scripts can be retrieved | `string` | `"https://raw.githubusercontent.com/terraform-aws-remote-access/master"` | no |
 | RemoteAccessUserGroup | Domain group of users authorized to use the RDGW | `string` | `"Domain Admins"` | no |
 | ScaleDownDesiredCapacity | (Optional) Desired number of instances during the Scale Down Scheduled Action; ignored if ScaleDownSchedule is unset | `string` | `"1"` | no |
 | ScaleDownSchedule | (Optional) Scheduled Action in cron-format (UTC) to scale down the number of instances; ignored if empty or ScaleUpSchedule is unset (E.g. "0 0 \* \* \*") | `string` | `""` | no |
@@ -48,7 +48,7 @@
 | SslCertificateName | The name (for IAM) or identifier (for ACM) of the SSL certificate to associate with the LB -- the cert must already exist in the service | `string` | `""` | no |
 | SslCertificateService | The service hosting the SSL certificate.  ACM or IAM are allowed values | `string` | `"ACM"` | no |
 | UpdateSchedule | (Optional) Time interval between auto stack updates. Refer to the AWS documentation for valid input syntax: https://docs.aws.amazon.com/AmazonCloudWatch/latest/events/ScheduledEvents.html | `string` | `""` | no |
-| UtilitiesRepoBranchPrefixUrl | URL prefix where the repo scripts can be retrieved | `string` | `"https://raw.githubusercontent.com/utils/master"` | no |
+| UtilityScriptsUrl | URL prefix where the repo scripts can be retrieved | `string` | `"https://raw.githubusercontent.com/utils/master"` | no |
 
 ## Outputs
 
