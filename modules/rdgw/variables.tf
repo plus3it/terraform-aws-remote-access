@@ -108,13 +108,13 @@ variable "RemoteAccessUserGroup" {
 }
 
 variable "RemoteAccessScriptsUrl" {
-  default     = "https://raw.githubusercontent.com/terraform-aws-remote-access/master"
+  default     = "https://raw.githubusercontent.com/plus3it/terraform-aws-remote-access/master"
   description = "URL prefix where the repo scripts can be retrieved"
   type        = string
 }
 
 variable "UtilityScriptsUrl" {
-  default     = "https://raw.githubusercontent.com/utils/master"
+  default     = "https://raw.githubusercontent.com/plus3it/utils/master"
   description = "URL prefix where the repo scripts can be retrieved"
   type        = string
 }
