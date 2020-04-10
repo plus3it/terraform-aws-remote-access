@@ -31,6 +31,7 @@ locals {
     " --s3-bucket ${var.S3Bucket}",
     " --parameter-overrides AmiId=${var.AmiId}",
     "\"AmiFilters=${var.AmiFilters}\"",
+    "\"AmiLookupLambdaArn=${var.AmiLookupLambdaArn}\"",
     "\"AmiOwners=${var.AmiOwners}\"",
     "\"AuthenticationMethod=${var.AuthenticationMethod}\"",
     "\"CloudWatchAgentUrl=${var.CloudWatchAgentUrl}\"",

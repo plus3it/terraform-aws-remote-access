@@ -225,3 +225,7 @@ variable "NlbZones" {
   }
 }
 
+variable "AmiLookupLambdaArn" {
+  description = "Arn of the ami-lookup-id lambda. See https://github.com/plus3it/lookup-ami-ids for more details."
+  type        = string
+}

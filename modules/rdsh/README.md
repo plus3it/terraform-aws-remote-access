@@ -18,6 +18,7 @@
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
+| AmiLookupLambdaArn | Arn of the ami-lookup-id lambda. See https://github.com/plus3it/lookup-ami-ids for more details. | `string` | n/a | yes |
 | DomainSvcAccount | User name for the account that will join the instance to the Connection Broker Cluster | `string` | n/a | yes |
 | DomainSvcPassword | Password for the Connection Broker service account. Must be at least 8 characters containing letters, numbers and symbols | `string` | n/a | yes |
 | RdpPrivateKeyPassword | Password to the RDP certificate private key | `string` | n/a | yes |

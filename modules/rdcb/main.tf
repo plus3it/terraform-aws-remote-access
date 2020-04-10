@@ -117,6 +117,7 @@ locals {
     " --parameter-overrides",
     "\"AmiId=${var.AmiId}\"",
     "\"AmiFilters=${var.AmiFilters}\"",
+    "\"AmiLookupLambdaArn=${var.AmiLookupLambdaArn}\"",
     "\"AmiOwners=${var.AmiOwners}\"",
     "\"CloudWatchAgentUrl=${var.CloudWatchAgentUrl}\"",
     "\"DataVolumeSize=${var.DataVolumeSize}\"",

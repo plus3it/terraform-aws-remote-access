@@ -188,3 +188,8 @@ variable "VpcId" {
   description = "VPC to deploy instance into"
   type        = string
 }
+
+variable "AmiLookupLambdaArn" {
+  description = "Arn of the ami-lookup-id lambda. See https://github.com/plus3it/lookup-ami-ids for more details."
+  type        = string
+}

@@ -19,6 +19,7 @@
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
+| AmiLookupLambdaArn | Arn of the ami-lookup-id lambda. See https://github.com/plus3it/lookup-ami-ids for more details. | `string` | n/a | yes |
 | S3Bucket | n/a | `any` | n/a | yes |
 | StackName | CloudFormation Stack Name.  Must be less than 10 characters | `string` | n/a | yes |
 | VpcId | VPC to deploy instance into | `string` | n/a | yes |

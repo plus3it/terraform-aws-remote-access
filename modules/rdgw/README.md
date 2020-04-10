@@ -18,6 +18,7 @@
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
+| AmiLookupLambdaArn | Arn of the ami-lookup-id lambda. See https://github.com/plus3it/lookup-ami-ids for more details. | `string` | n/a | yes |
 | DomainDirectoryId | ID of the AWS Directory Service domain, e.g. d-xxxxxxxxxx | `string` | n/a | yes |
 | PrivateSubnetIds | Comma separated string of Private Subnet IDs where the RDGW instances will run | `list(string)` | n/a | yes |
 | PublicSubnetIds | Comma separated string of Public subnet IDs to attach to the load balancer | `list(string)` | n/a | yes |

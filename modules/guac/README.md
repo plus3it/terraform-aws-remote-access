@@ -17,6 +17,7 @@
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
+| AmiLookupLambdaArn | Arn of the ami-lookup-id lambda. See https://github.com/plus3it/lookup-ami-ids for more details. | `string` | n/a | yes |
 | GuacDnsZoneId | Id of DNS zone for Guac Load Balancer DNS Record | `string` | n/a | yes |
 | LdapDN | Distinguished Name (DN) of the LDAP directory.  E.g. DC=domain,DC=com | `string` | n/a | yes |
 | LdapServer | Name of LDAP server Guacamole will authenticate against.  E.g. domain.com | `string` | n/a | yes |

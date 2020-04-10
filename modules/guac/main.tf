@@ -17,6 +17,7 @@ resource "aws_cloudformation_stack" "this" {
   parameters = {
     "AmiId"                           = var.AmiId
     "AmiFilters"                      = var.AmiFilters
+    "AmiLookupLambdaArn"              = var.AmiLookupLambdaArn
     "AmiOwner"                        = var.AmiOwner
     "BrandText"                       = var.BrandText
     "CloudWatchAgentUrl"              = var.CloudWatchAgentUrl

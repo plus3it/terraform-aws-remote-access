@@ -106,6 +106,9 @@ Parameters:
     Default: '[{"Name": "name", "Values": ["Windows_Server-2016-English-Full-Base-*"]}]'
     Description: Json string containing list of maps of ami search filters. refer to the boto3 docs for a complete filter list (https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/ec2.html#EC2.Client.describe_images)
     Type: String
+  AmiLookupLambdaArn:
+    Description: Arn of the ami-lookup-id lambda. See https://github.com/plus3it/lookup-ami-ids for more details.
+    Type: String
   AmiOwners:
     Default: '["amazon"]'
     Description: Json string containing a list of owners to filter the ami search against
@@ -250,7 +253,7 @@ Resources:
       Filters: !Ref AmiFilters
       Owners: !Ref AmiOwners
       Region: !Ref AWS::Region
-      ServiceToken: !Sub arn:${AWS::Partition}:lambda:${AWS::Region}:${AWS::AccountId}:function:cfn-lookup-ami-ids
+      ServiceToken: !Ref AmiLookupLambdaArn
     Type: Custom::AmiIdLookup
   DataVolume:
     DeletionPolicy: Snapshot

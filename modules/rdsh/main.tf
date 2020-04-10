@@ -33,6 +33,7 @@ locals {
     " --s3-bucket ${var.S3Bucket}",
     " --parameter-overrides AmiId=${var.AmiId}",
     "\"AmiFilters=${var.AmiFilters}\"",
+    "\"AmiLookupLambdaArn=${var.AmiLookupLambdaArn}\"",
     "\"AmiOwners=${var.AmiOwners}\"",
     "\"ConnectionBrokerFqdn=${var.ConnectionBrokerFqdn}\"",
     "\"DesiredCapacity=${var.DesiredCapacity}\"",
