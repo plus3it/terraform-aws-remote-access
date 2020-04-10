@@ -19,10 +19,13 @@
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
+| AmiLookupLambdaArn | Arn of the ami-lookup-id lambda. See https://github.com/plus3it/lookup-ami-ids for more details. | `string` | n/a | yes |
 | S3Bucket | n/a | `any` | n/a | yes |
 | StackName | CloudFormation Stack Name.  Must be less than 10 characters | `string` | n/a | yes |
+| VpcId | VPC to deploy instance into | `string` | n/a | yes |
+| AmiFilters | List of maps with additional ami search filters | <pre>list(object(<br>    {<br>      Name   = string,<br>      Values = list(string)<br>    }<br>  ))</pre> | <pre>[<br>  {<br>    "Name": "name",<br>    "Values": [<br>      "Windows_Server-2016-English-Full-Base-*"<br>    ]<br>  }<br>]</pre> | no |
 | AmiId | (Optional) AMI ID -- will supersede Lambda-based AMI lookup using AmiNameSearchString | `string` | `""` | no |
-| AmiNameSearchString | Search pattern to match against an AMI Name | `string` | `"Windows_Server-2016-English-Full-Base-*"` | no |
+| AmiOwners | List of owners to filter ami search results against | `list(string)` | <pre>[<br>  "amazon"<br>]</pre> | no |
 | CloudWatchAgentUrl | (Optional) HTTPS URL to CloudWatch Agent installer. Example: https://s3.amazonaws.com/amazoncloudwatch-agent/windows/amd64/latest/amazon-cloudwatch-agent.msi | `string` | `""` | no |
 | DataVolumeSize | Size of the data volume to attach to the instance | `string` | `"50"` | no |
 | DataVolumeSnapshotId | (Optional) Snapshot ID of an existing EBS volume. Leave blank to instantiate an empty volume | `string` | `""` | no |
@@ -41,13 +44,13 @@
 | PatchSchedule | Schedule used to apply patches to the instance | `string` | `"cron(0 6 ? * Sat *)"` | no |
 | PatchSnsTopicArn | SNS Topic used for patch status notifications | `string` | `""` | no |
 | RdcbDnszoneId | Zone to create DNS record for RDCB instance | `string` | `""` | no |
-| RepoBranchPrefixUrl | URL prefix where the repo scripts can be retrieved | `string` | `"https://raw.githubusercontent.com/plus3it/cfn/master"` | no |
+| RemoteAccessScriptsUrl | URL prefix where the repo scripts can be retrieved | `string` | `"https://raw.githubusercontent.com/plus3it/terraform-aws-remote-access/master"` | no |
 | SecurityGroupIngress | List of security group IPs to allow | `list(string)` | `[]` | no |
 | SnapshotFrequency | (Optional) Specify an interval in minutes to configure snapshots of the EBS fileshare volume. Set an empty value "" to skip configuring snapshots. Default interval is 60 minutes. | `string` | `"60"` | no |
 | SsmKeyId | KMS Key ID used to encrypt/decrypt the SsmRdcbCredential | `string` | `"xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"` | no |
 | SsmRdcbCredential | SSM Parameter Name for a SecureString containing the domain credential for the RDCB service account. SSM Parameter Value format is '@{Username = "<user>"; Password = "<password>"}' | `string` | `"/your-path/rdcb/credential"` | no |
 | TerminationProtection | Enable or disable instance termination protection.  Protection is enabled by default. | `string` | `true` | no |
-| VpcId | VPC to deploy instance into | `string` | `"vpc-12345678"` | no |
+| UtilityScriptsUrl | URL prefix where the repo scripts can be retrieved | `string` | `"https://raw.githubusercontent.com/plus3it/utils/master"` | no |
 
 ## Outputs
 

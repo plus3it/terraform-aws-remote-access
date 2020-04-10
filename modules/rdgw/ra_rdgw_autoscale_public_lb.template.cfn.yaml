@@ -48,7 +48,6 @@ Metadata:
       - Label:
           default: EC2 Instance Configuration
         Parameters:
-          - AmiNameSearchString
           - AmiId
           - InstanceType
           - KeyPairName
@@ -86,11 +85,9 @@ Metadata:
         Parameters:
           - CloudWatchAgentUrl
     ParameterLabels:
-      AmiNameSearchString:
-        default: AMI Name Search Pattern
       ScaleDownDesiredCapacity:
         default: Scale Down Desired Capacity
-  Version: 0.5.2
+  Version: 0.6.0
   cfn-lint:
     config:
       ignore_checks:
@@ -111,11 +108,18 @@ Outputs:
 Parameters:
   AmiId:
     Default: ''
-    Description: (Optional) AMI ID -- will supersede Lambda-based AMI lookup using AmiNameSearchString
+    Description: (Optional) AMI ID -- will supersede Lambda-based AMI lookup using AmiFilters
     Type: String
-  AmiNameSearchString:
-    Default: Windows_Server-2016-English-Full-Base-*
-    Description: Search pattern to match against an AMI Name
+  AmiFilters:
+    Default: '[{"Name": "name", "Values": ["Windows_Server-2016-English-Full-Base-*"]}]'
+    Description: Json string containing list of maps of ami search filters. refer to the boto3 docs for a complete filter list (https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/ec2.html#EC2.Client.describe_images)
+    Type: String
+  AmiLookupLambdaArn:
+    Description: Arn of the ami-lookup-id lambda. See https://github.com/plus3it/lookup-ami-ids for more details.
+    Type: String
+  AmiOwners:
+    Default: '["amazon"]'
+    Description: Json string containing a list of owners to filter the ami search against
     Type: String
   AuthenticationMethod:
     AllowedValues:
@@ -210,9 +214,14 @@ Parameters:
     Description: Domain group of users authorized to use the RDGW
     MinLength: '1'
     Type: String
-  RepoBranchPrefixUrl:
-    Description: URL prefix where the repo scripts can be retrieved
-    Default: https://raw.githubusercontent.com/plus3it/cfn/master
+  RemoteAccessScriptsUrl:
+    Description: URL prefix where the remote access scripts can be retrieved
+    Default: https://raw.githubusercontent.com/plus3it/terraform-aws-remote-access/master
+    Type: String
+    AllowedPattern: ^https:/.*
+  UtilityScriptsUrl:
+    Description: URL prefix where the utility scripts can be retrieved
+    Default: https://raw.githubusercontent.com/plus3it/utils/master
     Type: String
     AllowedPattern: ^https:/.*
   ScaleDownDesiredCapacity:
@@ -250,10 +259,10 @@ Resources:
   AmiIdLookup:
     Condition: UseAmiLookup
     Properties:
-      AmiNameSearchString: !Ref AmiNameSearchString
-      ForceUpdateToggle: !Ref ForceUpdateToggle
+      Filters: !Ref AmiFilters
+      Owners: !Ref AmiOwners
       Region: !Ref AWS::Region
-      ServiceToken: !Sub arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:cfn-look-up-ami-ids
+      ServiceToken: !Ref AmiLookupLambdaArn
     Type: Custom::AmiIdLookup
   AutoScalingGroup:
     CreationPolicy:
@@ -588,9 +597,9 @@ Resources:
         ps-modules:
           files:
             'C:\Program Files\WindowsPowerShell\Modules\P3Utils\P3Utils.psd1':
-              source: !Sub ${RepoBranchPrefixUrl}/psmodules/P3Utils/P3Utils.psd1
+              source: !Sub ${UtilityScriptsUrl}/psmodules/P3Utils/P3Utils.psd1
             'C:\Program Files\WindowsPowerShell\Modules\P3Utils\P3Utils.psm1':
-              source: !Sub ${RepoBranchPrefixUrl}/psmodules/P3Utils/P3Utils.psm1
+              source: !Sub ${UtilityScriptsUrl}/psmodules/P3Utils/P3Utils.psm1
         setup-crypto:
           commands:
             10-setup-crypto:
@@ -626,7 +635,7 @@ Resources:
                     - ${Command} --stack ${AWS::StackName} --region ${AWS::Region}
                     - Command: !FindInMap [CfnUtilsMap, Init, Update]
             'c:\cfn\scripts\configure-rdgw.ps1':
-              source: !Sub ${RepoBranchPrefixUrl}/scripts/configure-rdgw.ps1
+              source: !Sub ${RemoteAccessScriptsUrl}/scripts/configure-rdgw.ps1
           services:
             windows:
               cfn-hup:

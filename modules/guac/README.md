@@ -17,6 +17,7 @@
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
+| AmiLookupLambdaArn | Arn of the ami-lookup-id lambda. See https://github.com/plus3it/lookup-ami-ids for more details. | `string` | n/a | yes |
 | GuacDnsZoneId | Id of DNS zone for Guac Load Balancer DNS Record | `string` | n/a | yes |
 | LdapDN | Distinguished Name (DN) of the LDAP directory.  E.g. DC=domain,DC=com | `string` | n/a | yes |
 | LdapServer | Name of LDAP server Guacamole will authenticate against.  E.g. domain.com | `string` | n/a | yes |
@@ -25,8 +26,9 @@
 | SslCertificateName | The name (for IAM) or identifier (for ACM) of the SSL certificate to associate with the ALB -- the cert must already exist in the service | `string` | n/a | yes |
 | StackName | CloudFormation Stack Name.  Must be less than 10 characters | `string` | n/a | yes |
 | VpcId | VPC to deploy instance(s) into | `string` | n/a | yes |
+| AmiFilters | List of maps with additional ami search filters | <pre>list(object(<br>    {<br>      Name   = string,<br>      Values = list(string)<br>    }<br>  ))</pre> | <pre>[<br>  {<br>    "Name": "name",<br>    "Values": [<br>      "amzn-ami-hvm-2018.03.*-x86_64-gp2"<br>    ]<br>  }<br>]</pre> | no |
 | AmiId | (Optional) AMI ID -- will supersede Lambda-based AMI lookup using AmiNameSearchString | `string` | `""` | no |
-| AmiNameSearchString | Search pattern to match against an AMI Name | `string` | `"amzn-ami-hvm-2018.03.*-x86_64-gp2"` | no |
+| AmiOwners | List of owners to filter ami search results against | `list(string)` | <pre>[<br>  "amazon"<br>]</pre> | no |
 | BrandText | Text/Label to display branding for the Guac Login page | `string` | `"Remote Access"` | no |
 | Capabilities | Required IAM capabilities | `list(string)` | <pre>[<br>  "CAPABILITY_AUTO_EXPAND",<br>  "CAPABILITY_NAMED_IAM",<br>  "CAPABILITY_IAM"<br>]</pre> | no |
 | CloudWatchAgentUrl | (Optional) S3 URL to CloudWatch Agent installer. Example: s3://amazoncloudwatch-agent/windows/amd64/latest/amazon-cloudwatch-agent.msi | `string` | `"s3://amazoncloudwatch-agent/amazon_linux/amd64/latest/amazon-cloudwatch-agent.rpm"` | no |
@@ -47,6 +49,7 @@
 | OnFailureAction | Action to be taken if stack creation fails. This must be one of: DO\_NOTHING, ROLLBACK, or DELETE. Conflicts with DisableRollback | `string` | `"ROLLBACK"` | no |
 | PolicyBody | String containing the stack policy body. Conflicts with PolicyUrl | `string` | `""` | no |
 | PolicyUrl | URL to a file containing the stack policy. Conflicts with PolicyBody | `string` | `""` | no |
+| RemoteAccessScriptsUrl | URL prefix where the remote access scripts can be retrieved | `string` | `"https://raw.githubusercontent.com/plus3it/terraform-aws-remote-access/master"` | no |
 | ScaleDownDesiredCapacity | (Optional) Desired number of instances during the Scale Down Scheduled Action; ignored if ScaleDownSchedule is unset | `string` | `"1"` | no |
 | ScaleDownSchedule | (Optional) Scheduled Action in cron-format (UTC) to scale down the number of instances; ignored if empty or ScaleUpSchedule is unset (E.g. '0 0 \* \* \*') | `string` | `""` | no |
 | ScaleUpSchedule | (Optional) Scheduled Action in cron-format (UTC) to scale up to the Desired Capacity; ignored if empty or ScaleDownSchedule is unset (E.g. '0 10 \* \* Mon-Fri') | `string` | `""` | no |

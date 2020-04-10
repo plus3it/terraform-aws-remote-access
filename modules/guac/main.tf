@@ -16,7 +16,9 @@ resource "aws_cloudformation_stack" "this" {
 
   parameters = {
     "AmiId"                    = var.AmiId
-    "AmiNameSearchString"      = var.AmiNameSearchString
+    "AmiFilters"               = var.AmiFilters
+    "AmiLookupLambdaArn"       = var.AmiLookupLambdaArn
+    "AmiOwner"                 = var.AmiOwner
     "BrandText"                = var.BrandText
     "CloudWatchAgentUrl"       = var.CloudWatchAgentUrl
     "DesiredCapacity"          = var.DesiredCapacity
@@ -43,6 +45,7 @@ resource "aws_cloudformation_stack" "this" {
     "URLText2"                 = var.URLText2
     "UpdateSchedule"           = var.UpdateSchedule
     "VpcId"                    = var.VpcId
+    "RemoteAccessScriptsUrl"   = var.RemoteAccessScriptsUrl
   }
 
   timeouts {

@@ -4,10 +4,26 @@ variable "AmiId" {
   type        = string
 }
 
-variable "AmiNameSearchString" {
-  default     = "Windows_Server-2016-English-Full-Base-*"
-  description = "Search pattern to match against an AMI Name"
-  type        = string
+variable "AmiFilters" {
+  type = list(object(
+    {
+      Name   = string,
+      Values = list(string)
+    }
+  ))
+  description = "List of maps with additional ami search filters"
+  default = [
+    {
+      "Name" : "name",
+      "Values" : ["Windows_Server-2016-English-Full-Base-*"]
+    }
+  ]
+}
+
+variable "AmiOwners" {
+  type        = list(string)
+  description = "List of owners to filter ami search results against"
+  default     = ["amazon"]
 }
 
 variable "AuthenticationMethod" {
@@ -91,8 +107,14 @@ variable "RemoteAccessUserGroup" {
   type        = string
 }
 
-variable "RepoBranchPrefixUrl" {
-  default     = "https://raw.githubusercontent.com/plus3it/cfn/master"
+variable "RemoteAccessScriptsUrl" {
+  default     = "https://raw.githubusercontent.com/plus3it/terraform-aws-remote-access/master"
+  description = "URL prefix where the repo scripts can be retrieved"
+  type        = string
+}
+
+variable "UtilityScriptsUrl" {
+  default     = "https://raw.githubusercontent.com/plus3it/utils/master"
   description = "URL prefix where the repo scripts can be retrieved"
   type        = string
 }
@@ -134,7 +156,6 @@ variable "UpdateSchedule" {
 }
 
 variable "VpcId" {
-  default     = "vpc-12345678"
   description = "VPC to deploy instance into"
   type        = string
 }
@@ -160,3 +181,7 @@ variable "PublicDnszoneId" {
   type        = string
 }
 
+variable "AmiLookupLambdaArn" {
+  description = "Arn of the ami-lookup-id lambda. See https://github.com/plus3it/lookup-ami-ids for more details."
+  type        = string
+}

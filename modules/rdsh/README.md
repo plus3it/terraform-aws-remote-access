@@ -18,14 +18,16 @@
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
+| AmiLookupLambdaArn | Arn of the ami-lookup-id lambda. See https://github.com/plus3it/lookup-ami-ids for more details. | `string` | n/a | yes |
 | DomainSvcAccount | User name for the account that will join the instance to the Connection Broker Cluster | `string` | n/a | yes |
 | DomainSvcPassword | Password for the Connection Broker service account. Must be at least 8 characters containing letters, numbers and symbols | `string` | n/a | yes |
 | RdpPrivateKeyPassword | Password to the RDP certificate private key | `string` | n/a | yes |
 | RdpPrivateKeyPfx | S3 bucket and path to a private key for the RDP certificate, e.g. '<bucket>/path/to/key.pfx' | `string` | n/a | yes |
 | StackName | CloudFormation Stack Name.  Must be less than 10 characters | `string` | n/a | yes |
 | VpcId | VPC to deploy instance(s) into | `string` | n/a | yes |
+| AmiFilters | List of maps with additional ami search filters | <pre>list(object(<br>    {<br>      Name   = string,<br>      Values = list(string)<br>    }<br>  ))</pre> | <pre>[<br>  {<br>    "Name": "name",<br>    "Values": [<br>      "Windows_Server-2016-English-Full-Base-*"<br>    ]<br>  }<br>]</pre> | no |
 | AmiId | (Optional) AMI ID -- will supersede Lambda-based AMI lookup using AmiNameSearchString | `string` | `""` | no |
-| AmiNameSearchString | Search pattern to match against an AMI Name | `string` | `"Windows_Server-2016-English-Full-Base-*"` | no |
+| AmiOwners | List of owners to filter ami search results against | `list(string)` | <pre>[<br>  "amazon"<br>]</pre> | no |
 | CloudWatchAgentUrl | (Optional) S3 URL to CloudWatch Agent MSI. Example: s3://amazoncloudwatch-agent/windows/amd64/latest/amazon-cloudwatch-agent.msi | `string` | `""` | no |
 | ConnectionBrokerFqdn | Fully qualified domain name (FQDN) of the primary Connection Broker, e.g. 'cb.example.com' | `string` | `""` | no |
 | DesiredCapacity | The number of instances the autoscale group will spin up initially | `string` | `"1"` | no |
@@ -44,7 +46,7 @@
 | NlbZones | Map of NLB Zones | `map(string)` | <pre>{<br>  "us-east-1": "Z26RNL4JYFTOTI",<br>  "us-east-2": "ZLMOA37VPKANP",<br>  "us-west-1": "Z24FKFUX50B4VW",<br>  "us-west-2": "Z18D5FSROUN65G"<br>}</pre> | no |
 | PrivateDnszoneId | ZoneId where DNS record will be created for the RDSH nodes | `string` | `""` | no |
 | RdpPrivateKeyS3Endpoint | S3 endpoint URL hosting the bucket where the RDP certificate private key is stored | `string` | `"https://s3.amazonaws.com"` | no |
-| RepoBranchPrefixUrl | URL prefix where the repo scripts can be retrieved | `string` | `"https://raw.githubusercontent.com/plus3it/cfn/master"` | no |
+| RemoteAccessScriptsUrl | URL prefix where the repo scripts can be retrieved | `string` | `"https://raw.githubusercontent.com/plus3it/terraform-aws-remote-access/master"` | no |
 | S3Bucket | n/a | `string` | `"your_bucket"` | no |
 | ScaleDownDesiredCapacity | (Optional) Desired number of instances during the Scale Down Scheduled Action; ignored if ScaleDownSchedule is unset | `string` | `"1"` | no |
 | ScaleDownSchedule | (Optional) Scheduled Action in cron-format (UTC) to scale down the number of instances; ignored if empty or ScaleUpSchedule is unset (E.g. '0 0 \* \* \*') | `string` | `""` | no |
@@ -52,6 +54,7 @@
 | SubnetIDs | List of Subnet IDs where the RDSH instances and ELB will be launched | `list(string)` | `[]` | no |
 | UpdateSchedule | (Optional) Time interval between auto stack updates. Refer to the AWS documentation for valid input syntax: https://docs.aws.amazon.com/AmazonCloudWatch/latest/events/ScheduledEvents.html | `string` | `""` | no |
 | UserProfileDiskPath | Path to a CIFS share where User Profile Disks are stored, e.g. [ "home.example.com", "Profiles$" ] eq "\\\home.example.com\Profiles$" | `list(string)` | <pre>[<br>  "home.example.com",<br>  "Profiles$"<br>]</pre> | no |
+| UtilityScriptsUrl | URL prefix where the repo scripts can be retrieved | `string` | `"https://raw.githubusercontent.com/plus3it/utils/master"` | no |
 
 ## Outputs
 

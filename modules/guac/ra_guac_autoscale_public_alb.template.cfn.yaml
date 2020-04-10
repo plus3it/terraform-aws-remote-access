@@ -58,7 +58,7 @@ Mappings:
       Parameters:
         Location: s3://app-chemistry/snippets/instance_type_map.snippet.cfn.yaml
 Metadata:
-  Version: 0.5.2
+  Version: 0.6.0
   cfn-lint:
     config:
       ignore_checks:
@@ -85,9 +85,16 @@ Parameters:
     Default: ''
     Description: (Optional) AMI ID -- will supersede Lambda-based AMI lookup using AmiNameSearchString
     Type: String
-  AmiNameSearchString:
-    Default: amzn-ami-hvm-2018.03*.2018*-x86_64-gp2
-    Description: Search pattern to match against an AMI Name
+  AmiFilters:
+    Default: '[{"Name": "name", "Values": ["amzn-ami-hvm-2018.03*.2018*-x86_64-gp2"]}]'
+    Description: Json string containing list of maps of ami search filters. refer to the boto3 docs for a complete filter list (https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/ec2.html#EC2.Client.describe_images)
+    Type: String
+  AmiLookupLambdaArn:
+    Description: Arn of the ami-lookup-id lambda. See https://github.com/plus3it/lookup-ami-ids for more details.
+    Type: String
+  AmiOwners:
+    Default: '["amazon"]'
+    Description: Json string containing a list of owners to filter the ami search against
     Type: String
   BrandText:
     Default: ''
@@ -180,9 +187,9 @@ Parameters:
   PublicSubnetIds:
     Description: A list of Public subnet IDs to attach to the Application Load Balancer
     Type: List<AWS::EC2::Subnet::Id>
-  RepoBranchPrefixUrl:
-    Description: URL prefix where the repo scripts can be retrieved
-    Default: https://raw.githubusercontent.com/plus3it/cfn/master
+  RemoteAccessScriptsUrl:
+    Description: URL prefix where the remote access scripts can be retrieved
+    Default: https://raw.githubusercontent.com/plus3it/terraform-aws-remote-access/master
     Type: String
     AllowedPattern: ^https://.*
   ScaleDownDesiredCapacity:
@@ -285,10 +292,10 @@ Resources:
   AmiIdLookup:
     Condition: UseAmiLookup
     Properties:
-      AmiNameSearchString: !Ref AmiNameSearchString
-      ForceUpdateToggle: !Ref ForceUpdateToggle
+      Filters: !Ref AmiFilters
+      Owners: !Ref AmiOwners
       Region: !Ref AWS::Region
-      ServiceToken: !Sub arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:cfn-look-up-ami-ids
+      ServiceToken: !Ref AmiLookupLambdaArn
     Type: Custom::AmiIdLookup
   AutoScalingGroup:
     CreationPolicy:
@@ -567,7 +574,7 @@ Resources:
               group: root
               mode: '000700'
               owner: root
-              source: !Sub ${RepoBranchPrefixUrl}/scripts/make-guac.sh
+              source: !Sub ${RemoteAccessScriptsUrl}/scripts/make-guac.sh
           services:
             sysvinit:
               cfn-hup:
