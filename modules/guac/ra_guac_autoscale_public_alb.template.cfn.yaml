@@ -124,12 +124,12 @@ Parameters:
     Description: The base of the DN for all Guacamole configurations.
     Type: String
   GuacamoleVersion:
-    Default: 1.0.0
-    Description: Guacamole version tag. Defaults to 1.0.0
+    Default: 1.2.0
+    Description: Guacamole version tag. Defaults to 1.2.0
     Type: String
   GuacdVersion:
-    Default: 1.0.0
-    Description: Guacd version tag. Defaults to 1.0.0
+    Default: 1.2.0
+    Description: Guacd version tag. Defaults to 1.2.0
     Type: String
   InstanceType:
     AllowedValues:

@@ -57,14 +57,14 @@ variable "GuacBaseDN" {
 }
 
 variable "GuacamoleVersion" {
-  default     = "1.0.0"
-  description = "Guacamole version tag. Defaults to 1.0.0"
+  default     = "1.2.0"
+  description = "Guacamole version tag. Defaults to 1.2.0"
   type        = string
 }
 
 variable "GuacdVersion" {
-  default     = "1.0.0"
-  description = "Guacd version tag. Defaults to 1.0.0"
+  default     = "1.2.0"
+  description = "Guacd version tag. Defaults to 1.2.0"
   type        = string
 }
 

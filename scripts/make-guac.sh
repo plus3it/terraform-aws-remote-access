@@ -266,8 +266,8 @@ URLTEXT_1=
 URL_2=
 URLTEXT_2=
 BRANDTEXT="Apache Guacamole"
-GUACD_VERSION="1.0.0"
-GUACAMOLE_VERSION="1.0.0"
+GUACD_VERSION="1.2.0"
+GUACAMOLE_VERSION="1.2.0"
 
 # Parse command-line parameters
 while getopts :hH:D:U:R:A:C:P:L:T:l:t:B:V:v: opt
