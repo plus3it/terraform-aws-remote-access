@@ -44,6 +44,18 @@ variable "DesiredCapacity" {
   type        = string
 }
 
+variable "DockerGuacamoleImage" {
+  default     = "guacamole/guacamole:1.2.0"
+  description = "Identifier for GUACAMOLE docker image. Used by docker pull to retrieve the guacamole image"
+  type        = string
+}
+
+variable "DockerGuacdImage" {
+  default     = "guacamole/guacd:1.2.0"
+  description = "Identifier for GUACD docker image. Used by docker pull to retrieve the guacd image"
+  type        = string
+}
+
 variable "ForceUpdateToggle" {
   default     = "B"
   description = "A/B toggle that forces a change to a LaunchConfig property, triggering the AutoScale Update Policy"
@@ -53,18 +65,6 @@ variable "ForceUpdateToggle" {
 variable "GuacBaseDN" {
   default     = "CN=GuacConfigGroups"
   description = "The base of the DN for all Guacamole configurations."
-  type        = string
-}
-
-variable "GuacamoleVersion" {
-  default     = "1.2.0"
-  description = "Guacamole version tag. Defaults to 1.2.0"
-  type        = string
-}
-
-variable "GuacdVersion" {
-  default     = "1.2.0"
-  description = "Guacd version tag. Defaults to 1.2.0"
   type        = string
 }
 

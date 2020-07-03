@@ -112,6 +112,14 @@ Parameters:
     Description: The number of instances the autoscale group will spin up initially
     MinLength: '1'
     Type: String
+  DockerGuacamoleImage:
+    Default: guacamole/guacamole:1.2.0
+    Description: Identifier for GUACAMOLE docker image. Used by docker pull to retrieve the guacamole image. Defaults to guacamole/guacamole:1.2.0
+    Type: String
+  DockerGuacdImage:
+    Default: guacamole/guacd:1.2.0
+    Description: Identifier for GUACD docker image. Used by docker pull to retrieve the guacd image. Defaults to guacamole/guacamole:1.2.0
+    Type: String
   ForceUpdateToggle:
     AllowedValues:
       - A
@@ -122,14 +130,6 @@ Parameters:
   GuacBaseDN:
     Default: CN=GuacConfigGroups
     Description: The base of the DN for all Guacamole configurations.
-    Type: String
-  GuacamoleVersion:
-    Default: 1.2.0
-    Description: Guacamole version tag. Defaults to 1.2.0
-    Type: String
-  GuacdVersion:
-    Default: 1.2.0
-    Description: Guacd version tag. Defaults to 1.2.0
     Type: String
   InstanceType:
     AllowedValues:
@@ -532,8 +532,8 @@ Resources:
                   /etc/cfn/scripts/make-guac.sh
                   -H ${LdapServer}
                   -D ${LdapDN}
-                  -V ${GuacamoleVersion}
-                  -v ${GuacdVersion}
+                  -V ${DockerGuacamoleImage}
+                  -v ${DockerGuacdImage}
                   -C ${GuacBaseDN}
                   ${local_UseURL1}
                   ${local_UseURLText1}
