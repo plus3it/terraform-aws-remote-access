@@ -208,27 +208,6 @@ write_brand()
 }  # ----------  end of function write_brand  ----------
 
 
-write_guacamole_dockerfile()
-{
-    local guac_docker
-    local guac_dockerfile
-    guac_docker="$1"
-    guac_dockerfile="${guac_docker}/Dockerfile"
-
-    log "Writing Guacamole Dockerfile, ${guac_dockerfile}"
-    (
-        printf "FROM %s\n" "$DOCKER_GUACAMOLE_IMAGE"
-        printf "\n"
-        printf "RUN rm -rf /usr/local/tomcat/webapps/* && \\"
-        printf "\n"
-        printf "    sed -i 's#ln -sf /opt/guacamole/guacamole\.war /usr/local/tomcat/webapps/#ln -sf /opt/guacamole/guacamole\.war /usr/local/tomcat/webapps/ROOT.war#' /opt/guacamole/bin/start.sh\n"
-        printf "\n"
-        printf "CMD [\"/opt/guacamole/bin/start.sh\" ]\n"
-    ) > "${guac_dockerfile}"
-    log "Successfully added Guacamole Dockerfile"
-}  # ----------  end of function write_guacamole_dockerfile  ----------
-
-
 # Define default values
 LDAP_HOSTNAME=
 LDAP_DOMAIN_DN=
@@ -344,9 +323,7 @@ fi
 
 # Set internal variables
 DOCKER_GUACD=guacd
-DOCKER_GUACAMOLE_IMAGE_LOCAL=local/guacamole
 DOCKER_GUACAMOLE=guacamole
-DOCKER_GUACAMOLE_LOCAL=/root/guacamole
 GUAC_EXT=/tmp/extensions
 GUAC_HOME=/root/guac-home
 GUAC_DRIVE=/var/tmp/guacamole
@@ -354,8 +331,8 @@ GUAC_DRIVE=/var/tmp/guacamole
 
 # Setup build directories
 log "Initializing ${__SCRIPTNAME} build directories"
-rm -rf "${GUAC_EXT}" "${GUAC_HOME}" "${GUAC_DRIVE}" "${DOCKER_GUACAMOLE_LOCAL}" | log
-mkdir -p "${GUAC_EXT}" "${GUAC_HOME}/extensions" "${GUAC_DRIVE}" "${DOCKER_GUACAMOLE_LOCAL}" | log
+rm -rf "${GUAC_EXT}" "${GUAC_HOME}" "${GUAC_DRIVE}" | log
+mkdir -p "${GUAC_EXT}" "${GUAC_HOME}/extensions" "${GUAC_DRIVE}" | log
 
 # Install dependencies
 log "Installing docker"
@@ -376,11 +353,6 @@ docker pull "${DOCKER_GUACD_IMAGE}" | log
 # fetch the guacamole image
 log "Fetching the guacamole image, ${DOCKER_GUACAMOLE_IMAGE}"
 docker pull "${DOCKER_GUACAMOLE_IMAGE}" | log
-
-# Build local guacamole image
-log "Building local guacamole image from dockerfile"
-write_guacamole_dockerfile "${DOCKER_GUACAMOLE_LOCAL}"
-docker build -t "${DOCKER_GUACAMOLE_IMAGE_LOCAL}" "${DOCKER_GUACAMOLE_LOCAL}" | log
 
 # Create custom guacamole branding extension
 log "Setting up the custom branding extension"
@@ -437,7 +409,7 @@ docker run --name guacd \
 
 
 # Starting guacamole container
-log "Starting guacamole container, ${DOCKER_GUACAMOLE_IMAGE_LOCAL}"
+log "Starting guacamole container, ${DOCKER_GUACAMOLE_IMAGE}"
 docker run --name guacamole \
     --restart unless-stopped \
     --link guacd:guacd \
@@ -449,4 +421,4 @@ docker run --name guacamole \
     -e LDAP_USERNAME_ATTRIBUTE="${LDAP_USER_ATTRIBUTE}" \
     -e LDAP_CONFIG_BASE_DN="${LDAP_CONFIG_BASE},${LDAP_DOMAIN_DN}" \
     -e LDAP_GROUP_BASE_DN="${LDAP_GROUP_BASE},${LDAP_DOMAIN_DN}" \
-    -d -p 8080:8080 "${DOCKER_GUACAMOLE_IMAGE_LOCAL}" | log
+    -d -p 8080:8080 "${DOCKER_GUACAMOLE_IMAGE}" | log
