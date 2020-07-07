@@ -651,12 +651,31 @@ Resources:
             - !Sub arn:aws:acm:${AWS::Region}:${AWS::AccountId}:certificate/${SslCertificateName}
             - !Sub arn:aws:iam:${AWS::Region}:${AWS::AccountId}:server-certificate/${SslCertificateName}
       DefaultActions:
-        - TargetGroupArn: !Ref ALBTargetGroup
-          Type: forward
+        - RedirectConfig:
+            Host: '#{host}'
+            Path: /guacamole
+            Port: '#{port}'
+            Protocol: '#{protocol}'
+            Query: '#{query}'
+            StatusCode: HTTP_301
+          Type: redirect
       LoadBalancerArn: !Ref ALB
       Port: 443
       Protocol: HTTPS
     Type: AWS::ElasticLoadBalancingV2::Listener
+  ListenerRuleForward:
+    Type: AWS::ElasticLoadBalancingV2::ListenerRule
+    Properties:
+      Actions:
+        - TargetGroupArn: !Ref ALBTargetGroup
+          Type: forward
+      Conditions:
+        - Field: path-pattern
+          PathPatternConfig:
+            Values:
+              - /guacamole*
+      ListenerArn: !Ref Listener
+      Priority: 10
   PublicToAlbIngressTcp443:
     Properties:
       CidrIp: 0.0.0.0/0
