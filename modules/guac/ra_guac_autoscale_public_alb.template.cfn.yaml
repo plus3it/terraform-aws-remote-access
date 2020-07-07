@@ -255,7 +255,7 @@ Resources:
   ALBTargetGroup:
     Properties:
       HealthCheckIntervalSeconds: 30
-      HealthCheckPath: /index.html
+      HealthCheckPath: /
       HealthCheckPort: '8080'
       HealthCheckProtocol: HTTP
       HealthCheckTimeoutSeconds: 10
@@ -663,6 +663,21 @@ Resources:
       Port: 443
       Protocol: HTTPS
     Type: AWS::ElasticLoadBalancingV2::Listener
+  ListenerHTTP:
+    Properties:
+      DefaultActions:
+        - RedirectConfig:
+            Host: '#{host}'
+            Path: '/#{path}'
+            Port: 443
+            Protocol: HTTPS
+            Query: '#{query}'
+            StatusCode: HTTP_301
+          Type: redirect
+      LoadBalancerArn: !Ref ALB
+      Port: 80
+      Protocol: HTTP
+    Type: AWS::ElasticLoadBalancingV2::Listener
   ListenerRuleForward:
     Type: AWS::ElasticLoadBalancingV2::ListenerRule
     Properties:
@@ -683,6 +698,14 @@ Resources:
       GroupId: !Ref AlbSecurityGroup
       IpProtocol: tcp
       ToPort: 443
+    Type: AWS::EC2::SecurityGroupIngress
+  PublicToAlbIngressTcp80:
+    Properties:
+      CidrIp: 0.0.0.0/0
+      FromPort: 80
+      GroupId: !Ref AlbSecurityGroup
+      IpProtocol: tcp
+      ToPort: 80
     Type: AWS::EC2::SecurityGroupIngress
   ScaleDownScheduledAction:
     Condition: UseScheduledAction

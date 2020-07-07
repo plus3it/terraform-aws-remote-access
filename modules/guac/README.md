@@ -34,12 +34,12 @@
 | CloudWatchAgentUrl | (Optional) S3 URL to CloudWatch Agent installer. Example: s3://amazoncloudwatch-agent/windows/amd64/latest/amazon-cloudwatch-agent.msi | `string` | `"s3://amazoncloudwatch-agent/amazon_linux/amd64/latest/amazon-cloudwatch-agent.rpm"` | no |
 | DesiredCapacity | The number of instances the autoscale group will spin up initially | `string` | `"1"` | no |
 | DisableRollback | Set to true to disable rollback of the stack if stack creation failed. Conflicts with OnFailure | `string` | `false` | no |
+| DockerGuacamoleImage | Identifier for GUACAMOLE docker image. Used by docker pull to retrieve the guacamole image | `string` | `"guacamole/guacamole:1.2.0"` | no |
+| DockerGuacdImage | Identifier for GUACD docker image. Used by docker pull to retrieve the guacd image | `string` | `"guacamole/guacd:1.2.0"` | no |
 | ElbZones | Map of ELB Zones | `map(string)` | <pre>{<br>  "us-east-1": "Z35SXDOTRQ7X7K",<br>  "us-east-2": "Z3AADJGX6KTTL2",<br>  "us-west-1": "Z368ELLRRE2KJ0",<br>  "us-west-2": "Z1H1FL5HABSF5"<br>}</pre> | no |
 | ForceUpdateToggle | A/B toggle that forces a change to a LaunchConfig property, triggering the AutoScale Update Policy | `string` | `"B"` | no |
 | GuacBaseDN | The base of the DN for all Guacamole configurations. | `string` | `"CN=GuacConfigGroups"` | no |
 | GuacPublicDnsHostname | Hostname of DNS record used to reach Guac Elb | `string` | `"guacamole"` | no |
-| GuacamoleVersion | Guacamole version tag. Defaults to 1.0.0 | `string` | `"1.0.0"` | no |
-| GuacdVersion | Guacd version tag. Defaults to 1.0.0 | `string` | `"1.0.0"` | no |
 | IamRoleArn | The ARN of an IAM role that AWS CloudFormation assumes to create the stack. If you don't specify a value, AWS CloudFormation uses the role that was previously associated with the stack. If no role is available, AWS CloudFormation uses a temporary session that is generated from your user credentials | `string` | `""` | no |
 | InstanceType | Amazon EC2 instance type for the Remote Desktop Session Instance | `string` | `"c5.large"` | no |
 | KeyPairName | Public/private key pairs allow you to securely connect to your instance after it launches | `string` | `""` | no |
