@@ -58,7 +58,7 @@ Mappings:
       Parameters:
         Location: s3://app-chemistry/snippets/instance_type_map.snippet.cfn.yaml
 Metadata:
-  Version: 0.6.0
+  Version: 0.7.0
   cfn-lint:
     config:
       ignore_checks:
@@ -112,6 +112,14 @@ Parameters:
     Description: The number of instances the autoscale group will spin up initially
     MinLength: '1'
     Type: String
+  DockerGuacamoleImage:
+    Default: guacamole/guacamole:1.2.0
+    Description: Identifier for GUACAMOLE docker image. Used by docker pull to retrieve the guacamole image. Defaults to guacamole/guacamole:1.2.0
+    Type: String
+  DockerGuacdImage:
+    Default: guacamole/guacd:1.2.0
+    Description: Identifier for GUACD docker image. Used by docker pull to retrieve the guacd image. Defaults to guacamole/guacamole:1.2.0
+    Type: String
   ForceUpdateToggle:
     AllowedValues:
       - A
@@ -122,14 +130,6 @@ Parameters:
   GuacBaseDN:
     Default: CN=GuacConfigGroups
     Description: The base of the DN for all Guacamole configurations.
-    Type: String
-  GuacamoleVersion:
-    Default: 1.0.0
-    Description: Guacamole version tag. Defaults to 1.0.0
-    Type: String
-  GuacdVersion:
-    Default: 1.0.0
-    Description: Guacd version tag. Defaults to 1.0.0
     Type: String
   InstanceType:
     AllowedValues:
@@ -255,7 +255,7 @@ Resources:
   ALBTargetGroup:
     Properties:
       HealthCheckIntervalSeconds: 30
-      HealthCheckPath: /index.html
+      HealthCheckPath: /
       HealthCheckPort: '8080'
       HealthCheckProtocol: HTTP
       HealthCheckTimeoutSeconds: 10
@@ -532,8 +532,8 @@ Resources:
                   /etc/cfn/scripts/make-guac.sh
                   -H ${LdapServer}
                   -D ${LdapDN}
-                  -V ${GuacamoleVersion}
-                  -v ${GuacdVersion}
+                  -V ${DockerGuacamoleImage}
+                  -v ${DockerGuacdImage}
                   -C ${GuacBaseDN}
                   ${local_UseURL1}
                   ${local_UseURLText1}
@@ -651,12 +651,46 @@ Resources:
             - !Sub arn:aws:acm:${AWS::Region}:${AWS::AccountId}:certificate/${SslCertificateName}
             - !Sub arn:aws:iam:${AWS::Region}:${AWS::AccountId}:server-certificate/${SslCertificateName}
       DefaultActions:
-        - TargetGroupArn: !Ref ALBTargetGroup
-          Type: forward
+        - RedirectConfig:
+            Host: '#{host}'
+            Path: /guacamole
+            Port: '#{port}'
+            Protocol: '#{protocol}'
+            Query: '#{query}'
+            StatusCode: HTTP_301
+          Type: redirect
       LoadBalancerArn: !Ref ALB
       Port: 443
       Protocol: HTTPS
     Type: AWS::ElasticLoadBalancingV2::Listener
+  ListenerHTTP:
+    Properties:
+      DefaultActions:
+        - RedirectConfig:
+            Host: '#{host}'
+            Path: '/#{path}'
+            Port: '443'
+            Protocol: HTTPS
+            Query: '#{query}'
+            StatusCode: HTTP_301
+          Type: redirect
+      LoadBalancerArn: !Ref ALB
+      Port: 80
+      Protocol: HTTP
+    Type: AWS::ElasticLoadBalancingV2::Listener
+  ListenerRuleForward:
+    Type: AWS::ElasticLoadBalancingV2::ListenerRule
+    Properties:
+      Actions:
+        - TargetGroupArn: !Ref ALBTargetGroup
+          Type: forward
+      Conditions:
+        - Field: path-pattern
+          PathPatternConfig:
+            Values:
+              - /guacamole*
+      ListenerArn: !Ref Listener
+      Priority: 10
   PublicToAlbIngressTcp443:
     Properties:
       CidrIp: 0.0.0.0/0
@@ -664,6 +698,14 @@ Resources:
       GroupId: !Ref AlbSecurityGroup
       IpProtocol: tcp
       ToPort: 443
+    Type: AWS::EC2::SecurityGroupIngress
+  PublicToAlbIngressTcp80:
+    Properties:
+      CidrIp: 0.0.0.0/0
+      FromPort: 80
+      GroupId: !Ref AlbSecurityGroup
+      IpProtocol: tcp
+      ToPort: 80
     Type: AWS::EC2::SecurityGroupIngress
   ScaleDownScheduledAction:
     Condition: UseScheduledAction
