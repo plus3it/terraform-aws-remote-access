@@ -290,6 +290,7 @@ Resources:
     Condition: UseAmiLookup
     Properties:
       Filters: !Ref AmiFilters
+      ForceUpdateToggle: !Ref ForceUpdateToggle
       Owners: !Ref AmiOwners
       Region: !Ref AWS::Region
       ServiceToken: !Ref AmiLookupLambdaArn
