@@ -80,7 +80,7 @@ Metadata:
           default: Management Configuration
         Parameters:
           - NotificationEmail
-  Version: 0.7.2
+  Version: 0.7.3
   cfn-lint:
     config:
       ignore_checks:
@@ -374,11 +374,11 @@ Resources:
       Statistic: Average
       Threshold: 40
     Type: AWS::CloudWatch::Alarm
-  Ec2LowDiskSpaceAlarm40D:
+  Ec2LowDiskSpaceAlarm10D:
     Properties:
       AlarmActions:
         - !Ref SnsTopic
-      AlarmDescription: 'Trigger alarm when D: volume has less than 40% free disk space'
+      AlarmDescription: 'Trigger alarm when D: volume has less than 10% free disk space'
       ComparisonOperator: LessThanThreshold
       Dimensions:
         - Name: InstanceId
@@ -388,7 +388,7 @@ Resources:
       Namespace: AWS/EC2
       Period: 60
       Statistic: Average
-      Threshold: 40
+      Threshold: 10
     Type: AWS::CloudWatch::Alarm
   Ec2RecoveryAlarm:
     Properties:
