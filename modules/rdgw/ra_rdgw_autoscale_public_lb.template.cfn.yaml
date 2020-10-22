@@ -55,6 +55,8 @@ Metadata:
       - Label:
           default: RDGW Configuration
         Parameters:
+          - Route53DnsName
+          - Route53HostedZoneId
           - AuthenticationMethod
           - DomainDirectoryId
           - DomainDnsName
@@ -99,12 +101,18 @@ Outputs:
   Ec2SecurityGroupId:
     Description: Security Group ID for RDGW EC2 instances
     Value: !Ref Ec2SecurityGroup
+  GlobalAcceleratorDnsName:
+    Description: DNS name for the GlobalAccelerator
+    Value: !Sub ${GlobalAccelerator.DnsName}
   LoadBalancerDns:
     Description: DNS name for the LoadBalancer
     Value: !Sub ${LoadBalancerNlb.DNSName}
   LoadBalancerName:
     Description: Name of the Load Balancer
     Value: !Ref LoadBalancerNlb
+  TargetGroupName:
+    Description: Name of the Target Group
+    Value: !Ref TargetGroup
 Parameters:
   AmiId:
     Default: ''
@@ -187,7 +195,7 @@ Parameters:
       - m5.4xlarge
       - r4.large
       - r4.xlarge
-    Default: t2.micro
+    Default: t3.medium
     Description: Amazon EC2 instance type for the Remote Desktop Gateway Instance
     Type: String
   KeyPairName:
@@ -207,7 +215,7 @@ Parameters:
     Description: List of Private Subnet IDs where the RDGW instances will run
     Type: List<AWS::EC2::Subnet::Id>
   PublicSubnetIDs:
-    Description: A list of Public subnet IDs to attach to the load balancer
+    Description: A list of Public Subnet IDs to attach to the load balancer
     Type: List<AWS::EC2::Subnet::Id>
   RemoteAccessUserGroup:
     Default: Domain Admins
@@ -219,6 +227,12 @@ Parameters:
     Default: https://raw.githubusercontent.com/plus3it/terraform-aws-remote-access/master
     Type: String
     AllowedPattern: ^https:/.*
+  Route53HostedZoneId:
+    Description: ID of the Route53 Hosted Zone in which to create the record for `Route53DnsName`
+    Type: String
+  Route53DnsName:
+    Description: Friendly DNS Name for the RDGW service (e.g. rdgw.example.com)
+    Type: String
   UtilityScriptsUrl:
     Description: URL prefix where the utility scripts can be retrieved
     Default: https://raw.githubusercontent.com/plus3it/utils/master
@@ -393,6 +407,38 @@ Resources:
           Value: !Sub ra-rdgw-ec2-${AWS::StackName}
       VpcId: !Ref VPC
     Type: AWS::EC2::SecurityGroup
+  GlobalAccelerator:
+    Properties:
+      Enabled: True
+      IpAddressType: IPV4
+      Name: !Ref AWS::StackName
+      Tags:
+        - Key: Name
+          Value: !Ref AWS::StackName
+    Type: AWS::GlobalAccelerator::Accelerator
+  GlobalAcceleratorListener:
+    Properties:
+      AcceleratorArn: !Ref GlobalAccelerator
+      ClientAffinity: NONE
+      PortRanges:
+        - FromPort: 443
+          ToPort: 443
+      Protocol: TCP
+    Type: AWS::GlobalAccelerator::Listener
+  GlobalAcceleratorEndpointGroup:
+    Properties:
+      EndpointConfigurations:
+        - EndpointId: !Ref LoadBalancerNlb
+          Weight: 128
+      EndpointGroupRegion: !Ref AWS::Region
+      HealthCheckIntervalSeconds: 30
+      HealthCheckPath: /
+      HealthCheckPort: 443
+      HealthCheckProtocol: HTTPS
+      ListenerArn: !Ref GlobalAcceleratorListener
+      ThresholdCount: 3
+      TrafficDialPercentage: 100
+    Type: AWS::GlobalAccelerator::EndpointGroup
   LaunchConfig:
     Metadata:
       'AWS::CloudFormation::Init':
@@ -736,6 +782,17 @@ Resources:
       IpProtocol: tcp
       ToPort: 8091
     Type: AWS::EC2::SecurityGroupIngress
+  Route53RecordSetGroup:
+    Properties:
+      HostedZoneId: !Ref Route53HostedZoneId
+      RecordSets:
+        - AliasTarget:
+            DNSName: !Sub ${GlobalAccelerator.DnsName}
+            EvaluateTargetHealth: True
+            HostedZoneId: Z2BJ6XQ5FK7U4H
+          Name: !Ref Route53DnsName
+          Type: A
+    Type: AWS::Route53::RecordSetGroup
   ScaleDownScheduledAction:
     Condition: UseScheduledAction
     Properties:
