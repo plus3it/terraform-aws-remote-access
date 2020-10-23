@@ -58,7 +58,7 @@ Mappings:
       Parameters:
         Location: s3://app-chemistry/snippets/instance_type_map.snippet.cfn.yaml
 Metadata:
-  Version: 0.8.0
+  Version: 0.8.1
   cfn-lint:
     config:
       ignore_checks:
@@ -461,7 +461,7 @@ Resources:
   GlobalAcceleratorListener:
     Properties:
       AcceleratorArn: !Ref GlobalAccelerator
-      ClientAffinity: NONE
+      ClientAffinity: SOURCE_IP
       PortRanges:
         - FromPort: 443
           ToPort: 443
