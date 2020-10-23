@@ -58,7 +58,7 @@ Mappings:
       Parameters:
         Location: s3://app-chemistry/snippets/instance_type_map.snippet.cfn.yaml
 Metadata:
-  Version: 0.7.3
+  Version: 0.8.0
   cfn-lint:
     config:
       ignore_checks:
@@ -71,6 +71,9 @@ Outputs:
   Ec2SecurityGroupId:
     Description: Security Group ID for Guacamole instances
     Value: !Ref Ec2SecurityGroup
+  GlobalAcceleratorDnsName:
+    Description: DNS name for the GlobalAccelerator
+    Value: !Sub ${GlobalAccelerator.DnsName}
   LoadBalancerDns:
     Description: DNS name for the ALB
     Value: !Sub ${ALB.DNSName}
@@ -192,6 +195,12 @@ Parameters:
     Default: https://raw.githubusercontent.com/plus3it/terraform-aws-remote-access/master
     Type: String
     AllowedPattern: ^https://.*
+  Route53HostedZoneId:
+    Description: ID of the Route53 Hosted Zone in which to create the record for `Route53DnsName`
+    Type: String
+  Route53DnsName:
+    Description: Friendly DNS Name for the RDGW service (e.g. rdgw.example.com)
+    Type: String
   ScaleDownDesiredCapacity:
     Default: '1'
     Description: (Optional) Desired number of instances during the Scale Down Scheduled Action; ignored if ScaleDownSchedule is unset
@@ -440,6 +449,38 @@ Resources:
           Value: !Sub ra-guac-ec2-${AWS::StackName}
       VpcId: !Ref VpcId
     Type: AWS::EC2::SecurityGroup
+  GlobalAccelerator:
+    Properties:
+      Enabled: True
+      IpAddressType: IPV4
+      Name: !Ref AWS::StackName
+      Tags:
+        - Key: Name
+          Value: !Ref AWS::StackName
+    Type: AWS::GlobalAccelerator::Accelerator
+  GlobalAcceleratorListener:
+    Properties:
+      AcceleratorArn: !Ref GlobalAccelerator
+      ClientAffinity: NONE
+      PortRanges:
+        - FromPort: 443
+          ToPort: 443
+      Protocol: TCP
+    Type: AWS::GlobalAccelerator::Listener
+  GlobalAcceleratorEndpointGroup:
+    Properties:
+      EndpointConfigurations:
+        - EndpointId: !Ref ALB
+          Weight: 128
+      EndpointGroupRegion: !Ref AWS::Region
+      HealthCheckIntervalSeconds: 30
+      HealthCheckPath: /guacamole
+      HealthCheckPort: 443
+      HealthCheckProtocol: HTTPS
+      ListenerArn: !Ref GlobalAcceleratorListener
+      ThresholdCount: 3
+      TrafficDialPercentage: 100
+    Type: AWS::GlobalAccelerator::EndpointGroup
   LaunchConfig:
     Metadata:
       'AWS::CloudFormation::Init':
@@ -708,6 +749,17 @@ Resources:
       IpProtocol: tcp
       ToPort: 80
     Type: AWS::EC2::SecurityGroupIngress
+  Route53RecordSetGroup:
+    Properties:
+      HostedZoneId: !Ref Route53HostedZoneId
+      RecordSets:
+        - AliasTarget:
+            DNSName: !Sub ${GlobalAccelerator.DnsName}
+            EvaluateTargetHealth: True
+            HostedZoneId: Z2BJ6XQ5FK7U4H
+          Name: !Ref Route53DnsName
+          Type: A
+    Type: AWS::Route53::RecordSetGroup
   ScaleDownScheduledAction:
     Condition: UseScheduledAction
     Properties:
