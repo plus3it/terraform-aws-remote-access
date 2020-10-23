@@ -419,7 +419,7 @@ Resources:
   GlobalAcceleratorListener:
     Properties:
       AcceleratorArn: !Ref GlobalAccelerator
-      ClientAffinity: NONE
+      ClientAffinity: SOURCE_IP
       PortRanges:
         - FromPort: 443
           ToPort: 443
