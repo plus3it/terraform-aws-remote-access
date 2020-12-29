@@ -35,8 +35,3 @@ updates:
   schedule:
     interval: daily
   open-pull-requests-limit: 10
-- package-ecosystem: gomod
-  directory: "/tests"
-  schedule:
-    interval: daily
-  open-pull-requests-limit: 10
