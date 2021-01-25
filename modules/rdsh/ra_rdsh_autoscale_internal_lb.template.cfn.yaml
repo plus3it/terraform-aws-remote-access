@@ -86,7 +86,7 @@ Metadata:
     ParameterLabels:
       ScaleDownDesiredCapacity:
         default: Scale Down Desired Capacity
-  Version: 0.8.1
+  Version: 0.8.2
   cfn-lint:
     config:
       ignore_checks:
