@@ -493,10 +493,6 @@ Resources:
               - !Ref AWS::NoValue
             - make-guac
             - finalize
-          update:
-            - setup
-            - make-guac
-            - finalize
         cw-agent-install:
           commands:
             01-install-cloudwatch-agent:
