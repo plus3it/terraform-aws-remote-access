@@ -80,7 +80,7 @@ Metadata:
           default: Management Configuration
         Parameters:
           - NotificationEmail
-  Version: 0.8.2
+  Version: 0.8.3
   cfn-lint:
     config:
       ignore_checks:
