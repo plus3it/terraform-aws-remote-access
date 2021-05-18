@@ -128,7 +128,7 @@ Parameters:
       - A
       - B
     Default: A
-    Description: A/B toggle that forces a change to a LaunchConfig property, triggering the AutoScale Update Policy
+    Description: A/B toggle that forces a change to a LaunchTemplate property, triggering the AutoScale Update Policy
     Type: String
   GuacBaseDN:
     Default: CN=GuacConfigGroups
@@ -316,7 +316,9 @@ Resources:
       DesiredCapacity: !Ref DesiredCapacity
       HealthCheckGracePeriod: 3600
       HealthCheckType: ELB
-      LaunchConfigurationName: !Ref LaunchConfig
+      LaunchTemplate:
+        LaunchTemplateId: !Ref LaunchTemplate
+        Version: !GetAtt LaunchTemplate.LatestVersionNumber
       MaxSize: !Ref MaxCapacity
       MetricsCollection:
         - Granularity: 1Minute
@@ -481,7 +483,7 @@ Resources:
       ThresholdCount: 3
       TrafficDialPercentage: 100
     Type: AWS::GlobalAccelerator::EndpointGroup
-  LaunchConfig:
+  LaunchTemplate:
     Metadata:
       'AWS::CloudFormation::Init':
         configSets:
@@ -602,8 +604,8 @@ Resources:
               content: !Sub |
                 [cfn-auto-reloader-hook]
                 triggers=post.update
-                path=Resources.LaunchConfig.Metadata.AWS::CloudFormation::Init
-                action=/opt/aws/bin/cfn-init -v -c update --stack ${AWS::StackName} --resource LaunchConfig --region ${AWS::Region}
+                path=Resources.LaunchTemplate.Metadata.AWS::CloudFormation::Init
+                action=/opt/aws/bin/cfn-init -v -c update --stack ${AWS::StackName} --resource LaunchTemplate --region ${AWS::Region}
                 runas=root
               group: root
               mode: '000400'
@@ -622,37 +624,39 @@ Resources:
                   - /etc/cfn/cfn-hup.conf
                   - /etc/cfn/hooks.d/cfn-auto-reloader.conf
     Properties:
-      BlockDeviceMappings:
-        - DeviceName: /dev/xvda
-          Ebs:
-            DeleteOnTermination: true
-            VolumeType: gp2
-      EbsOptimized: !FindInMap [InstanceTypeMap, !Ref InstanceType, SupportsEbsOptimized]
-      IamInstanceProfile: !Ref Ec2IamInstanceProfile
-      ImageId: !If [UseAmiLookup, !Sub '${AmiIdLookup.Id}', !Ref AmiId]
-      InstanceType: !Ref InstanceType
-      KeyName: !Ref KeyPairName
-      SecurityGroups:
-        - !Ref Ec2SecurityGroup
-      UserData:
-        Fn::Base64: !Sub |
-          #!/bin/bash -xe
-          # CFN LaunchConfig Update Toggle: ${ForceUpdateToggle}
+      LaunchTemplateData:
+        BlockDeviceMappings:
+          - DeviceName: /dev/xvda
+            Ebs:
+              DeleteOnTermination: true
+              VolumeType: gp3
+        EbsOptimized: !FindInMap [InstanceTypeMap, !Ref InstanceType, SupportsEbsOptimized]
+        IamInstanceProfile:
+          Name: !Ref Ec2IamInstanceProfile
+        ImageId: !If [UseAmiLookup, !Sub '${AmiIdLookup.Id}', !Ref AmiId]
+        InstanceType: !Ref InstanceType
+        KeyName: !Ref KeyPairName
+        SecurityGroupIds:
+          - !GetAtt Ec2SecurityGroup.GroupId
+        UserData:
+          Fn::Base64: !Sub |
+            #!/bin/bash -xe
+            # CFN LaunchTemplate Update Toggle: ${ForceUpdateToggle}
 
-          # Install ssm agent
-          yum -y install https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/linux_amd64/amazon-ssm-agent.rpm || true
+            # Install ssm agent
+            yum -y install https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/linux_amd64/amazon-ssm-agent.rpm || true
 
-          # Add cfn utils to path
-          hash cfn-signal 2> /dev/null || PATH="${!PATH}:/usr/local/bin:/opt/aws/bin"
+            # Add cfn utils to path
+            hash cfn-signal 2> /dev/null || PATH="${!PATH}:/usr/local/bin:/opt/aws/bin"
 
-          # Execute cfn-init
-          cfn-init -v -c config --stack ${AWS::StackName} --resource LaunchConfig --region ${AWS::Region} || \
-            ( \
-            echo 'ERROR: cfn-init failed! Aborting!' ; \
-            cfn-signal -e 1 --stack ${AWS::StackName} --resource AutoScalingGroup --region ${AWS::Region} ; \
-            exit 1 ; \
-            )
-    Type: AWS::AutoScaling::LaunchConfiguration
+            # Execute cfn-init
+            cfn-init -v -c config --stack ${AWS::StackName} --resource LaunchTemplate --region ${AWS::Region} || \
+              ( \
+              echo 'ERROR: cfn-init failed! Aborting!' ; \
+              cfn-signal -e 1 --stack ${AWS::StackName} --resource AutoScalingGroup --region ${AWS::Region} ; \
+              exit 1 ; \
+              )
+    Type: AWS::EC2::LaunchTemplate
   Listener:
     Properties:
       Certificates:
