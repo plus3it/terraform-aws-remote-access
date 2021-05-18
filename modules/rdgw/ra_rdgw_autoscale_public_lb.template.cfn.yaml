@@ -37,8 +37,8 @@ Mappings:
         Location: s3://app-chemistry/snippets/shell_command_map.snippet.cfn.yaml
   CfnUtilsMap:
     Init:
-      Config: cfn-init.exe -v -c config --resource LaunchConfig
-      Update: cfn-init.exe -v -c update --resource LaunchConfig
+      Config: cfn-init.exe -v -c config --resource LaunchTemplate
+      Update: cfn-init.exe -v -c update --resource LaunchTemplate
     Signal:
       Success: cfn-signal.exe -e 0 --resource AutoScalingGroup
       Failure: cfn-signal.exe -e 1 --resource AutoScalingGroup
@@ -169,7 +169,7 @@ Parameters:
       - A
       - B
     Default: A
-    Description: A/B toggle that forces a change to a LaunchConfig property, triggering the AutoScale Update Policy
+    Description: A/B toggle that forces a change to a LaunchTemplate property, triggering the AutoScale Update Policy
     Type: String
   InstanceType:
     AllowedValues:
@@ -288,7 +288,9 @@ Resources:
       DesiredCapacity: !Ref DesiredCapacity
       HealthCheckGracePeriod: 3600
       HealthCheckType: ELB
-      LaunchConfigurationName: !Ref LaunchConfig
+      LaunchTemplate:
+        LaunchTemplateId: !Ref LaunchTemplate
+        Version: !GetAtt LaunchTemplate.LatestVersionNumber
       MaxSize: !Ref MaxCapacity
       MetricsCollection:
         - Granularity: 1Minute
@@ -439,7 +441,7 @@ Resources:
       ThresholdCount: 3
       TrafficDialPercentage: 100
     Type: AWS::GlobalAccelerator::EndpointGroup
-  LaunchConfig:
+  LaunchTemplate:
     Metadata:
       'AWS::CloudFormation::Init':
         configSets:
@@ -676,7 +678,7 @@ Resources:
                 - |
                   [cfn-auto-reloader-hook]
                   triggers=post.update
-                  path=Resources.LaunchConfig.Metadata.AWS::CloudFormation::Init
+                  path=Resources.LaunchTemplate.Metadata.AWS::CloudFormation::Init
                   action=${InitUpdate}
                 - InitUpdate: !Sub
                     - ${Command} --stack ${AWS::StackName} --region ${AWS::Region}
@@ -702,41 +704,43 @@ Resources:
                     - Command: !FindInMap [CfnUtilsMap, Signal, Failure]
               waitAfterCompletion: forever
     Properties:
-      BlockDeviceMappings:
-        - DeviceName: /dev/sda1
-          Ebs:
-            DeleteOnTermination: true
-            VolumeSize: 50
-            VolumeType: gp2
-      EbsOptimized: !FindInMap [InstanceTypeMap, !Ref InstanceType, SupportsEbsOptimized]
-      IamInstanceProfile: !Ref Ec2IamInstanceProfile
-      ImageId: !If [UseAmiLookup, !Sub '${AmiIdLookup.Id}', AmiId]
-      InstanceType: !Ref InstanceType
-      KeyName: !Ref KeyPairName
-      SecurityGroups:
-        - !Ref Ec2SecurityGroup
-      UserData:
-        Fn::Base64: !Sub
-          - |
-            <script>
-            REM CFN LaunchConfig Update Toggle: ${ForceUpdateToggle}
-            ${InitConfig}
-            if %ERRORLEVEL% equ 0 goto success
+      LaunchTemplateData:
+        BlockDeviceMappings:
+          - DeviceName: /dev/sda1
+            Ebs:
+              DeleteOnTermination: true
+              VolumeSize: 50
+              VolumeType: gp3
+        EbsOptimized: !FindInMap [InstanceTypeMap, !Ref InstanceType, SupportsEbsOptimized]
+        IamInstanceProfile:
+          Name: !Ref Ec2IamInstanceProfile
+        ImageId: !If [UseAmiLookup, !Sub '${AmiIdLookup.Id}', AmiId]
+        InstanceType: !Ref InstanceType
+        KeyName: !Ref KeyPairName
+        SecurityGroupIds:
+          - !GetAtt Ec2SecurityGroup.GroupId
+        UserData:
+          Fn::Base64: !Sub
+            - |
+              <script>
+              REM CFN LaunchTemplate Update Toggle: ${ForceUpdateToggle}
+              ${InitConfig}
+              if %ERRORLEVEL% equ 0 goto success
 
-            :error
-            ${SignalFailure}
-            echo "ERROR: cfn-init failed! Aborting!"
-            exit /b 1
+              :error
+              ${SignalFailure}
+              echo "ERROR: cfn-init failed! Aborting!"
+              exit /b 1
 
-            :success
-            </script>
-          - InitConfig: !Sub
-              - ${Command} --stack ${AWS::StackName} --region ${AWS::Region}
-              - Command: !FindInMap [CfnUtilsMap, Init, Config]
-            SignalFailure: !Sub
-              - ${Command} --stack ${AWS::StackName} --region ${AWS::Region}
-              - Command: !FindInMap [CfnUtilsMap, Signal, Failure]
-    Type: AWS::AutoScaling::LaunchConfiguration
+              :success
+              </script>
+            - InitConfig: !Sub
+                - ${Command} --stack ${AWS::StackName} --region ${AWS::Region}
+                - Command: !FindInMap [CfnUtilsMap, Init, Config]
+              SignalFailure: !Sub
+                - ${Command} --stack ${AWS::StackName} --region ${AWS::Region}
+                - Command: !FindInMap [CfnUtilsMap, Signal, Failure]
+    Type: AWS::EC2::LaunchTemplate
   LaunchConfigLogGroup:
     Condition: InstallCloudWatchAgent
     Properties:
