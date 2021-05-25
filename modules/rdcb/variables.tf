@@ -68,6 +68,12 @@ variable "DomainNetbiosName" {
   type        = string
 }
 
+variable "DomainOuDn" {
+  default     = "DC=example,DC=com"
+  description = "DN of the Organizational Unit (OU) for the RDCB computer object (e.g. OU=test,DC=example,DC=com)"
+  type        = string
+}
+
 variable "Ec2SubnetAz" {
   default     = "us-east-1a"
   description = "Availability zone of the private subnet"

@@ -62,6 +62,7 @@ Metadata:
           - DomainDirectoryId
           - DomainDnsName
           - DomainNetbiosName
+          - DomainOuDn
           - DomainAccessUserGroup
           - SsmKeyId
           - SsmRdcbCredential
@@ -151,6 +152,10 @@ Parameters:
     Description: NetBIOS name of the domain (e.g. EXAMPLE)
     MaxLength: '15'
     MinLength: '1'
+    Type: String
+  DomainOuDn:
+    Default: DC=example,DC=com
+    Description: DN of the Organizational Unit (OU) for the RDCB computer object (e.g. OU=test,DC=example,DC=com)
     Type: String
   Ec2SubnetAz:
     Description: Availability zone of the private subnet
@@ -867,7 +872,17 @@ Resources:
               - local_ExtraSecurityGroupIds: !Join [',', !Ref ExtraSecurityGroupIds]
           SubnetId: !Ref Ec2SubnetId
       SsmAssociations:
-        - DocumentName: !Sub awsconfig_Domain_${DomainDirectoryId}_${DomainDnsName}
+        - AssociationParameters:
+            - Key: directoryId
+              Value:
+                - !Ref DomainDirectoryId
+            - Key: directoryName
+              Value:
+                - !Ref DomainDnsName
+            - Key: directoryOU
+              Value:
+                - !Ref DomainOuDn
+          DocumentName: AWS-JoinDirectoryServiceDomain
       Tags:
         - Key: Name
           Value: !Ref AWS::StackName

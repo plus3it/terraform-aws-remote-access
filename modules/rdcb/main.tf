@@ -126,6 +126,7 @@ locals {
     "\"DomainDirectoryId=${var.DomainDirectoryId}\"",
     "\"DomainDnsName=${var.DomainDnsName}\"",
     "\"DomainNetbiosName=${var.DomainNetbiosName}\"",
+    "\"DomainOuDn=${var.DomainOuDn}\"",
     "\"Ec2SubnetAz=${var.Ec2SubnetAz}\"",
     "\"Ec2SubnetId=${var.Ec2SubnetId}\"",
     "\"ExtraSecurityGroupIds=${aws_security_group.rdcb-sg1.id},${join(",", var.ExtraSecurityGroupIds)}\"",

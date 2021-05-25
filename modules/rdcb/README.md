@@ -33,6 +33,7 @@
 | DomainDirectoryId | ID of the AWS Directory Service domain, e.g. d-xxxxxxxxxx | `string` | `"d-xxxxxxxxxx"` | no |
 | DomainDnsName | Fully qualified domain name (FQDN) of the forest root domain, e.g. example.com | `string` | `"ad.example.com"` | no |
 | DomainNetbiosName | NetBIOS name of the domain (e.g. EXAMPLE) | `string` | `"example"` | no |
+| DomainOuDn | DN of the Organizational Unit (OU) for the RDCB computer object (e.g. OU=test,DC=example,DC=com) | `string` | `"DC=example,DC=com"` | no |
 | Ec2SubnetAz | Availability zone of the private subnet | `string` | `"us-east-1a"` | no |
 | Ec2SubnetId | Private Subnet ID where the file server will run | `string` | `"subnet-xxxxxxxx"` | no |
 | ExtraSecurityGroupIds | List of extra Security Group IDs to attach to the RDCB EC2 instance | `list(string)` | `[]` | no |
