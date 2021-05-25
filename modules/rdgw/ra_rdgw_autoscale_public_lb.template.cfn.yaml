@@ -740,6 +740,12 @@ Resources:
               SignalFailure: !Sub
                 - ${Command} --stack ${AWS::StackName} --region ${AWS::Region}
                 - Command: !FindInMap [CfnUtilsMap, Signal, Failure]
+      LaunchTemplateName: !Ref AWS::StackName
+      TagSpecifications:
+        - ResourceType: launch-template
+          Tags:
+            - Key: Name
+              Value: !Ref AWS::StackName
     Type: AWS::EC2::LaunchTemplate
   LaunchConfigLogGroup:
     Condition: InstallCloudWatchAgent
