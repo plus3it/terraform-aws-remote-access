@@ -272,7 +272,7 @@ Resources:
           Value: !Ref AWS::StackName
         - Key: Consistency Group
           Value: BackupGroup01
-      VolumeType: gp2
+      VolumeType: gp3
     Type: AWS::EC2::Volume
   Ec2IamInstanceProfile:
     Properties:
@@ -853,7 +853,7 @@ Resources:
           Ebs:
             DeleteOnTermination: true
             VolumeSize: 50
-            VolumeType: gp2
+            VolumeType: gp3
       DisableApiTermination: !Ref TerminationProtection
       EbsOptimized: !FindInMap [InstanceTypeMap, !Ref InstanceType, SupportsEbsOptimized]
       IamInstanceProfile: !Ref Ec2IamInstanceProfile
