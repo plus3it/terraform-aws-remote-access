@@ -295,6 +295,14 @@ $GitParams = "/SILENT /NOCANCEL /NORESTART /SAVEINF=${Env:Temp}\git_params.txt"
 $null = Start-Process -FilePath ${GitInstaller} -ArgumentList ${GitParams} -PassThru -Wait
 Write-Verbose "Installed git for windows"
 
+# Install Session Manager
+$SessionManagerPluginUrl = "https://s3.amazonaws.com/session-manager-downloads/plugin/latest/windows/SessionManagerPluginSetup.exe"
+$SessionManagerInstaller = "${Env:Temp}\$(($SessionManagerPluginUrl -split('/'))[-1])"
+Invoke-RetryCommand -Command Download-File -ArgList @{Source=$SessionManagerPluginUrl; Destination=$SessionManagerInstaller}
+$SessionManagerParams = "/INSTALL /PASSIVE /QUIET /NORESTART /LOG=${Env:Temp}\session_manager.log"
+$null = Start-Process -FilePath ${SessionManagerInstaller} -ArgumentList ${SessionManagerParams} -PassThru -Wait
+Write-Verbose "Installed Session Manager for AWS"
+
 # Update git system config, aws credential helper needs to be listed first
 $GitCmd = "C:\Program Files\Git\cmd\git.exe"
 & "$GitCmd" config --system --unset credential.helper
