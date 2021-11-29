@@ -629,7 +629,7 @@ Resources:
               waitAfterCompletion: '0'
         install-rdsh:
           commands:
-            20-configure-admins:
+            10-configure-admins:
               command: !Sub
                 - >-
                   ${PowershellCommand} -Command "
@@ -640,6 +640,21 @@ Resources:
                   [Microsoft.TerminalServices.PSEngine.UserGroupHelper]::AddMember('Administrators', '${DomainSvcAccount}');
                   } }
                   -Verbose -ErrorAction Stop" || ${SignalFailure}
+                - PowershellCommand: !FindInMap [ShellCommandMap, powershell, command]
+                  SignalFailure: !Sub
+                    - (${Command} --stack ${AWS::StackName} --region ${AWS::Region} && exit /b 1)
+                    - Command: !FindInMap [CfnUtilsMap, Signal, Failure]
+              waitAfterCompletion: '0'
+            20-configure-logon-as-service:
+              command: !Sub
+                - >-
+                  ${PowershellCommand} -Command "
+                  $ErrorActionPreference = \"Stop\";
+                  $VerbosePreference = \"Continue\";
+                  Install-Module Carbon -Confirm:$false -Force;
+                  Import-Module Carbon;
+                  Grant-CPrivilege -Identity '${DomainSvcAccount}' -Privilege SeServiceLogonRight
+                  " || ${SignalFailure}
                 - PowershellCommand: !FindInMap [ShellCommandMap, powershell, command]
                   SignalFailure: !Sub
                     - (${Command} --stack ${AWS::StackName} --region ${AWS::Region} && exit /b 1)
