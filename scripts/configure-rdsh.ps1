@@ -287,13 +287,48 @@ $SignOffShortcut.IconLocation = "${env:SYSTEMROOT}\System32\imageres.dll,81"
 $SignOffShortcut.Save()
 Write-Verbose "Created the logoff shortcut"
 
-# Install Git for Windows
-$GitUrl = "https://github.com/git-for-windows/git/releases/download/v2.22.0.windows.1/Git-2.22.0-64-bit.exe"
-$GitInstaller = "${Env:Temp}\$(($GitUrl -split('/'))[-1])"
-Invoke-RetryCommand -Command Download-File -ArgList @{Source=$GitUrl; Destination=$GitInstaller}
-$GitParams = "/SILENT /NOCANCEL /NORESTART /SAVEINF=${Env:Temp}\git_params.txt"
-$null = Start-Process -FilePath ${GitInstaller} -ArgumentList ${GitParams} -PassThru -Wait
-Write-Verbose "Installed git for windows"
+# Install Scoop
+Invoke-Expression (New-Object System.Net.WebClient).DownloadString('https://get.scoop.sh')
+scoop install aria2
+scoop config aria2-warning-enabled false
+scoop install --global 7zip git  # Needed to manage buckets and update scoop
+scoop bucket add extras
+scoop bucket add java
+scoop update
+
+# Packages to install with Scoop
+$ScoopPackages = @(
+    "atom",
+    "aws",
+    "firefox",
+    "googlechrome",
+    "mobaxterm",
+    "nodejs-lts",
+    "notepadplusplus",
+    "openjdk",
+    "putty",
+    "python",
+    "shellcheck",
+    "slack",
+    "vscode"
+)
+
+# Deps needed for python. Need to silence output from lessmsi since it has non-ASCII characters
+scoop install --global lessmsi 6> $null
+scoop install --global dark
+
+# Install packages with Scoop
+scoop install --global $ScoopPackages
+
+# Test scoop packages
+Invoke-Expression "scoop list" -InformationVariable ScoopList
+foreach ($Package in $ScoopPackages + @("git", "7zip")) {
+    if (-not "$ScoopList".Contains($Package)) {
+        Write-Error "Failed to install Scoop package: $Package"
+    } else {
+        Write-Verbose "Found Scoop package: $Package"
+    }
+}
 
 # Install Session Manager
 $SessionManagerPluginUrl = "https://s3.amazonaws.com/session-manager-downloads/plugin/latest/windows/SessionManagerPluginSetup.exe"
@@ -304,52 +339,12 @@ $null = Start-Process -FilePath ${SessionManagerInstaller} -ArgumentList ${Sessi
 Write-Verbose "Installed Session Manager for AWS"
 
 # Update git system config, aws credential helper needs to be listed first
-$GitCmd = "C:\Program Files\Git\cmd\git.exe"
+$GitCmd = "git.exe"
 & "$GitCmd" config --system --unset credential.helper
 & "$GitCmd" config --system --add 'credential.https://git-codecommit.us-east-1.amazonaws.com.helper' '!aws codecommit credential-helper $@'
 & "$GitCmd" config --system --add 'credential.https://git-codecommit.us-east-1.amazonaws.com.usehttppath' 'true'
 & "$GitCmd" config --system --add 'credential.helper' 'manager'
 Write-Verbose "Configured git for windows"
-
-# Install Python 3.6
-$Py36Url = "https://www.python.org/ftp/python/3.6.8/python-3.6.8-amd64.exe"
-$Py36Installer = "${Env:Temp}\$(($Py36Url -split('/'))[-1])"
-Invoke-RetryCommand -Command Download-File -ArgList @{Source=$Py36Url; Destination=$Py36Installer}
-$Py36Params = "/log ${env:temp}\python.log /quiet InstallAllUsers=1 PrependPath=1"
-$null = Start-Process -FilePath ${Py36Installer} -ArgumentList ${Py36Params} -PassThru -Wait
-Write-Verbose "Installed python 3.6"
-
-# Install Haskell Platform (with cabal)
-$HaskellVersion = "8.0.2"
-$HaskellUrl = "https://downloads.haskell.org/~platform/${HaskellVersion}/HaskellPlatform-${HaskellVersion}-minimal-x86_64-setup.exe"
-$HaskellInstaller = "${Env:Temp}\$(($HaskellUrl -split('/'))[-1])"
-Invoke-RetryCommand -Command Download-File -ArgList @{Source=$HaskellUrl; Destination=$HaskellInstaller}
-$HaskellParams = "/S"
-$null = Start-Process -FilePath ${HaskellInstaller} -ArgumentList ${HaskellParams} -PassThru -Wait
-Write-Verbose "Installed haskell platform"
-
-# Update paths, prep for cabal-based installs
-$HaskellPaths = @(
-    "C:\Program Files\Haskell\bin"
-    "C:\Program Files\Haskell Platform\${HaskellVersion}\lib\extralibs\bin"
-    "C:\Program Files\Haskell Platform\${HaskellVersion}\bin"
-    "C:\Program Files\Haskell Platform\${HaskellVersion}\mingw\bin"
-)
-$Env:Path += ";$($HaskellPaths -join ';')"
-
-# Update cabal
-$CabalExe = "cabal.exe"
-$CabalUpdateParams = "update"
-$null = Start-Process -FilePath ${CabalExe} -ArgumentList ${CabalUpdateParams} -PassThru -Wait -NoNewWindow
-Write-Verbose "Updated cabal"
-
-# Install cabal packages
-$CabalPackages = @(
-    "shellcheck"
-)
-$CabalInstallParams = "install --global ${CabalPackages}"
-$null = Start-Process -FilePath ${CabalExe} -ArgumentList ${CabalInstallParams} -PassThru -Wait -NoNewWindow
-Write-Verbose "Installed shellcheck"
 
 # Install PsGet, a PowerShell Module
 (new-object Net.WebClient).DownloadString("https://raw.githubusercontent.com/psget/psget/master/GetPsGet.ps1") | iex
