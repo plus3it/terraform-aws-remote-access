@@ -306,6 +306,7 @@ $ScoopPackages = @(
     "nodejs-lts",
     "notepadplusplus",
     "openjdk",
+    "openssh",
     "putty",
     "python",
     "shellcheck",
