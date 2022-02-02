@@ -14,6 +14,15 @@ Conditions:
     - !Equals
       - !Ref BrandText
       - ''
+  UseDockerAuthentication: !And
+    - !Not
+      - !Equals
+        - !Ref DockerPasswordSsm
+        - ''
+    - !Not
+      - !Equals
+        - !Ref DockerUsernameSsm
+        - ''
   UseScalingPolicy: !Or
     - !Equals
       - !Ref ScaleUpSchedule
@@ -89,7 +98,7 @@ Parameters:
     Description: (Optional) AMI ID -- will supersede Lambda-based AMI lookup using AmiNameSearchString
     Type: String
   AmiFilters:
-    Default: '[{"Name": "name", "Values": ["amzn-ami-hvm-2018.03*.2018*-x86_64-gp2"]}]'
+    Default: '[{"Name": "name", "Values": ["amzn-ami-hvm-2018.03.*-x86_64-gp2"]}]'
     Description: Json string containing list of maps of ami search filters. refer to the boto3 docs for a complete filter list (https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/ec2.html#EC2.Client.describe_images)
     Type: String
   AmiLookupLambdaArn:
@@ -122,6 +131,14 @@ Parameters:
   DockerGuacdImage:
     Default: guacamole/guacd:1.2.0
     Description: Identifier for GUACD docker image. Used by docker pull to retrieve the guacd image. Defaults to guacamole/guacamole:1.2.0
+    Type: String
+  DockerPasswordSsm:
+    Default: ''
+    Description: AWS Systems Manager Parameter Store location for Docker password
+    Type: String
+  DockerUsernameSsm:
+    Default: ''
+    Description: AWS Systems Manager Parameter Store location for Docker username
     Type: String
   ForceUpdateToggle:
     AllowedValues:
@@ -390,6 +407,7 @@ Resources:
               - ssm:DescribeAssociation
               - ssm:GetDeployablePatchSnapshotForInstance
               - ssm:GetDocument
+              - ssm:GetParameters
               - ssm:ListAssociations
               - ssm:ListInstanceAssociations
               - ssm:PutInventory
@@ -580,11 +598,15 @@ Resources:
                   ${local_UseURL2}
                   ${local_UseURLText2}
                   ${local_UseBrandText}
+                  ${local_UseDockerUsername}
+                  ${local_UseDockerPassword}
                 - local_UseURL1: !If [UseURL1, !Sub ' -L "${URL1}"', '']
                   local_UseURLText1: !If [UseURLText1, !Sub ' -T "${URLText1}"', '']
                   local_UseURL2: !If [UseURL2, !Sub ' -l "${URL2}"', '']
                   local_UseURLText2: !If [UseURLText2, !Sub ' -t "${URLText2}"', '']
                   local_UseBrandText: !If [UseBrandText, !Sub ' -B "${BrandText}"', '']
+                  local_UseDockerUsername: !If [UseDockerAuthentication, !Sub ' -S "${DockerUsernameSsm}"', '']
+                  local_UseDockerPassword: !If [UseDockerAuthentication, !Sub ' -s "${DockerPasswordSsm}"', '']
         setup:
           commands:
             10-yum-update:
@@ -642,6 +664,9 @@ Resources:
           Fn::Base64: !Sub |
             #!/bin/bash -xe
             # CFN LaunchTemplate Update Toggle: ${ForceUpdateToggle}
+
+            # Export AWS ENVs
+            export AWS_DEFAULT_REGION=${AWS::Region}
 
             # Install ssm agent
             yum -y install https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/linux_amd64/amazon-ssm-agent.rpm || true
