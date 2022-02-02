@@ -133,12 +133,12 @@ Parameters:
     MinLength: '1'
     Type: String
   DockerGuacamoleImage:
-    Default: guacamole/guacamole:1.2.0
-    Description: Identifier for GUACAMOLE docker image. Used by docker pull to retrieve the guacamole image. Defaults to guacamole/guacamole:1.2.0
+    Default: guacamole/guacamole:1.4.0
+    Description: Identifier for GUACAMOLE docker image. Used by docker pull to retrieve the guacamole image. Defaults to guacamole/guacamole:1.4.0
     Type: String
   DockerGuacdImage:
-    Default: guacamole/guacd:1.2.0
-    Description: Identifier for GUACD docker image. Used by docker pull to retrieve the guacd image. Defaults to guacamole/guacamole:1.2.0
+    Default: guacamole/guacd:1.4.0
+    Description: Identifier for GUACD docker image. Used by docker pull to retrieve the guacd image. Defaults to guacamole/guacamole:1.4.0
     Type: String
   DockerPasswordSsm:
     Default: ''
