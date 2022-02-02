@@ -3,6 +3,10 @@ Conditions:
   UseACM: !Equals
     - !Ref SslCertificateService
     - ACM
+  UseAlternateALB: !Not
+    - !Equals
+      - !Ref AlternateALB
+      - ''
   UseAmiLookup: !Equals
     - !Ref AmiId
     - ''
@@ -107,6 +111,10 @@ Parameters:
   AmiOwners:
     Default: '["amazon"]'
     Description: Json string containing a list of owners to filter the ami search against
+    Type: String
+  AlternateALB:
+    Default: ''
+    Description: Name of alternative ALB for Guac to use as the internet-facing endpoint
     Type: String
   BrandText:
     Default: ''
@@ -270,10 +278,10 @@ Parameters:
 Resources:
   ALB:
     Properties:
-      Scheme: internet-facing
+      Scheme: !If [UseAlternateALB, 'internal', 'internet-facing']
       SecurityGroups:
         - !Ref AlbSecurityGroup
-      Subnets: !Ref PublicSubnetIds
+      Subnets: !If [UseAlternateALB, !Ref PrivateSubnetIds, !Ref PublicSubnetIds]
       Tags:
         - Key: Name
           Value: !Ref AWS::StackName
