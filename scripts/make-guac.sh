@@ -132,6 +132,8 @@ usage()
   -B  Text for branding of the homepage. Default is "Apache Guacamole".
   -V  Docker image to use for Guacamole. Default is "guacamole/guacamole"
   -v  Docker image to use for guacd. Default is "guacamole/guacd"
+  -S  AWS Systems Manager path to Docker username
+  -s  AWS Systems Manager path to Docker password
 EOT
 }  # ----------  end of function usage  ----------
 
@@ -223,9 +225,11 @@ URLTEXT_2=
 BRANDTEXT="Apache Guacamole"
 DOCKER_GUACAMOLE_IMAGE=guacamole/guacamole
 DOCKER_GUACD_IMAGE=guacamole/guacd
+SSM_DOCKER_USERNAME=
+SSM_DOCKER_PASSWORD=
 
 # Parse command-line parameters
-while getopts :hH:D:U:R:A:C:P:L:T:l:t:B:V:v: opt
+while getopts :hH:D:U:R:A:C:P:L:T:l:t:B:V:v:S:s: opt
 do
     case "${opt}" in
         h)
@@ -273,6 +277,12 @@ do
             ;;
         v)
             DOCKER_GUACD_IMAGE="${OPTARG}"
+            ;;
+        S)
+            SSM_DOCKER_USERNAME="${OPTARG}"
+            ;;
+        s)
+            SSM_DOCKER_PASSWORD="${OPTARG}"
             ;;
         \?)
             usage
@@ -328,7 +338,6 @@ GUAC_EXT=/tmp/extensions
 GUAC_HOME=/root/guac-home
 GUAC_DRIVE=/var/tmp/guacamole
 
-
 # Setup build directories
 log "Initializing ${__SCRIPTNAME} build directories"
 rm -rf "${GUAC_EXT}" "${GUAC_HOME}" "${GUAC_DRIVE}" | log
@@ -345,6 +354,20 @@ service docker start | log
 # enable docker service
 log "Enabling docker services"
 chkconfig docker on | log
+
+# configure docker authentication if AWS SSM parameters provided
+if [[ -n "${SSM_DOCKER_USERNAME:-}" ]] && [[ -n "${SSM_DOCKER_PASSWORD:-}" ]]
+then
+  DOCKER_USERNAME=$(aws ssm get-parameters --name "$SSM_DOCKER_USERNAME" --with-decryption --query 'Parameters[0].Value' --output text)
+  DOCKER_PASSWORD=$(aws ssm get-parameters --name "$SSM_DOCKER_PASSWORD" --with-decryption --query 'Parameters[0].Value' --output text)
+  if [[ "$DOCKER_USERNAME" == "None" ]] || [[ "$DOCKER_PASSWORD" == "None" ]]
+  then
+    log "Docker username or password is invalid, skipping Docker authentication"
+  else
+    log "Valid Docker username and password parameters provided, configuring Docker authentication"
+    echo "${DOCKER_PASSWORD}" | docker login --username "${DOCKER_USERNAME}" --password-stdin
+  fi
+fi
 
 # fetch the guacd image
 log "Fetching the guacd image, ${DOCKER_GUACD_IMAGE}"
