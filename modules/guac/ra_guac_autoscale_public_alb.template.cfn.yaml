@@ -23,6 +23,18 @@ Conditions:
       - !Equals
         - !Ref DockerUsernameSsm
         - ''
+  UseGlobalAccelerator: !Equals
+      - !Ref CreateGlobalAccelerator
+      - 'true'
+  UseRoute53DnsRecord: !And
+    - !Not
+      - !Equals
+        - !Ref Route53DnsName
+        - ''
+    - !Not
+      - !Equals
+        - !Ref Route53HostedZoneId
+        - ''
   UseScalingPolicy: !Or
     - !Equals
       - !Ref ScaleUpSchedule
@@ -108,6 +120,19 @@ Parameters:
     Default: '["amazon"]'
     Description: Json string containing a list of owners to filter the ami search against
     Type: String
+  AlbScheme:
+    AllowedValues:
+      - internal
+      - internet-facing
+    Default: internal
+    Description: Setting to configure the load balancer to be publicly routable from the internet or only privately within the VPC
+    Type: String
+  AlbSubnetIds:
+    Description: List of Subnet IDs where the Guacamole load-balancer will run
+    Type: List<AWS::EC2::Subnet::Id>
+  AsgSubnetIds:
+    Description: List of Subnet IDs where the Guacamole instances will run
+    Type: List<AWS::EC2::Subnet::Id>
   BrandText:
     Default: ''
     Description: Text/Label to display branding for the Guac Login page
@@ -119,18 +144,25 @@ Parameters:
       (Optional) S3 URL to CloudWatch Agent installer. Example:
       s3://amazoncloudwatch-agent/amazon_linux/amd64/latest/amazon-cloudwatch-agent.rpm
     Type: String
+  CreateGlobalAccelerator:
+    AllowedValues:
+      - false
+      - true
+    Default: true
+    Description: Decision on whether to create Global Accelerator resources for the Guac
+    Type: String
   DesiredCapacity:
     Default: '1'
     Description: The number of instances the autoscale group will spin up initially
     MinLength: '1'
     Type: String
   DockerGuacamoleImage:
-    Default: guacamole/guacamole:1.2.0
-    Description: Identifier for GUACAMOLE docker image. Used by docker pull to retrieve the guacamole image. Defaults to guacamole/guacamole:1.2.0
+    Default: guacamole/guacamole:1.4.0
+    Description: Identifier for GUACAMOLE docker image. Used by docker pull to retrieve the guacamole image. Defaults to guacamole/guacamole:1.4.0
     Type: String
   DockerGuacdImage:
-    Default: guacamole/guacd:1.2.0
-    Description: Identifier for GUACD docker image. Used by docker pull to retrieve the guacd image. Defaults to guacamole/guacamole:1.2.0
+    Default: guacamole/guacd:1.4.0
+    Description: Identifier for GUACD docker image. Used by docker pull to retrieve the guacd image. Defaults to guacamole/guacamole:1.4.0
     Type: String
   DockerPasswordSsm:
     Default: ''
@@ -201,22 +233,18 @@ Parameters:
     Description: The minimum number of instances for the autoscale group
     MinLength: '1'
     Type: String
-  PrivateSubnetIds:
-    Description: List of Private Subnet IDs where the Guacamole instances will run
-    Type: List<AWS::EC2::Subnet::Id>
-  PublicSubnetIds:
-    Description: A list of Public subnet IDs to attach to the Application Load Balancer
-    Type: List<AWS::EC2::Subnet::Id>
   RemoteAccessScriptsUrl:
     Description: URL prefix where the remote access scripts can be retrieved
     Default: https://raw.githubusercontent.com/plus3it/terraform-aws-remote-access/master
     Type: String
     AllowedPattern: ^https://.*
   Route53HostedZoneId:
-    Description: ID of the Route53 Hosted Zone in which to create the record for `Route53DnsName`
+    Default: ''
+    Description: (Optional) ID of the Route53 Hosted Zone. Required if the desire is to create a DNS record for Guac and `Route53DnsName` is also provided
     Type: String
   Route53DnsName:
-    Description: Friendly DNS Name for the RDGW service (e.g. rdgw.example.com)
+    Default: ''
+    Description: (Optional) Friendly DNS Name for the RDGW service (e.g. rdgw.example.com).  Required if the desire is to create a DNS record for Guac
     Type: String
   ScaleDownDesiredCapacity:
     Default: '1'
@@ -270,10 +298,10 @@ Parameters:
 Resources:
   ALB:
     Properties:
-      Scheme: internet-facing
+      Scheme: !Ref AlbScheme
       SecurityGroups:
         - !Ref AlbSecurityGroup
-      Subnets: !Ref PublicSubnetIds
+      Subnets: !Ref AlbSubnetIds
       Tags:
         - Key: Name
           Value: !Ref AWS::StackName
@@ -346,7 +374,7 @@ Resources:
           Value: !Ref AWS::StackName
       TargetGroupARNs:
         - !Ref ALBTargetGroup
-      VPCZoneIdentifier: !Ref PrivateSubnetIds
+      VPCZoneIdentifier: !Ref AsgSubnetIds
     Type: AWS::AutoScaling::AutoScalingGroup
     UpdatePolicy:
       AutoScalingReplacingUpdate:
@@ -470,6 +498,7 @@ Resources:
       VpcId: !Ref VpcId
     Type: AWS::EC2::SecurityGroup
   GlobalAccelerator:
+    Condition: UseGlobalAccelerator
     Properties:
       Enabled: True
       IpAddressType: IPV4
@@ -479,6 +508,7 @@ Resources:
           Value: !Ref AWS::StackName
     Type: AWS::GlobalAccelerator::Accelerator
   GlobalAcceleratorListener:
+    Condition: UseGlobalAccelerator
     Properties:
       AcceleratorArn: !Ref GlobalAccelerator
       ClientAffinity: SOURCE_IP
@@ -488,6 +518,7 @@ Resources:
       Protocol: TCP
     Type: AWS::GlobalAccelerator::Listener
   GlobalAcceleratorEndpointGroup:
+    Condition: UseGlobalAccelerator
     Properties:
       EndpointConfigurations:
         - EndpointId: !Ref ALB
@@ -754,6 +785,7 @@ Resources:
       ToPort: 80
     Type: AWS::EC2::SecurityGroupIngress
   Route53RecordSetGroup:
+    Condition: UseRoute53DnsRecord
     Properties:
       HostedZoneId: !Ref Route53HostedZoneId
       RecordSets:
