@@ -444,4 +444,7 @@ docker run --name guacamole \
     -e LDAP_USERNAME_ATTRIBUTE="${LDAP_USER_ATTRIBUTE}" \
     -e LDAP_CONFIG_BASE_DN="${LDAP_CONFIG_BASE},${LDAP_DOMAIN_DN}" \
     -e LDAP_GROUP_BASE_DN="${LDAP_GROUP_BASE},${LDAP_DOMAIN_DN}" \
+    -e SAML_IDP_METADATA_URL=https://portal.sso.us-east-1.amazonaws.com/saml/metadata/ODY4OTkxNzM5NTEwX2lucy01MzAxMmUxZmNiNDk2Zjcw \
+    -e SAML_CALLBACK_URL=https://guac.test.dicelab.net/guacamole \
+    -e SAML_DEBUG=True \
     -d -p 8080:8080 "${DOCKER_GUACAMOLE_IMAGE}" | log
