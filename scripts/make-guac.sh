@@ -134,6 +134,16 @@ usage()
   -v  Docker image to use for guacd. Default is "guacamole/guacd"
   -S  AWS Systems Manager path to Docker username
   -s  AWS Systems Manager path to Docker password
+  -E  Guacamole MySQL remote database server hostname or IP address
+  -e  Guacamole MySQL remote database server port
+  -F  Guacamole MySQL remote database SSL mode
+  -f  Guacamole MySQL remote database name
+  -G  Guacamole MySQL remote database user name
+  -g  Guacamole MySQL remote database user password
+  -I  SAML entity ID
+  -i  SAML Identity Provider metadata URL
+  -J  SAML callback URL
+ 
 EOT
 }  # ----------  end of function usage  ----------
 
@@ -214,10 +224,24 @@ write_brand()
 LDAP_HOSTNAME=
 LDAP_DOMAIN_DN=
 LDAP_USER_BASE="CN=Users"
+LDAP_USER_BASE_DN=
 LDAP_USER_ATTRIBUTE="cn"
 LDAP_CONFIG_BASE="CN=GuacConfigGroups"
+LDAP_CONFIG_BASE_DN=
 LDAP_GROUP_BASE="CN=Users"
+LDAP_GROUP_BASE_DN=
 LDAP_PORT="389"
+MYSQL_HOSTNAME=
+MYSQL_PORT="3306"
+MYSQL_DATABASE=
+MYSQL_USER=
+MYSQL_PASSWORD=
+MYSQL_SSL_MODE="disabled"
+MYSQL_AUTO_CREATE_ACCOUNTS=true
+SAML_CALLBACK_URL=
+SAML_ENTITY_ID=
+SAML_IDP_METADATA_URL=
+SAML_DEBUG=True
 URL_1=
 URLTEXT_1=
 URL_2=
@@ -229,7 +253,7 @@ SSM_DOCKER_USERNAME=
 SSM_DOCKER_PASSWORD=
 
 # Parse command-line parameters
-while getopts :hH:D:U:R:A:C:P:L:T:l:t:B:V:v:S:s: opt
+while getopts :hH:D:U:R:A:C:P:L:T:l:t:B:V:v:S:s:E:e:F:f:G:g:I:i:J: opt
 do
     case "${opt}" in
         h)
@@ -256,6 +280,33 @@ do
             ;;
         P)
             LDAP_PORT="${OPTARG}"
+            ;;
+        E)
+            MYSQL_HOSTNAME="${OPTARG}"
+            ;;
+        e)
+            MYSQL_PORT="${OPTARG}"
+            ;;
+        F)
+            MYSQL_SSL_MODE="${OPTARG}"
+            ;;
+        f)
+            MYSQL_DATABASE="${OPTARG}"
+            ;;
+        G)
+            MYSQL_USER="${OPTARG}"
+            ;;
+        g)
+            MYSQL_PASSWORD="${OPTARG}"
+            ;;
+        I)
+            SAML_ENTITY_ID="${OPTARG}"
+            ;;
+        i)
+            SAML_IDP_METADATA_URL="${OPTARG}"
+            ;;
+        j)
+            SAML_CALLBACK_URL="${OPTARG}"
             ;;
         L)
             URL_1="${OPTARG}"
@@ -295,11 +346,19 @@ shift $((OPTIND-1))
 
 
 # Validate parameters
+if [[ -z "${LDAP_HOSTNAME}" ]] && [[ -z ${SAML_IDP_METADATA_URL} ]] && [[ -z ${MYSQL_HOSTNAME} ]]
+then
+    die "No authentication option provided.  Please configure at least one option."
+elif [[ -n "${LDAP_HOSTNAME}" ]] && [[ -n ${SAML_IDP_METADATA_URL} ]]
+then
+    die "Both LDAP and SAML authentication specified. Please configure only one or the other."
+fi
+
 if [ -n "${LDAP_HOSTNAME}" ]
 then
     if [ -z "${LDAP_DOMAIN_DN}" ]
     then
-        die "LDAP Hostname was provided (-H), but the LDAP Domain DN was not (-D)"
+         die "LDAP Hostname was provided (-H), but the LDAP Domain DN was not (-D)"
     fi
 elif [ -n "${LDAP_DOMAIN_DN}" ]
 then
@@ -332,6 +391,7 @@ fi
 
 
 # Set internal variables
+CATALINA_CONF_DIR=/usr/local/tomcat/conf
 DOCKER_GUACD=guacd
 DOCKER_GUACAMOLE=guacamole
 GUAC_EXT=/tmp/extensions
@@ -341,11 +401,13 @@ GUAC_DRIVE=/var/tmp/guacamole
 # Setup build directories
 log "Initializing ${__SCRIPTNAME} build directories"
 rm -rf "${GUAC_EXT}" "${GUAC_HOME}" "${GUAC_DRIVE}" | log
-mkdir -p "${GUAC_EXT}" "${GUAC_HOME}/extensions" "${GUAC_DRIVE}" | log
+mkdir -p "${CATALINA_CONF_DIR}" "${GUAC_EXT}" "${GUAC_HOME}/extensions" "${GUAC_DRIVE}" | log
 
 # Install dependencies
 log "Installing docker"
 retry 2 yum -y install docker | log
+log "Installing xmlstarlet"
+retry 2 yum -y install xmlstarlet | log
 
 # start docker
 log "Starting docker"
@@ -422,6 +484,47 @@ then
     docker rm "${DOCKER_GUACAMOLE}" | log
 fi
 
+# Initialize arrays for Docker run parameters
+params_begin=(
+    --restart unless-stopped
+    --link guacd:guacd
+    -v "${GUAC_HOME}":/guac-home
+    -e GUACAMOLE_HOME=/guac-home
+)
+
+params_saml=()
+
+params_mysql=()
+
+params_end=(
+    -d -p 8080:8080 "${DOCKER_GUACAMOLE_IMAGE}"
+)
+
+[[ -n $CATALINA_CONF ]] && params_begin+=(-v "${CATALINA_CONF}":"${CATALINA_CONF}")
+[[ -n $EXTENSION_PRIORITY ]] && params_begin+=(-e EXTENSION_PRIORITY=${EXTENSION_PRIORITY})
+
+#[[ -n $LDAP_HOSTNAME ]] && params+=(-e LDAP_HOSTNAME=${LDAP_HOSTNAME})
+#[[ -n $LDAP_USER_BASE ]] && [[ -n $LDAP_DOMAIN_DN ]] && params+=(-e LDAP_USER_BASE_DN="${LDAP_USER_BASE},${LDAP_DOMAIN_DN}")
+#[[ -n $LDAP_USER_ATTRIBUTE ]] && params+=(-e LDAP_USER_ATTRIBUTE=${LDAP_USER_ATTRIBUTE})
+#[[ -n $LDAP_CONFIG_BASE ]] && [[ -n $LDAP_DOMAIN_DN ]] && params+=(-e LDAP_CONFIG_BASE_DN="${LDAP_CONFIG_BASE},${LDAP_DOMAIN_DN}")
+#[[ -n $LDAP_GROUP_BASE ]] && [[ -n $LDAP_DOMAIN_DN ]] && params+=(-e LDAP_GROUP_BASE_DN="${LDAP_GROUP_BASE},${LDAP_DOMAIN_DN}")
+#[[ -n $LDAP_PORT ]] && params+=(-e LDAP_PORT=${LDAP_PORT})
+
+# Build SAML parameters if present
+[[ -n $SAML_IDP_METADATA_URL ]] && params_saml+=(-e SAML_IDP_METADATA_URL=${SAML_IDP_METADATA_URL})
+[[ -n $SAML_ENTITY_ID ]] && params_saml+=(-e SAML_ENTITY_ID=${SAML_ENTITY_ID})
+[[ -n $SAML_CALLBACK_URL ]] && params_saml+=(-e SAML_CALLBACK_URL=${SAML_CALLBACK_URL})
+[[ -n $SAML_GROUP_ATTRIBUTE ]] && params_saml+=(-e SAML_GROUP_ATTRIBUTE=${SAML_GROUP_ATTRIBUTE})
+[[ -n $SAML_DEBUG ]] && params_saml+=(-e SAML_DEBUG=${SAML_DEBUG})
+
+# Build MYSQL parameters if present
+[[ -n $MYSQL_HOSTNAME ]] && params_mysql+=(-e MYSQL_HOSTNAME=${MYSQL_HOSTNAME})
+[[ -n $MYSQL_PORT ]] && params_mysql+=(-e MYSQL_PORT=${MYSQL_PORT})
+[[ -n $MYSQL_DATABASE ]] && params_mysql+=(-e MYSQL_DATABASE=${MYSQL_DATABASE})
+[[ -n $MYSQL_USER ]] && params_mysql+=(-e MYSQL_USER=${MYSQL_USER})
+[[ -n $MYSQL_PASSWORD ]] && params_mysql+=(-e MYSQL_PASSWORD=${MYSQL_PASSWORD})
+[[ -n $MYSQL_SSL_MODE ]] && params_mysql+=(-e MYSQL_SSL_MODE=${MYSQL_SSL_MODE})
+[[ -n $MYSQL_AUTO_CREATE_ACCOUNTS ]] && params+=(-e MYSQL_AUTO_CREATE_ACCOUNTS=${MYSQL_AUTO_CREATE_ACCOUNTS})
 
 # Starting guacd container
 log "Starting guacd container, ${DOCKER_GUACD_IMAGE}"
@@ -430,21 +533,44 @@ docker run --name guacd \
     -v "${GUAC_DRIVE}":"${GUAC_DRIVE}" \
     -d "${DOCKER_GUACD_IMAGE}" | log
 
-
 # Starting guacamole container
+
 log "Starting guacamole container, ${DOCKER_GUACAMOLE_IMAGE}"
-docker run --name guacamole \
-    --restart unless-stopped \
-    --link guacd:guacd \
-    -v "${GUAC_HOME}":/guac-home \
-    -e GUACAMOLE_HOME=/guac-home \
-    -e LDAP_HOSTNAME="${LDAP_HOSTNAME}" \
-    -e LDAP_PORT="${LDAP_PORT}" \
-    -e LDAP_USER_BASE_DN="${LDAP_USER_BASE},${LDAP_DOMAIN_DN}" \
-    -e LDAP_USERNAME_ATTRIBUTE="${LDAP_USER_ATTRIBUTE}" \
-    -e LDAP_CONFIG_BASE_DN="${LDAP_CONFIG_BASE},${LDAP_DOMAIN_DN}" \
-    -e LDAP_GROUP_BASE_DN="${LDAP_GROUP_BASE},${LDAP_DOMAIN_DN}" \
-    -e SAML_IDP_METADATA_URL=https://portal.sso.us-east-1.amazonaws.com/saml/metadata/ODY4OTkxNzM5NTEwX2lucy01MzAxMmUxZmNiNDk2Zjcw \
-    -e SAML_CALLBACK_URL=https://guac.test.dicelab.net/guacamole \
-    -e SAML_DEBUG=True \
-    -d -p 8080:8080 "${DOCKER_GUACAMOLE_IMAGE}" | log
+
+if [[ -n $LDAP_HOSTNAME ]]
+then
+    log "Using LDAP authentication, ${LDAP_HOSTNAME}"
+    docker run --name guacamole \
+        "${params_begin[@]}" \
+        -e LDAP_HOSTNAME="${LDAP_HOSTNAME}" \
+        -e LDAP_PORT="${LDAP_PORT}" \
+        -e LDAP_USER_BASE_DN="${LDAP_USER_BASE},${LDAP_DOMAIN_DN}" \
+        -e LDAP_USERNAME_ATTRIBUTE="${LDAP_USER_ATTRIBUTE}" \
+        -e LDAP_CONFIG_BASE_DN="${LDAP_CONFIG_BASE},${LDAP_DOMAIN_DN}" \
+        -e LDAP_GROUP_BASE_DN="${LDAP_GROUP_BASE},${LDAP_DOMAIN_DN}" \
+        "${params_mysql[@]}" \
+        "${params_end[@]}" | log
+elif [[ -n $SAML_IDP_METADATA_URL ]]
+then
+    log "Using SAML authentication, ${SAML_IDP_METADATA_URL}"
+
+    # Initial docker run to grab SAML extension jar
+    docker run --name guacamole \
+        "${params_begin[@]}" \
+        "${params_saml[@]}" \
+        "${params_mysql[2]}" \
+        "${params_end[@]}" | log
+
+    # Copy SAML jar to ${GUAC_HOME}/extensions/ folder
+    docker cp guacamole:/opt/guacamole/saml/guacamole-auth-sso-saml-${DOCKER_GUACAMOLE_IMAGE##*:}.jar ${GUAC_HOME}/extensions/.
+
+    # Remove initial docker run
+    docker rm -f guacamole
+
+    # Final docker run for Guacamole
+    docker run --name guacamole \
+        "${params_begin[@]}" \
+        "${params_saml[@]}" \
+        "${params_mysql[2]}" \
+        "${params_end[@]}" | log
+fi
