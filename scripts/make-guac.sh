@@ -134,16 +134,20 @@ usage()
   -v  Docker image to use for guacd. Default is "guacamole/guacd"
   -S  AWS Systems Manager path to Docker username
   -s  AWS Systems Manager path to Docker password
-  -E  Guacamole MySQL remote database server hostname or IP address
-  -e  Guacamole MySQL remote database server port
-  -F  Guacamole MySQL remote database SSL mode
-  -f  Guacamole MySQL remote database name
-  -G  Guacamole MySQL remote database user name
-  -g  Guacamole MySQL remote database user password
+  -E  MySQL remote database server hostname or IP address
+  -e  MySQL remote database server port
+  -F  MySQL remote database SSL mode
+  -f  MySQL remote database name
+  -G  MySQL remote database user name
+  -g  MySQL remote database user password
+  -K  Decision on whether to automatically create a new database user when
+      using one of the other authentication extension options.
+  -k  Comma-delimited list of extension namespaces designating the order each is loaded
   -I  SAML entity ID
   -i  SAML Identity Provider metadata URL
   -J  SAML callback URL
- 
+  -j  SAML groups attribute
+
 EOT
 }  # ----------  end of function usage  ----------
 
@@ -224,12 +228,9 @@ write_brand()
 LDAP_HOSTNAME=
 LDAP_DOMAIN_DN=
 LDAP_USER_BASE="CN=Users"
-LDAP_USER_BASE_DN=
 LDAP_USER_ATTRIBUTE="cn"
 LDAP_CONFIG_BASE="CN=GuacConfigGroups"
-LDAP_CONFIG_BASE_DN=
 LDAP_GROUP_BASE="CN=Users"
-LDAP_GROUP_BASE_DN=
 LDAP_PORT="389"
 MYSQL_HOSTNAME=
 MYSQL_PORT="3306"
@@ -253,7 +254,7 @@ SSM_DOCKER_USERNAME=
 SSM_DOCKER_PASSWORD=
 
 # Parse command-line parameters
-while getopts :hH:D:U:R:A:C:P:L:T:l:t:B:V:v:S:s:E:e:F:f:G:g:I:i:J: opt
+while getopts :hH:D:U:R:A:C:P:L:T:l:t:B:V:v:S:s:E:e:F:f:G:g:I:i:J:j:K:k: opt
 do
     case "${opt}" in
         h)
@@ -299,14 +300,23 @@ do
         g)
             MYSQL_PASSWORD="${OPTARG}"
             ;;
+        K)
+            MYSQL_AUTO_CREATE_ACCOUNTS="${OPTARG}"
+            ;;
+        k)
+            EXTENSION_PRIORITY="${OPTARG}"
+            ;;
         I)
             SAML_ENTITY_ID="${OPTARG}"
             ;;
         i)
             SAML_IDP_METADATA_URL="${OPTARG}"
             ;;
-        j)
+        J)
             SAML_CALLBACK_URL="${OPTARG}"
+            ;;
+        j)
+            SAML_GROUP_ATTRIBUTE="${OPTARG}"
             ;;
         L)
             URL_1="${OPTARG}"
@@ -358,7 +368,7 @@ if [ -n "${LDAP_HOSTNAME}" ]
 then
     if [ -z "${LDAP_DOMAIN_DN}" ]
     then
-         die "LDAP Hostname was provided (-H), but the LDAP Domain DN was not (-D)"
+        die "LDAP Hostname was provided (-H), but the LDAP Domain DN was not (-D)"
     fi
 elif [ -n "${LDAP_DOMAIN_DN}" ]
 then
@@ -391,7 +401,7 @@ fi
 
 
 # Set internal variables
-CATALINA_CONF_DIR=/usr/local/tomcat/conf
+CATALINA_CONF=/usr/local/tomcat/conf/server.xml
 DOCKER_GUACD=guacd
 DOCKER_GUACAMOLE=guacamole
 GUAC_EXT=/tmp/extensions
@@ -401,7 +411,7 @@ GUAC_DRIVE=/var/tmp/guacamole
 # Setup build directories
 log "Initializing ${__SCRIPTNAME} build directories"
 rm -rf "${GUAC_EXT}" "${GUAC_HOME}" "${GUAC_DRIVE}" | log
-mkdir -p "${CATALINA_CONF_DIR}" "${GUAC_EXT}" "${GUAC_HOME}/extensions" "${GUAC_DRIVE}" | log
+mkdir -p "${GUAC_EXT}" "${GUAC_HOME}/extensions" "${GUAC_DRIVE}" | log
 
 # Install dependencies
 log "Installing docker"
@@ -500,31 +510,24 @@ params_end=(
     -d -p 8080:8080 "${DOCKER_GUACAMOLE_IMAGE}"
 )
 
-[[ -n $CATALINA_CONF ]] && params_begin+=(-v "${CATALINA_CONF}":"${CATALINA_CONF}")
-[[ -n $EXTENSION_PRIORITY ]] && params_begin+=(-e EXTENSION_PRIORITY=${EXTENSION_PRIORITY})
-
-#[[ -n $LDAP_HOSTNAME ]] && params+=(-e LDAP_HOSTNAME=${LDAP_HOSTNAME})
-#[[ -n $LDAP_USER_BASE ]] && [[ -n $LDAP_DOMAIN_DN ]] && params+=(-e LDAP_USER_BASE_DN="${LDAP_USER_BASE},${LDAP_DOMAIN_DN}")
-#[[ -n $LDAP_USER_ATTRIBUTE ]] && params+=(-e LDAP_USER_ATTRIBUTE=${LDAP_USER_ATTRIBUTE})
-#[[ -n $LDAP_CONFIG_BASE ]] && [[ -n $LDAP_DOMAIN_DN ]] && params+=(-e LDAP_CONFIG_BASE_DN="${LDAP_CONFIG_BASE},${LDAP_DOMAIN_DN}")
-#[[ -n $LDAP_GROUP_BASE ]] && [[ -n $LDAP_DOMAIN_DN ]] && params+=(-e LDAP_GROUP_BASE_DN="${LDAP_GROUP_BASE},${LDAP_DOMAIN_DN}")
-#[[ -n $LDAP_PORT ]] && params+=(-e LDAP_PORT=${LDAP_PORT})
+# Set extension priority if present
+[[ -z $EXTENSION_PRIORITY ]] || params_begin+=(-e EXTENSION_PRIORITY="${EXTENSION_PRIORITY}")
 
 # Build SAML parameters if present
-[[ -n $SAML_IDP_METADATA_URL ]] && params_saml+=(-e SAML_IDP_METADATA_URL=${SAML_IDP_METADATA_URL})
-[[ -n $SAML_ENTITY_ID ]] && params_saml+=(-e SAML_ENTITY_ID=${SAML_ENTITY_ID})
-[[ -n $SAML_CALLBACK_URL ]] && params_saml+=(-e SAML_CALLBACK_URL=${SAML_CALLBACK_URL})
-[[ -n $SAML_GROUP_ATTRIBUTE ]] && params_saml+=(-e SAML_GROUP_ATTRIBUTE=${SAML_GROUP_ATTRIBUTE})
-[[ -n $SAML_DEBUG ]] && params_saml+=(-e SAML_DEBUG=${SAML_DEBUG})
+[[ -n $SAML_IDP_METADATA_URL ]] && params_saml+=(-e SAML_IDP_METADATA_URL="${SAML_IDP_METADATA_URL}")
+[[ -n $SAML_ENTITY_ID ]] && params_saml+=(-e SAML_ENTITY_ID="${SAML_ENTITY_ID}")
+[[ -n $SAML_CALLBACK_URL ]] && params_saml+=(-e SAML_CALLBACK_URL="${SAML_CALLBACK_URL}")
+[[ -n $SAML_GROUP_ATTRIBUTE ]] && params_saml+=(-e SAML_GROUP_ATTRIBUTE="${SAML_GROUP_ATTRIBUTE}")
+[[ -n $SAML_DEBUG ]] && params_saml+=(-e SAML_DEBUG="${SAML_DEBUG}")
 
 # Build MYSQL parameters if present
-[[ -n $MYSQL_HOSTNAME ]] && params_mysql+=(-e MYSQL_HOSTNAME=${MYSQL_HOSTNAME})
-[[ -n $MYSQL_PORT ]] && params_mysql+=(-e MYSQL_PORT=${MYSQL_PORT})
-[[ -n $MYSQL_DATABASE ]] && params_mysql+=(-e MYSQL_DATABASE=${MYSQL_DATABASE})
-[[ -n $MYSQL_USER ]] && params_mysql+=(-e MYSQL_USER=${MYSQL_USER})
-[[ -n $MYSQL_PASSWORD ]] && params_mysql+=(-e MYSQL_PASSWORD=${MYSQL_PASSWORD})
-[[ -n $MYSQL_SSL_MODE ]] && params_mysql+=(-e MYSQL_SSL_MODE=${MYSQL_SSL_MODE})
-[[ -n $MYSQL_AUTO_CREATE_ACCOUNTS ]] && params+=(-e MYSQL_AUTO_CREATE_ACCOUNTS=${MYSQL_AUTO_CREATE_ACCOUNTS})
+[[ -n $MYSQL_HOSTNAME ]] && params_mysql+=(-e MYSQL_HOSTNAME="${MYSQL_HOSTNAME}")
+[[ -n $MYSQL_PORT ]] && params_mysql+=(-e MYSQL_PORT="${MYSQL_PORT}")
+[[ -n $MYSQL_DATABASE ]] && params_mysql+=(-e MYSQL_DATABASE="${MYSQL_DATABASE}")
+[[ -n $MYSQL_USER ]] && params_mysql+=(-e MYSQL_USER="${MYSQL_USER}")
+[[ -n $MYSQL_PASSWORD ]] && params_mysql+=(-e MYSQL_PASSWORD="${MYSQL_PASSWORD}")
+[[ -n $MYSQL_SSL_MODE ]] && params_mysql+=(-e MYSQL_SSL_MODE="${MYSQL_SSL_MODE}")
+[[ -n $MYSQL_AUTO_CREATE_ACCOUNTS ]] && params+=(-e MYSQL_AUTO_CREATE_ACCOUNTS="${MYSQL_AUTO_CREATE_ACCOUNTS}")
 
 # Starting guacd container
 log "Starting guacd container, ${DOCKER_GUACD_IMAGE}"
@@ -554,23 +557,35 @@ elif [[ -n $SAML_IDP_METADATA_URL ]]
 then
     log "Using SAML authentication, ${SAML_IDP_METADATA_URL}"
 
+    # Add CATALINA_CONF with x-forwarded-proto configuration docker container
+    log "Linking updated server.xml file with x-forward-proto configuration"
+    params_begin+=(-v "/etc/cfn/files/tomcat/conf/server.xml":"${CATALINA_CONF}")
+
+    # Configure guacamole.properties to use environment variables
+    log "Creating guacamole.properties file and enable environment properties usage"
+    touch "${GUAC_HOME}/guacamole.properties"
+    echo "enable-environment-properties: true" > "${GUAC_HOME}/guacamole.properties"
+
     # Initial docker run to grab SAML extension jar
+    log "Starting intial Guacamole docker to copy SAML extension jar"
     docker run --name guacamole \
         "${params_begin[@]}" \
         "${params_saml[@]}" \
-        "${params_mysql[2]}" \
+        "${params_mysql[@]}" \
         "${params_end[@]}" | log
 
     # Copy SAML jar to ${GUAC_HOME}/extensions/ folder
-    docker cp guacamole:/opt/guacamole/saml/guacamole-auth-sso-saml-${DOCKER_GUACAMOLE_IMAGE##*:}.jar ${GUAC_HOME}/extensions/.
+    log "Copying SAML jar file to extensions folder"
+    SAML_JAR_FILENAME=$(sudo docker exec -u root guacamole find /opt/guacamole/saml/ -name "*.jar" | awk -F/ '{print $NF}')
+    docker cp guacamole:/opt/guacamole/saml/"${SAML_JAR_FILENAME}" "${GUAC_HOME}"/extensions/"${SAML_JAR_FILENAME}"
 
     # Remove initial docker run
     docker rm -f guacamole
 
-    # Final docker run for Guacamole
+    log "Launching Guacamole container with all configurations"
     docker run --name guacamole \
         "${params_begin[@]}" \
         "${params_saml[@]}" \
-        "${params_mysql[2]}" \
+        "${params_mysql[@]}" \
         "${params_end[@]}" | log
 fi
