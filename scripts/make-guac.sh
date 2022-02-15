@@ -568,15 +568,13 @@ then
 
     # Initial docker run to grab SAML extension jar
     log "Starting intial Guacamole docker to copy SAML extension jar"
-    docker run --name guacamole \
-        "${params_begin[@]}" \
-        "${params_saml[@]}" \
-        "${params_mysql[@]}" \
-        "${params_end[@]}" | log
+    docker run --rm -dit --name guacamole \
+        --entrypoint bash \
+        "${DOCKER_GUACAMOLE_IMAGE}" | log
 
     # Copy SAML jar to ${GUAC_HOME}/extensions/ folder
     log "Copying SAML jar file to extensions folder"
-    SAML_JAR_FILENAME=$(sudo docker exec -u root guacamole find /opt/guacamole/saml/ -name "*.jar" | awk -F/ '{print $NF}')
+    SAML_JAR_FILENAME=$(docker exec -u root guacamole find /opt/guacamole/saml/ -name "*.jar" | awk -F/ '{print $NF}')
     docker cp guacamole:/opt/guacamole/saml/"${SAML_JAR_FILENAME}" "${GUAC_HOME}"/extensions/"${SAML_JAR_FILENAME}"
 
     # Remove initial docker run
