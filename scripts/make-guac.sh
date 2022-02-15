@@ -514,20 +514,20 @@ params_end=(
 [[ -z $EXTENSION_PRIORITY ]] || params_begin+=(-e EXTENSION_PRIORITY="${EXTENSION_PRIORITY}")
 
 # Build SAML parameters if present
-[[ -n $SAML_IDP_METADATA_URL ]] && params_saml+=(-e SAML_IDP_METADATA_URL="${SAML_IDP_METADATA_URL}")
-[[ -n $SAML_ENTITY_ID ]] && params_saml+=(-e SAML_ENTITY_ID="${SAML_ENTITY_ID}")
-[[ -n $SAML_CALLBACK_URL ]] && params_saml+=(-e SAML_CALLBACK_URL="${SAML_CALLBACK_URL}")
-[[ -n $SAML_GROUP_ATTRIBUTE ]] && params_saml+=(-e SAML_GROUP_ATTRIBUTE="${SAML_GROUP_ATTRIBUTE}")
-[[ -n $SAML_DEBUG ]] && params_saml+=(-e SAML_DEBUG="${SAML_DEBUG}")
+[[ -z $SAML_IDP_METADATA_URL ]] || params_saml+=(-e SAML_IDP_METADATA_URL="${SAML_IDP_METADATA_URL}")
+[[ -z $SAML_ENTITY_ID ]] || params_saml+=(-e SAML_ENTITY_ID="${SAML_ENTITY_ID}")
+[[ -z $SAML_CALLBACK_URL ]] || params_saml+=(-e SAML_CALLBACK_URL="${SAML_CALLBACK_URL}")
+[[ -z $SAML_GROUP_ATTRIBUTE ]] || params_saml+=(-e SAML_GROUP_ATTRIBUTE="${SAML_GROUP_ATTRIBUTE}")
+[[ -z $SAML_DEBUG ]] || params_saml+=(-e SAML_DEBUG="${SAML_DEBUG}")
 
 # Build MYSQL parameters if present
-[[ -n $MYSQL_HOSTNAME ]] && params_mysql+=(-e MYSQL_HOSTNAME="${MYSQL_HOSTNAME}")
-[[ -n $MYSQL_PORT ]] && params_mysql+=(-e MYSQL_PORT="${MYSQL_PORT}")
-[[ -n $MYSQL_DATABASE ]] && params_mysql+=(-e MYSQL_DATABASE="${MYSQL_DATABASE}")
-[[ -n $MYSQL_USER ]] && params_mysql+=(-e MYSQL_USER="${MYSQL_USER}")
-[[ -n $MYSQL_PASSWORD ]] && params_mysql+=(-e MYSQL_PASSWORD="${MYSQL_PASSWORD}")
-[[ -n $MYSQL_SSL_MODE ]] && params_mysql+=(-e MYSQL_SSL_MODE="${MYSQL_SSL_MODE}")
-[[ -n $MYSQL_AUTO_CREATE_ACCOUNTS ]] && params+=(-e MYSQL_AUTO_CREATE_ACCOUNTS="${MYSQL_AUTO_CREATE_ACCOUNTS}")
+[[ -z $MYSQL_HOSTNAME ]] || params_mysql+=(-e MYSQL_HOSTNAME="${MYSQL_HOSTNAME}")
+[[ -z $MYSQL_PORT ]] || params_mysql+=(-e MYSQL_PORT="${MYSQL_PORT}")
+[[ -z $MYSQL_DATABASE ]] || params_mysql+=(-e MYSQL_DATABASE="${MYSQL_DATABASE}")
+[[ -z $MYSQL_USER ]] || params_mysql+=(-e MYSQL_USER="${MYSQL_USER}")
+[[ -z $MYSQL_PASSWORD ]] || params_mysql+=(-e MYSQL_PASSWORD="${MYSQL_PASSWORD}")
+[[ -z $MYSQL_SSL_MODE ]] || params_mysql+=(-e MYSQL_SSL_MODE="${MYSQL_SSL_MODE}")
+[[ -z $MYSQL_AUTO_CREATE_ACCOUNTS ]] || params+=(-e MYSQL_AUTO_CREATE_ACCOUNTS="${MYSQL_AUTO_CREATE_ACCOUNTS}")
 
 # Starting guacd container
 log "Starting guacd container, ${DOCKER_GUACD_IMAGE}"
