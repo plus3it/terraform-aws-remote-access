@@ -527,7 +527,7 @@ params_end=(
 [[ -z $MYSQL_USER ]] || params_mysql+=(-e MYSQL_USER="${MYSQL_USER}")
 [[ -z $MYSQL_PASSWORD ]] || params_mysql+=(-e MYSQL_PASSWORD="${MYSQL_PASSWORD}")
 [[ -z $MYSQL_SSL_MODE ]] || params_mysql+=(-e MYSQL_SSL_MODE="${MYSQL_SSL_MODE}")
-[[ -z $MYSQL_AUTO_CREATE_ACCOUNTS ]] || params+=(-e MYSQL_AUTO_CREATE_ACCOUNTS="${MYSQL_AUTO_CREATE_ACCOUNTS}")
+[[ -z $MYSQL_AUTO_CREATE_ACCOUNTS ]] || params_mysql+=(-e MYSQL_AUTO_CREATE_ACCOUNTS="${MYSQL_AUTO_CREATE_ACCOUNTS}")
 
 # Starting guacd container
 log "Starting guacd container, ${DOCKER_GUACD_IMAGE}"
