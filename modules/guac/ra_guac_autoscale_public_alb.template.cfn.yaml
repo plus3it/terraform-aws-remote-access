@@ -23,6 +23,10 @@ Conditions:
       - !Equals
         - !Ref DockerUsernameSsm
         - ''
+  UseExtensionPriority: !Not
+    - !Equals
+      - !Ref ExtensionPriority
+      - ''
   UseGlobalAccelerator: !Equals
       - !Ref CreateGlobalAccelerator
       - 'true'
@@ -34,6 +38,22 @@ Conditions:
     - !Not
       - !Equals
         - !Ref Route53HostedZoneId
+        - ''
+  UseLdap: !Not
+    - !And
+      - !Equals
+        - !Ref LdapDN
+        - ''
+      - !Equals
+        - !Ref LdapServer
+        - ''
+  UseSaml: !Not
+    - !And
+      - !Equals
+        - !Ref SamlCallbackUrl
+        - ''
+      - !Equals
+        - !Ref SamlIdpMetadataUrl
         - ''
   UseScalingPolicy: !Or
     - !Equals
@@ -172,6 +192,10 @@ Parameters:
     Default: ''
     Description: AWS Systems Manager Parameter Store location for Docker username
     Type: String
+  ExtensionPriority:
+    Default: ''
+    Description: (Optional) Comma-separated list of namespaces designating the order in which each extension is loaded. If not provided, extensions are loaded according to filename
+    Type: String
   ForceUpdateToggle:
     AllowedValues:
       - A
@@ -214,14 +238,12 @@ Parameters:
     Description: Public/private key pairs allow you to securely connect to your instance after it launches
     Type: AWS::EC2::KeyPair::KeyName
   LdapDN:
-    Default: DC=ad,DC=example,DC=com
+    Default: ''
     Description: Distinguished Name (DN) of the LDAP directory
-    MinLength: '1'
     Type: String
   LdapServer:
-    Default: ad.example.com
+    Default: ''
     Description: Name of LDAP server Guacamole will authenticate against
-    MinLength: '1'
     Type: String
   MaxCapacity:
     Default: '2'
@@ -232,6 +254,37 @@ Parameters:
     Default: '0'
     Description: The minimum number of instances for the autoscale group
     MinLength: '1'
+    Type: String
+  MySqlAutoCreateAccounts:
+    AllowedValues:
+      - false
+      - true
+    Default: true
+    Description: Decision on whether to automatically create local accounts when users log using alternate authentication methods
+    Type: String
+  MySqlDatabaseName:
+    Default: ''
+    Description: Name of the database Guacamole will use to store application data
+    Type: String
+  MySqlHostName:
+    Default: ''
+    Description: FQDN or IP address of remote MySQL database server hosting the Guacamole database
+    Type: String
+  MySqlPassword:
+    Default: ''
+    Description: Password for the Guacamole MySQL database user
+    Type: String
+  MySqlPort:
+    Default: '3306'
+    Description: Port used by the MySQL database server
+    Type: String
+  MySqlSslMode:
+    Default: 'disabled'
+    Description: SSL mode Guacamole will use when when communicating with the database host
+    Type: String
+  MySqlUserName:
+    Default: ''
+    Description: Username with permissions to access the Guacamole database
     Type: String
   RemoteAccessScriptsUrl:
     Description: URL prefix where the remote access scripts can be retrieved
@@ -245,6 +298,22 @@ Parameters:
   Route53DnsName:
     Default: ''
     Description: (Optional) Friendly DNS Name for the RDGW service (e.g. rdgw.example.com).  Required if the desire is to create a DNS record for Guac
+    Type: String
+  SamlCallbackUrl:
+    Default: ''
+    Description:  URL SAML identity provider will use after a successful authentication to respond to Guacamole
+    Type: String
+  SamlEntityId:
+    Default: ''
+    Description:  Entity ID of the Guacamole SAML client. Required if either SamlIdpMetadataUrl is not provided or ID is not in metadata file
+    Type: String
+  SamlGroupAttribute:
+    Default: ''
+    Description: Name of the attribute provided by the SAML identity provider with group information of user
+    Type: String
+  SamlIdpMetadataUrl:
+    Default: ''
+    Description: URL of XML metadata file with information on how to authenticate with the SAML identity provider
     Type: String
   ScaleDownDesiredCapacity:
     Default: '1'
@@ -619,23 +688,50 @@ Resources:
               command: !Sub
                 - >-
                   /etc/cfn/scripts/make-guac.sh
-                  -H ${LdapServer}
-                  -D ${LdapDN}
                   -V ${DockerGuacamoleImage}
                   -v ${DockerGuacdImage}
-                  -C ${GuacBaseDN}
+                  ${local_UseLdapGuacBaseDN}
+                  ${local_UseLdapDN}
+                  ${local_UseLdapServer}
+                  ${local_UseMySqlAutoCreateAccounts}
+                  ${local_UseMySqlDatabaseName}
+                  ${local_UseMySqlHostName}
+                  ${local_UseMySqlPassword}
+                  ${local_UseMySqlPort}
+                  ${local_UseMySqlSslMode}
+                  ${local_UseMySqlUserName}
+                  ${local_UseSamlCallbackUrl}
+                  ${local_UseSamlEntityId}
+                  ${local_UseSamlGroupAttribute}
+                  ${local_UseSamlIdpMetadataUrl}
                   ${local_UseURL1}
                   ${local_UseURLText1}
                   ${local_UseURL2}
                   ${local_UseURLText2}
                   ${local_UseBrandText}
+                  ${local_UseExtensionPriority}
                   ${local_UseDockerUsername}
                   ${local_UseDockerPassword}
-                - local_UseURL1: !If [UseURL1, !Sub ' -L "${URL1}"', '']
+                - local_UseLdapGuacBaseDN: !If [UseLdap, !Sub '-C "${GuacBaseDN}"', '']
+                  local_UseLdapDN: !If [UseLdap, !Sub '-D "${LdapDN}"', '']
+                  local_UseLdapServer: !If [UseLdap, !Sub '-H "${LdapServer}"', '']
+                  local_UseMySqlAutoCreateAccounts: !If [UseSaml, !Sub '-K "${MySqlAutoCreateAccounts}"' , '']
+                  local_UseMySqlDatabaseName: !If [UseSaml, !Sub '-f "${MySqlDatabaseName}"', '']
+                  local_UseMySqlHostName: !If [UseSaml, !Sub '-E "${MySqlHostName}"', '']
+                  local_UseMySqlPassword: !If [UseSaml, !Sub '-g "${MySqlPassword}"', '']
+                  local_UseMySqlPort: !If [UseSaml, !Sub '-e "${MySqlPort}"', '']
+                  local_UseMySqlSslMode: !If [UseSaml, !Sub '-F "${MySqlSslMode}"', '']
+                  local_UseMySqlUserName: !If [UseSaml, !Sub '-G "${MySqlUserName}"', '']
+                  local_UseSamlCallbackUrl: !If [UseSaml, !Sub '-J "${SamlCallbackUrl}"', '']
+                  local_UseSamlEntityId: !If [UseSaml, !Sub '-I "${SamlEntityId}"', '']
+                  local_UseSamlGroupAttribute: !If [UseSaml, !Sub '-j "${SamlGroupAttribute}"', '']
+                  local_UseSamlIdpMetadataUrl: !If [UseSaml, !Sub '-i "${SamlIdpMetadataUrl}"', '']
+                  local_UseURL1: !If [UseURL1, !Sub ' -L "${URL1}"', '']
                   local_UseURLText1: !If [UseURLText1, !Sub ' -T "${URLText1}"', '']
                   local_UseURL2: !If [UseURL2, !Sub ' -l "${URL2}"', '']
                   local_UseURLText2: !If [UseURLText2, !Sub ' -t "${URLText2}"', '']
                   local_UseBrandText: !If [UseBrandText, !Sub ' -B "${BrandText}"', '']
+                  local_UseExtensionPriority: !If [UseExtensionPriority, !Sub '-k "${ExtensionPriority}"', '']
                   local_UseDockerUsername: !If [UseDockerAuthentication, !Sub ' -S "${DockerUsernameSsm}"', '']
                   local_UseDockerPassword: !If [UseDockerAuthentication, !Sub ' -s "${DockerPasswordSsm}"', '']
         setup:
@@ -668,6 +764,11 @@ Resources:
               mode: '000700'
               owner: root
               source: !Sub ${RemoteAccessScriptsUrl}/scripts/make-guac.sh
+            /etc/cfn/files/tomcat/conf/server.xml:
+              group: root
+              mode: '000744'
+              owner: root
+              source: !Sub ${RemoteAccessScriptsUrl}/scripts/files/server.xml
           services:
             sysvinit:
               cfn-hup:
