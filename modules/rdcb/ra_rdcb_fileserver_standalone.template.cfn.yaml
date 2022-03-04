@@ -311,6 +311,7 @@ Resources:
           - Action:
               - ec2:CreateSnapshot
               - ec2:DeleteSnapshot
+              - ec2:DescribeTags
               - ec2:DescribeSnapshots
               - ec2:DescribeVolumes
             Effect: Allow
@@ -340,9 +341,15 @@ Resources:
       Dimensions:
         - Name: InstanceId
           Value: !Ref RdCbFileServerInstance
+        - Name: InstanceType
+          Value: !Ref InstanceType
+        - Name: instance
+          Value: "C:"
+        - Name: objectname
+          Value: LogicalDisk
       EvaluationPeriods: 5
-      MetricName: LogicalDiskPercentFreeSpace_C
-      Namespace: AWS/EC2
+      MetricName: LogicalDisk % Free Space
+      Namespace: CWAgent
       Period: 60
       Statistic: Average
       Threshold: 20
@@ -356,9 +363,15 @@ Resources:
       Dimensions:
         - Name: InstanceId
           Value: !Ref RdCbFileServerInstance
+        - Name: InstanceType
+          Value: !Ref InstanceType
+        - Name: instance
+          Value: "D:"
+        - Name: objectname
+          Value: LogicalDisk
       EvaluationPeriods: 5
-      MetricName: LogicalDiskPercentFreeSpace_D
-      Namespace: AWS/EC2
+      MetricName: LogicalDisk % Free Space
+      Namespace: CWAgent
       Period: 60
       Statistic: Average
       Threshold: 20
@@ -372,9 +385,15 @@ Resources:
       Dimensions:
         - Name: InstanceId
           Value: !Ref RdCbFileServerInstance
+        - Name: InstanceType
+          Value: !Ref InstanceType
+        - Name: instance
+          Value: "C:"
+        - Name: objectname
+          Value: LogicalDisk
       EvaluationPeriods: 5
-      MetricName: LogicalDiskPercentFreeSpace_C
-      Namespace: AWS/EC2
+      MetricName: LogicalDisk % Free Space
+      Namespace: CWAgent
       Period: 60
       Statistic: Average
       Threshold: 40
@@ -388,9 +407,15 @@ Resources:
       Dimensions:
         - Name: InstanceId
           Value: !Ref RdCbFileServerInstance
+        - Name: InstanceType
+          Value: !Ref InstanceType
+        - Name: instance
+          Value: "D:"
+        - Name: objectname
+          Value: LogicalDisk
       EvaluationPeriods: 5
-      MetricName: LogicalDiskPercentFreeSpace_D
-      Namespace: AWS/EC2
+      MetricName: LogicalDisk % Free Space
+      Namespace: CWAgent
       Period: 60
       Statistic: Average
       Threshold: 10
@@ -676,6 +701,53 @@ Resources:
               content: !Sub
                 - |
                   {
+                    "agent": {
+                      "omit_hostname": true,
+                      "region": "us-east-1"
+                    },
+                    "metrics": {
+                      "metrics_collected": {
+                        "LogicalDisk": {
+                          "measurement": [
+                            {
+                              "name": "% Free Space",
+                              "unit": "Percent"
+                            }
+                          ],
+                          "resources": ["C:", "D:"]
+                        },
+                        "Memory": {
+                          "measurement": [
+                            {
+                              "name": "% Committed Bytes In Use",
+                              "unit": "Percent"
+                            },
+                            {
+                              "name": "Pages/sec",
+                              "unit": "Count/Second"
+                            },
+                            {
+                              "name": "Available MBytes",
+                              "unit": "Megabytes"
+                            }
+                          ],
+                          "resources": []
+                        },
+                        "Paging File": {
+                          "measurement": [
+                            {
+                              "name": "% Usage",
+                              "unit": "Percent"
+                            }
+                          ],
+                          "resources": ["_Total"]
+                        }
+                      },
+                      "append_dimensions": {
+                        "InstanceId": "${!aws:InstanceId}",
+                        "InstanceType": "${!aws:InstanceType}"
+                      }
+                    },
                     "logs": {
                       "logs_collected" : {
                         "files" : {
@@ -929,11 +1001,6 @@ Resources:
     Type: AWS::SNS::Subscription
   SnsTopic:
     Type: AWS::SNS::Topic
-  SsmAssociationCloudWatchMetrics:
-    'Fn::Transform':
-      Name: AWS::Include
-      Parameters:
-        Location: s3://app-chemistry/snippets/ssm_cloudwatch_instance_memory_disk_c_d.snippet.cfn.yaml
   PatchBaseline:
     Properties:
       ApprovalRules:

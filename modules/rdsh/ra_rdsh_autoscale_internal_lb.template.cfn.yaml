@@ -387,6 +387,7 @@ Resources:
             Resource: '*'
           - Action:
               - ec2:DescribeInstanceStatus
+              - ec2:DescribeTags
             Effect: Allow
             Resource: '*'
           - Action:
@@ -509,6 +510,57 @@ Resources:
               content: !Sub
                 - |
                   {
+                    "agent": {
+                      "omit_hostname": true,
+                      "region": "us-east-1"
+                    },
+                    "metrics": {
+                      "metrics_collected": {
+                        "LogicalDisk": {
+                          "measurement": [
+                            {
+                              "name": "% Free Space",
+                              "unit": "Percent"
+                            }
+                          ],
+                          "resources": ["C:"]
+                        },
+                        "Memory": {
+                          "measurement": [
+                            {
+                              "name": "% Committed Bytes In Use",
+                              "unit": "Percent"
+                            },
+                            {
+                              "name": "Pages/sec",
+                              "unit": "Count/Second"
+                            },
+                            {
+                              "name": "Available MBytes",
+                              "unit": "Megabytes"
+                            }
+                          ],
+                          "resources": []
+                        },
+                        "Paging File": {
+                          "measurement": [
+                            {
+                              "name": "% Usage",
+                              "unit": "Percent"
+                            }
+                          ],
+                          "resources": ["_Total"]
+                        }
+                      },
+                      "append_dimensions": {
+                        "InstanceId": "${!aws:InstanceId}",
+                        "InstanceType": "${!aws:InstanceType}",
+                        "AutoScalingGroupName": "${!aws:AutoScalingGroupName}"
+                      },
+                      "aggregation_dimensions": [
+                        ["AutoScalingGroupName"]
+                      ]
+                    },
                     "logs": {
                       "logs_collected" : {
                         "files" : {
@@ -881,11 +933,6 @@ Resources:
       DesiredCapacity: !Ref MaxCapacity
       Recurrence: !Ref ScaleUpSchedule
     Type: AWS::AutoScaling::ScheduledAction
-  SsmAssociationCloudWatchMetrics:
-    'Fn::Transform':
-      Name: AWS::Include
-      Parameters:
-        Location: s3://app-chemistry/snippets/ssm_cloudwatch_asg_memory_disk_c.snippet.cfn.yaml
   SsmAssociationJoinDomain:
     'Fn::Transform':
       Name: AWS::Include
