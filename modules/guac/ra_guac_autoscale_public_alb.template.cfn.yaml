@@ -528,6 +528,7 @@ Resources:
             Resource: '*'
           - Action:
               - ec2:DescribeInstanceStatus
+              - ec2:DescribeTags
             Effect: Allow
             Resource: '*'
           - Action:
@@ -629,6 +630,40 @@ Resources:
               content: !Sub
                 - |
                   {
+                    "agent": {
+                      "omit_hostname": true,
+                      "region": "us-east-1"
+                    },
+                    "metrics": {
+                      "metrics_collected": {
+                        "disk": {
+                          "measurement": [
+                            {
+                              "name": "disk_used_percent",
+                              "unit": "Percent"
+                            }
+                          ],
+                          "resources": ["*"]
+                        },
+                        "mem": {
+                          "measurement": [
+                            {
+                              "name": "mem_used_percent",
+                              "unit": "Percent"
+                            }
+                          ],
+                          "resources": []
+                        }
+                      },
+                      "append_dimensions": {
+                        "InstanceId": "${!aws:InstanceId}",
+                        "InstanceType": "${!aws:InstanceType}",
+                        "AutoScalingGroupName": "${!aws:AutoScalingGroupName}"
+                      },
+                      "aggregation_dimensions": [
+                        ["AutoScalingGroupName"]
+                      ]
+                    },
                     "logs":
                     {
                       "logs_collected":
