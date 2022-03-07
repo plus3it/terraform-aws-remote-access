@@ -450,11 +450,11 @@ fi
 
 # fetch the guacd image
 log "Fetching the guacd image, ${DOCKER_GUACD_IMAGE}"
-docker pull "${DOCKER_GUACD_IMAGE}" | log
+retry 2 docker pull "${DOCKER_GUACD_IMAGE}" | log
 
 # fetch the guacamole image
 log "Fetching the guacamole image, ${DOCKER_GUACAMOLE_IMAGE}"
-docker pull "${DOCKER_GUACAMOLE_IMAGE}" | log
+retry 2 docker pull "${DOCKER_GUACAMOLE_IMAGE}" | log
 
 # Create custom guacamole branding extension
 log "Setting up the custom branding extension"
