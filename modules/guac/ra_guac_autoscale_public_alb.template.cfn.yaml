@@ -601,11 +601,6 @@ Resources:
       ThresholdCount: 3
       TrafficDialPercentage: 100
     Type: AWS::GlobalAccelerator::EndpointGroup
-  LogGroup:
-    Condition: InstallCloudWatchAgent
-    Properties:
-      LogGroupName: !Sub /aws/ec2/lx/${AWS::StackName}
-    Type: AWS::Logs::LogGroup
   LaunchTemplate:
     Metadata:
       'AWS::CloudFormation::Init':
@@ -683,7 +678,7 @@ Resources:
                       "log_stream_name": "default_logs_{instance_id}"
                     }
                   }
-                - local_LogGroup: !If [InstallCloudWatchAgent, !Ref LogGroup, !Ref 'AWS::NoValue']
+                - local_LogGroup: !If [InstallCloudWatchAgent, !Ref GuacLaunchConfigLogGroup, !Ref 'AWS::NoValue']
         finalize:
           commands:
             10-signal-success:
@@ -697,6 +692,7 @@ Resources:
                   /etc/cfn/scripts/make-guac.sh
                   -V ${DockerGuacamoleImage}
                   -v ${DockerGuacdImage}
+                  -w /aws/ec2/lx/${AWS::StackName}
                   ${local_UseLdapGuacBaseDN}
                   ${local_UseLdapDN}
                   ${local_UseLdapServer}

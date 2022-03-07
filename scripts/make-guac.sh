@@ -147,6 +147,7 @@ usage()
   -i  SAML Identity Provider metadata URL
   -J  SAML callback URL
   -j  SAML groups attribute
+  -w  Name of AWS Log Group where Docker logs will be streamed
 
 EOT
 }  # ----------  end of function usage  ----------
@@ -225,6 +226,7 @@ write_brand()
 
 
 # Define default values
+AWSLOGS_GROUP=
 LDAP_HOSTNAME=
 LDAP_DOMAIN_DN=
 LDAP_USER_BASE="CN=Users"
@@ -254,7 +256,7 @@ SSM_DOCKER_USERNAME=
 SSM_DOCKER_PASSWORD=
 
 # Parse command-line parameters
-while getopts :hH:D:U:R:A:C:P:L:T:l:t:B:V:v:S:s:E:e:F:f:G:g:I:i:J:j:K:k: opt
+while getopts :hH:D:U:R:A:C:P:L:T:l:t:B:V:v:S:s:E:e:F:f:G:g:I:i:J:j:K:k:w: opt
 do
     case "${opt}" in
         h)
@@ -345,6 +347,9 @@ do
         s)
             SSM_DOCKER_PASSWORD="${OPTARG}"
             ;;
+        w)
+            AWSLOGS_GROUP="${OPTARG}"
+            ;;
         \?)
             usage
             echo "ERROR: unknown parameter \"$OPTARG\""
@@ -407,6 +412,8 @@ DOCKER_GUACAMOLE=guacamole
 GUAC_EXT=/tmp/extensions
 GUAC_HOME=/root/guac-home
 GUAC_DRIVE=/var/tmp/guacamole
+EC2_METADATA_TOKEN=$(curl -X PUT "http://169.254.169.254/latest/api/token" -H "X-aws-ec2-metadata-token-ttl-seconds: 21600")
+EC2_INSTANCE_ID=$(curl -H "X-aws-ec2-metadata-token: $EC2_METADATA_TOKEN" -v http://169.254.169.254/latest/meta-data/instance-id)
 
 # Setup build directories
 log "Initializing ${__SCRIPTNAME} build directories"
@@ -502,6 +509,9 @@ params_begin=(
     -e GUACAMOLE_HOME=/guac-home
 )
 
+params_log_driver_guacd=()
+params_log_driver_guacamole=()
+
 params_saml=()
 
 params_mysql=()
@@ -529,10 +539,26 @@ params_end=(
 [[ -z $MYSQL_SSL_MODE ]] || params_mysql+=(-e MYSQL_SSL_MODE="${MYSQL_SSL_MODE}")
 [[ -z $MYSQL_AUTO_CREATE_ACCOUNTS ]] || params_mysql+=(-e MYSQL_AUTO_CREATE_ACCOUNTS="${MYSQL_AUTO_CREATE_ACCOUNTS}")
 
+# Build log driver parameters if present
+if [[ -n $AWSLOGS_GROUP ]]
+then
+    params_log_driver=()
+    params_log_driver+=(--log-driver=awslogs)
+    params_log_driver+=(--log-opt awslogs-group="${AWSLOGS_GROUP}")
+    params_log_driver+=(--log-opt awslogs-create-group=true)
+
+    params_log_driver_guacd=("${params_log_driver[@]}")
+    params_log_driver_guacd+=(--log-opt awslogs-stream="${EC2_INSTANCE_ID}//docker/guacd")
+
+    params_log_driver_guacamole=("${params_log_driver[@]}")
+    params_log_driver_guacamole+=(--log-opt awslogs-stream="${EC2_INSTANCE_ID}//docker/guacamole")
+fi
+
 # Starting guacd container
 log "Starting guacd container, ${DOCKER_GUACD_IMAGE}"
 docker run --name guacd \
     --restart unless-stopped \
+    "${params_log_driver_guacd[@]}" \
     -v "${GUAC_DRIVE}":"${GUAC_DRIVE}" \
     -d "${DOCKER_GUACD_IMAGE}" | log
 
@@ -545,6 +571,7 @@ then
     log "Using LDAP authentication, ${LDAP_HOSTNAME}"
     docker run --name guacamole \
         "${params_begin[@]}" \
+        "${params_log_driver_guacamole[@]}" \
         -e LDAP_HOSTNAME="${LDAP_HOSTNAME}" \
         -e LDAP_PORT="${LDAP_PORT}" \
         -e LDAP_USER_BASE_DN="${LDAP_USER_BASE},${LDAP_DOMAIN_DN}" \
@@ -583,6 +610,7 @@ then
     log "Launching Guacamole container with all configurations"
     docker run --name guacamole \
         "${params_begin[@]}" \
+        "${params_log_driver_guacamole[@]}" \
         "${params_saml[@]}" \
         "${params_mysql[@]}" \
         "${params_end[@]}" | log
