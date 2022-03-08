@@ -319,13 +319,13 @@ scoop install --global lessmsi 6> $null
 scoop install --global dark
 
 # Install packages with Scoop
-scoop install --global $ScoopPackages
+Invoke-Expression "scoop install --global $($ScoopPackages -join ' ')"
 
 # Test scoop packages
-Invoke-Expression "scoop list" -InformationVariable ScoopList
+Invoke-Expression "scoop list" -OutVariable ScoopList
 foreach ($Package in $ScoopPackages + @("git", "7zip")) {
-    if (-not "$ScoopList".Contains($Package)) {
-        Write-Error "Failed to install Scoop package: $Package"
+    if (-not $ScoopList.Name.Contains($Package)) {
+        Write-Error "ERROR: Failed to install Scoop package: $Package"
     } else {
         Write-Verbose "Found Scoop package: $Package"
     }
