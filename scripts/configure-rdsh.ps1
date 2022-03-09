@@ -287,8 +287,13 @@ $SignOffShortcut.IconLocation = "${env:SYSTEMROOT}\System32\imageres.dll,81"
 $SignOffShortcut.Save()
 Write-Verbose "Created the logoff shortcut"
 
+# Download Scoop Installer
+$ScoopInstallerUrl = "https://get.scoop.sh"
+$ScoopInstallerFile = "${Env:Temp}\ScoopInstall.ps1"
+Invoke-RetryCommand -Command Download-File -ArgList @{Source=$ScoopInstallerUrl; Destination=$ScoopInstallerFile}
+
 # Install Scoop
-Invoke-Expression (New-Object System.Net.WebClient).DownloadString('https://get.scoop.sh')
+& $ScoopInstallerFile -RunAsAdmin
 scoop install aria2
 scoop config aria2-warning-enabled false
 scoop install --global 7zip git  # Needed to manage buckets and update scoop
