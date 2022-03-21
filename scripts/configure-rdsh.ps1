@@ -360,6 +360,28 @@ Write-Verbose "Installed psget"
 # Install-PackageProvider -Name NuGet -MinimumVersion 2.8.5.201 -Force
 # Write-Verbose "Installed nuget"
 
+# Create temp directory
+$TmpDirPath = "C:\Temp"
+$TmpDir = New-Item -Path $TmpDirPath -ItemType "Directory" -Force
+Write-Verbose "Created temp directory, ${TmpDir}"
+
+$TmpAcl = Get-Acl $TmpDir
+$TmpAcl.SetAccessRuleProtection($True, $False)
+$TmpRule = New-Object System.Security.AccessControl.FileSystemAccessRule('CREATOR OWNER', 'FullControl', 'ContainerInherit, ObjectInherit', 'InheritOnly', 'Allow')
+$TmpAcl.AddAccessRule($TmpRule)
+$TmpRule = New-Object System.Security.AccessControl.FileSystemAccessRule('SYSTEM', 'FullControl', 'ContainerInherit, ObjectInherit', 'None', 'Allow')
+$TmpAcl.AddAccessRule($TmpRule)
+$TmpRule = New-Object System.Security.AccessControl.FileSystemAccessRule('Administrators', 'FullControl', 'None', 'None', 'Allow')
+$TmpAcl.AddAccessRule($TmpRule)
+$TmpRule = New-Object System.Security.AccessControl.FileSystemAccessRule('Users', 'Read', 'None', 'None', 'Allow')
+$TmpAcl.AddAccessRule($TmpRule)
+$TmpRule = New-Object System.Security.AccessControl.FileSystemAccessRule('Users', 'Synchronize', 'None', 'None', 'Allow')
+$TmpAcl.AddAccessRule($TmpRule)
+$TmpRule = New-Object System.Security.AccessControl.FileSystemAccessRule('Users', 'AppendData', 'None', 'None', 'Allow')
+$TmpAcl.AddAccessRule($TmpRule)
+Set-Acl $TmpDirPath $TmpAcl -ErrorAction Stop
+Write-Verbose "Restricted the acl on the temp directory, ${TmpDir}"
+
 if ($HealthCheckEndPoint)
 {
     Write-Verbose "Setting up the RDSH Health Check End Point..."
