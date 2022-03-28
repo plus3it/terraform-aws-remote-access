@@ -385,6 +385,15 @@ Resources:
       HealthyThresholdCount: 5
       Port: 8080
       Protocol: HTTP
+      TargetGroupAttributes:
+        - Key: deregistration_delay.timeout_seconds
+          Value: 300
+        - Key: stickiness.enabled
+          Value: true
+        - Key: stickiness.type
+          Value: lb_cookie
+        - Key: stickiness.lb_cookie.duration_seconds,
+          Value: 86400
       UnhealthyThresholdCount: 10
       VpcId: !Ref VpcId
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
