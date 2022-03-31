@@ -392,7 +392,7 @@ Resources:
           Value: true
         - Key: stickiness.type
           Value: lb_cookie
-        - Key: stickiness.lb_cookie.duration_seconds,
+        - Key: stickiness.lb_cookie.duration_seconds
           Value: 86400
       UnhealthyThresholdCount: 10
       VpcId: !Ref VpcId
@@ -503,34 +503,14 @@ Resources:
                 - ec2.amazonaws.com
                 - ssm.amazonaws.com
         Version: 2012-10-17
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore
       Path: /
     Type: AWS::IAM::Role
   Ec2IamRolePolicy:
     Properties:
       PolicyDocument:
         Statement:
-          - Action:
-              - ssm:DescribeAssociation
-              - ssm:GetDeployablePatchSnapshotForInstance
-              - ssm:GetDocument
-              - ssm:GetParameters
-              - ssm:ListAssociations
-              - ssm:ListInstanceAssociations
-              - ssm:PutInventory
-              - ssm:UpdateAssociationStatus
-              - ssm:UpdateInstanceAssociationStatus
-              - ssm:UpdateInstanceInformation
-            Effect: Allow
-            Resource: '*'
-          - Action:
-              - ec2messages:AcknowledgeMessage
-              - ec2messages:DeleteMessage
-              - ec2messages:FailMessage
-              - ec2messages:GetEndpoint
-              - ec2messages:GetMessages
-              - ec2messages:SendReply
-            Effect: Allow
-            Resource: '*'
           - Action:
               - cloudwatch:PutMetricData
             Effect: Allow
