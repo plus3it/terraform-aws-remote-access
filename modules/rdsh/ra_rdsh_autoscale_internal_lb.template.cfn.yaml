@@ -302,7 +302,7 @@ Resources:
         Timeout: PT85M
     Properties:
       DesiredCapacity: !Ref DesiredCapacity
-      HealthCheckGracePeriod: 8100
+      HealthCheckGracePeriod: 10800
       HealthCheckType: ELB
       LaunchTemplate:
         LaunchTemplateId: !Ref LaunchTemplate
