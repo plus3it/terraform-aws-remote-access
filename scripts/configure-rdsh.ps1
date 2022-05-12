@@ -297,6 +297,8 @@ Invoke-RetryCommand -Command Download-File -ArgList @{Source=$ScoopInstallerUrl;
 scoop install aria2
 scoop config aria2-warning-enabled false
 scoop install --global 7zip git  # Needed to manage buckets and update scoop
+scoop bucket rm main  # See https://github.com/ScoopInstaller/Scoop/issues/4917#issuecomment-1125400640
+scoop bucket add main
 scoop bucket add extras
 scoop bucket add java
 scoop update
