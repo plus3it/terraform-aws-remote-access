@@ -34,7 +34,7 @@ foreach ($Feature in (Get-WindowsFeature $RequiredFeatures))
 }
 if ($MissingFeatures)
 {
-    throw "Missing required Windows features: $($MissingFeatures -join ',')"
+    throw "[$(get-date -format o)]: Missing required Windows features: $($MissingFeatures -join ',')"
 }
 
 # Validate availability of RDS Licensing configuration
@@ -42,7 +42,7 @@ $null = Import-Module RemoteDesktop,RemoteDesktopServices -Verbose:$false
 $TestPath = "RDS:\LicenseServer"
 if (-not (Get-ChildItem $TestPath -ErrorAction SilentlyContinue))
 {
-    throw "System needs to reboot to create the path: ${TestPath}"
+    throw "[$(get-date -format o)]: System needs to reboot to create the path: ${TestPath}"
 }
 
 # Get the system name
@@ -57,11 +57,11 @@ if (-not $RdClientAccessName)
 if (-not (Get-RDServer -ConnectionBroker $SystemName -ErrorAction SilentlyContinue))
 {
     New-RDSessionDeployment -ConnectionBroker $SystemName -SessionHost $SystemName
-    Write-Verbose "Created the RD Session Deployment!"
+    Write-Verbose "[$(get-date -format o)]: Created the RD Session Deployment!"
 }
 else
 {
-    Write-Warning "RD Session Deployment already exists, skipping"
+    Write-Warning "[$(get-date -format o)]: RD Session Deployment already exists, skipping"
 }
 
 # Configure RDCB HA
@@ -80,16 +80,16 @@ if (-not (Get-RDConnectionBrokerHighAvailability -ConnectionBroker $SystemName -
     Set-RDConnectionBrokerHighAvailability -ConnectionBroker $SystemName -DatabaseConnectionString $RdcbDatabaseConnectionString -ClientAccessName $RdClientAccessName
     if (-not (Get-RDConnectionBrokerHighAvailability -ConnectionBroker $SystemName -ErrorAction SilentlyContinue))
     {
-        throw "Failed to configure RD Connection Broker High Availability!"
+        throw "[$(get-date -format o)]: Failed to configure RD Connection Broker High Availability!"
     }
     else
     {
-        Write-Verbose "Configured RD Connection Broker High Availability!"
+        Write-Verbose "[$(get-date -format o)]: Configured RD Connection Broker High Availability!"
     }
 }
 else
 {
-    Write-Warning "RD Connection Broker High Availability already configured, skipping"
+    Write-Warning "[$(get-date -format o)]: RD Connection Broker High Availability already configured, skipping"
 }
 
 # Configure RDS Licensing
@@ -106,5 +106,5 @@ $obj = gwmi -namespace "Root/CIMV2/TerminalServices" Win32_TerminalServiceSettin
 $null = $obj.SetSpecifiedLicenseServerList("localhost")
 $null = $obj.ChangeMode(2)
 
-Write-Verbose "Configured RD Licensing!"
-Write-Verbose "configure-rdcb.ps1 complete!"
+Write-Verbose "[$(get-date -format o)]: Configured RD Licensing!"
+Write-Verbose "[$(get-date -format o)]: configure-rdcb.ps1 complete!"

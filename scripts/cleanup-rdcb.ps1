@@ -26,16 +26,16 @@ $LockFile = "${UpdPath}\cleanup-rdcb-${ConnectionBroker}.lock".ToLower()
 $Lock = $false
 
 # Get an exclusive lock on the lock file
-Write-Verbose "Attempting to create exclusive lock on ${LockFile}"
+Write-Verbose "[$(get-date -format o)]: Attempting to create exclusive lock on ${LockFile}"
 while (-not $Lock) {
     try {
         $Lock = [System.IO.File]::Open($LockFile, [System.IO.FileMode]::OpenOrCreate, [System.IO.FileAccess]::ReadWrite, [System.IO.FileShare]::None)
-        Write-Verbose "Established lock!"
+        Write-Verbose "[$(get-date -format o)]: Established lock!"
     }
     catch {
         # Sleep for 3 to 20 seconds - randomized to keep from hammering
         $Sleep = Get-Random -Minimum 3 -Maximum 20
-        Write-Verbose "Detected existing lock, retrying in $Sleep seconds"
+        Write-Verbose "[$(get-date -format o)]: Detected existing lock, retrying in $Sleep seconds"
         $Sleep | Start-Sleep
     }
 }
@@ -67,5 +67,5 @@ try {
 } finally {
     # Release the lock on the shared resource
     $Lock.Close()
-    Write-Verbose "Released lock on ${LockFile}"
+    Write-Verbose "[$(get-date -format o)]: Released lock on ${LockFile}"
 }

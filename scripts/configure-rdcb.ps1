@@ -19,7 +19,7 @@ foreach ($Feature in (Get-WindowsFeature $RequiredFeatures))
 }
 if ($MissingFeatures)
 {
-    throw "Missing required Windows features: $($MissingFeatures -join ',')"
+    throw "[$(get-date -format o)]: Missing required Windows features: $($MissingFeatures -join ',')"
 }
 
 # Validate availability of RDS Licensing configuration
@@ -27,7 +27,7 @@ $null = Import-Module RemoteDesktop,RemoteDesktopServices -Verbose:$false
 $TestPath = "RDS:\LicenseServer"
 if (-not (Get-ChildItem $TestPath -ErrorAction SilentlyContinue))
 {
-    throw "System needs to reboot to create the path: ${TestPath}"
+    throw "[$(get-date -format o)]: System needs to reboot to create the path: ${TestPath}"
 }
 
 # Get the system name
@@ -37,11 +37,11 @@ $SystemName = [System.Net.DNS]::GetHostByName('').HostName
 if (-not (Get-RDServer -ConnectionBroker $SystemName -ErrorAction SilentlyContinue))
 {
     New-RDSessionDeployment -ConnectionBroker $SystemName -SessionHost $SystemName
-    Write-Verbose "Created the RD Session Deployment!"
+    Write-Verbose "[$(get-date -format o)]: Created the RD Session Deployment!"
 }
 else
 {
-    Write-Warning "RD Session Deployment already exists, skipping"
+    Write-Warning "[$(get-date -format o)]: RD Session Deployment already exists, skipping"
 }
 
 # Configure RDS Licensing
@@ -58,5 +58,5 @@ $obj = gwmi -namespace "Root/CIMV2/TerminalServices" Win32_TerminalServiceSettin
 $null = $obj.SetSpecifiedLicenseServerList("localhost")
 $null = $obj.ChangeMode(2)
 
-Write-Verbose "Configured RD Licensing!"
-Write-Verbose "configure-rdcb.ps1 complete!"
+Write-Verbose "[$(get-date -format o)]: Configured RD Licensing!"
+Write-Verbose "[$(get-date -format o)]: configure-rdcb.ps1 complete!"

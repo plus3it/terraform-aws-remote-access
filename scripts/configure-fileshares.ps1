@@ -16,7 +16,7 @@ BEGIN
 {
     $RequiredFeatures = @("FS-FileServer")
     Install-WindowsFeature $RequiredFeatures
-    Write-Verbose "Installed Windows features: $($RequiredFeatures -join ',')"
+    Write-Verbose "[$(get-date -format o)]: Installed Windows features: $($RequiredFeatures -join ',')"
 }
 PROCESS
 {
@@ -28,22 +28,22 @@ PROCESS
         if (-not (Test-Path $Folder))
         {
             New-Item -ItemType directory -Path "$Folder" -Force -ErrorAction $ErrorActionPreference
-            Write-Verbose "Created folder: ${Folder}"
+            Write-Verbose "[$(get-date -format o)]: Created folder: ${Folder}"
             $SetAcl = $true
         }
         else
         {
-            Write-Verbose "Folder already exists, ${Folder}, skipping"
+            Write-Verbose "[$(get-date -format o)]: Folder already exists, ${Folder}, skipping"
         }
 
         if (-not (Get-SmbShare -Name $Share -ErrorAction SilentlyContinue))
         {
             New-SmbShare -Name $Share -Path "$Folder" -FullAccess Everyone -EncryptData $true -FolderEnumerationMode AccessBased -ErrorAction $ErrorActionPreference
-            Write-Verbose "Created SMB share: ${Share}"
+            Write-Verbose "[$(get-date -format o)]: Created SMB share: ${Share}"
         }
         else
         {
-            Write-Verbose "Share already exists, ${Share}, skipping"
+            Write-Verbose "[$(get-date -format o)]: Share already exists, ${Share}, skipping"
         }
 
         if ($SetAcl)
@@ -59,7 +59,7 @@ PROCESS
             $Rule = New-Object System.Security.AccessControl.FileSystemAccessRule("${DomainNetBiosName}\${GroupName}", "ListDirectory, Read, CreateDirectories, AppendData", "None", "None", "Allow")
             $Acl.AddAccessRule($Rule)
             Set-Acl $Folder $Acl -ErrorAction $ErrorActionPreference
-            Write-Verbose "Set ACL on folder: $Folder"
+            Write-Verbose "[$(get-date -format o)]: Set ACL on folder: $Folder"
         }
     }
 }

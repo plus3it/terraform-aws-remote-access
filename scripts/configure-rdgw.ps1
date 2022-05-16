@@ -125,17 +125,17 @@ Restart-Service tsgateway
 
 if ($HealthCheckEndPoint)
 {
-    Write-Verbose "Setting up the RDSH Health Check End Point..."
+    Write-Verbose "[$(get-date -format o)]: Setting up the RDSH Health Check End Point..."
 
     # Install IIS
     Install-WindowsFeature -Name Web-Server -IncludeManagementTools
     Import-Module WebAdministration
-    Write-Verbose "Installed IIS to service health check requests"
+    Write-Verbose "[$(get-date -format o)]: Installed IIS to service health check requests"
 
     # Create the health check ping file
     $HealthCheckPing = "${HealthCheckDir}\ping.html"
     $null = New-Item -Path $HealthCheckPing -ItemType File -Value "OK" -Force
-    Write-Verbose "Created the health check ping file: ${HealthCheckPing}"
+    Write-Verbose "[$(get-date -format o)]: Created the health check ping file: ${HealthCheckPing}"
 
     # Restrict the acl on the health check directory
     $Acl = Get-Acl $HealthCheckDir
@@ -153,21 +153,21 @@ if ($HealthCheckEndPoint)
     $Rule = New-Object System.Security.AccessControl.FileSystemAccessRule('CREATOR OWNER', 'FullControl', 'ContainerInherit, ObjectInherit', 'InheritOnly', 'Allow')
     $Acl.AddAccessRule($Rule)
     Set-Acl $HealthCheckDir $Acl -ErrorAction Stop
-    Write-Verbose "Restricted the acl on the health check directory: ${HealthCheckDir}"
+    Write-Verbose "[$(get-date -format o)]: Restricted the acl on the health check directory: ${HealthCheckDir}"
 
     if (-not (Get-Website -Name $HealthCheckSiteName))
     {
         New-WebSite -Name $HealthCheckSiteName -PhysicalPath $HealthCheckDir -Port $HealthCheckPort
-        Write-Verbose "Created new health check site:"
-        Write-Verbose "    Name: ${HealthCheckSiteName}"
-        Write-Verbose "    Path: ${HealthCheckDir}"
-        Write-Verbose "    Port: ${HealthCheckPort}"
+        Write-Verbose "[$(get-date -format o)]: Created new health check site:"
+        Write-Verbose "[$(get-date -format o)]:     Name: ${HealthCheckSiteName}"
+        Write-Verbose "[$(get-date -format o)]:     Path: ${HealthCheckDir}"
+        Write-Verbose "[$(get-date -format o)]:     Port: ${HealthCheckPort}"
     }
     else
     {
         Get-WebBinding -Name $HealthCheckSiteName | % {Remove-WebBinding}
         New-WebBinding -Name $HealthCheckSiteName -Port $HealthCheckPort
-        Write-Verbose "Configured the health check site to listen on ${HealthCheckPort}"
+        Write-Verbose "[$(get-date -format o)]: Configured the health check site to listen on ${HealthCheckPort}"
     }
 
     # Open the firewall for the health check endpoint
@@ -195,7 +195,7 @@ if ($HealthCheckEndPoint)
             $PSCmdlet.ThrowTerminatingError($PSItem)
         }
     }
-    Write-Verbose "Opened firewall port ${HealthCheckPort} for ${HealthCheckSiteName}"
+    Write-Verbose "[$(get-date -format o)]: Opened firewall port ${HealthCheckPort} for ${HealthCheckSiteName}"
 }
 
-Write-Verbose "Completed configure-rdgw.ps1!"
+Write-Verbose "[$(get-date -format o)]: Completed configure-rdgw.ps1!"
