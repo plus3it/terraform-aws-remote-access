@@ -301,6 +301,8 @@ Resources:
         Count: 1
         Timeout: PT85M
     Properties:
+      Cooldown: 0
+      DefaultInstanceWarmup: 0
       DesiredCapacity: !Ref DesiredCapacity
       HealthCheckGracePeriod: 15000
       HealthCheckType: ELB
