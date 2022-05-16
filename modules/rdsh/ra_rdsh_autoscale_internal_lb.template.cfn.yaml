@@ -455,8 +455,8 @@ Resources:
             - join-domain
             - setup-crypto
             - ps-modules
-            - check-upd-path
             - install-cloudwatch-agent
+            - check-upd-path
             - setup
             - suspend-azrebalance
             - install-features
