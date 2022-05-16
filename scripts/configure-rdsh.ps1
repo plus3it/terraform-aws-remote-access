@@ -213,6 +213,7 @@ try
         Write-Verbose ($UpdAcl.Access | Out-String)
         Invoke-RetryCommand -Command Set-Acl -ArgList @{Path=$UpdPath; AclObject=$UpdAcl} -CheckExpression '$?'
     }
+    Write-Verbose "[$(get-date -format o)]: Ensured UPD ACL has entry for host identity, $Identity"
 }
 catch
 {
