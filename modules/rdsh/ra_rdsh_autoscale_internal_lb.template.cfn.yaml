@@ -738,8 +738,17 @@ Resources:
           commands:
             10-join-domain:
               command: !Sub
-                - ${PowershellCommand} -Command Write-Verbose 'Waiting for SSM to complete domain join, which reboots the instance automatically' -Verbose
+                - >-
+                  ${PowershellCommand} -Command "
+                  $ErrorActionPreference = \"Stop\";
+                  $VerbosePreference = \"Continue\";
+                  Set-Service -Name AmazonSSMAgent -StartupType Automatic -Status Running;
+                  Write-Verbose 'Waiting for SSM to complete domain join, which reboots the instance automatically'
+                  " || ${SignalFailure}
                 - PowershellCommand: !FindInMap [ShellCommandMap, powershell, command]
+                  SignalFailure: !Sub
+                    - (${Command} --stack ${AWS::StackName} --region ${AWS::Region} & shutdown /s /t 0)
+                    - Command: !FindInMap [CfnUtilsMap, Signal, Failure]
               waitAfterCompletion: '1200'
         check-upd-path:
           commands:
