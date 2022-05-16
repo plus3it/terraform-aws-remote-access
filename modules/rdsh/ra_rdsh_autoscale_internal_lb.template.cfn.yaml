@@ -298,7 +298,7 @@ Resources:
   AutoScalingGroup:
     CreationPolicy:
       ResourceSignal:
-        Count: !Ref DesiredCapacity
+        Count: 1
         Timeout: PT85M
     Properties:
       DesiredCapacity: !Ref DesiredCapacity

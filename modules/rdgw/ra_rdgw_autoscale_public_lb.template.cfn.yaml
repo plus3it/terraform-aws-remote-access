@@ -282,7 +282,7 @@ Resources:
   AutoScalingGroup:
     CreationPolicy:
       ResourceSignal:
-        Count: !Ref DesiredCapacity
+        Count: 1
         Timeout: PT50M
     Properties:
       DesiredCapacity: !Ref DesiredCapacity
