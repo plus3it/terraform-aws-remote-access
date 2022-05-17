@@ -872,8 +872,8 @@ Resources:
               if %ERRORLEVEL% equ 0 goto success
 
               :error
-              ${SignalFailure}
               echo "ERROR: cfn-init failed! Aborting!"
+              ${SignalFailure}
               shutdown /s /t 0
 
               :success
