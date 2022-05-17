@@ -333,7 +333,8 @@ Invoke-Expression "scoop install --global $($ScoopPackages -join ' ')"
 Invoke-Expression "scoop list" -OutVariable ScoopList
 foreach ($Package in $ScoopPackages + @("git", "7zip")) {
     if (-not $ScoopList.Name.Contains($Package)) {
-        Write-Error "[$(get-date -format o)]: ERROR: Failed to install Scoop package: $Package"
+        Write-Verbose "[$(get-date -format o)]: Retrying install of failed Scoop package: $Package"
+        Invoke-RetryCommand -Command "scoop install --global $Package"
     } else {
         Write-Verbose "[$(get-date -format o)]: Found Scoop package: $Package"
     }
