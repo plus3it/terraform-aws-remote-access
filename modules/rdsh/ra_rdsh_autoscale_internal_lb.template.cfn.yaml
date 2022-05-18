@@ -298,9 +298,11 @@ Resources:
   AutoScalingGroup:
     CreationPolicy:
       ResourceSignal:
-        Count: !Ref DesiredCapacity
+        Count: 1
         Timeout: PT85M
     Properties:
+      Cooldown: 0
+      DefaultInstanceWarmup: 0
       DesiredCapacity: !Ref DesiredCapacity
       HealthCheckGracePeriod: 15000
       HealthCheckType: ELB
@@ -453,8 +455,8 @@ Resources:
             - join-domain
             - setup-crypto
             - ps-modules
-            - check-upd-path
             - install-cloudwatch-agent
+            - check-upd-path
             - setup
             - suspend-azrebalance
             - install-features
@@ -502,7 +504,7 @@ Resources:
                   -Verbose -ErrorAction Stop" || ${SignalFailure}
                 - PowershellCommand: !FindInMap [ShellCommandMap, powershell, command]
                   SignalFailure: !Sub
-                    - (${Command} --stack ${AWS::StackName} --region ${AWS::Region} && exit /b 1)
+                    - (${Command} --stack ${AWS::StackName} --region ${AWS::Region} & shutdown /s /t 120 & exit /b 1)
                     - Command: !FindInMap [CfnUtilsMap, Signal, Failure]
               waitAfterCompletion: '0'
           files:
@@ -596,6 +598,12 @@ Resources:
                               "timestamp_format": "%H:%M:%S %y %b %-d"
                             },
                             {
+                              "file_path": "c:\\ProgramData\\Amazon\\EC2-Windows\\Launch\\Log\\UserdataExecution.log",
+                              "log_group_name": "${local_InstanceLogGroup}",
+                              "log_stream_name": "{instance_id}//c/ProgramData/Amazon/EC2-Windows/Launch/Log/UserdataExecution.log",
+                              "timestamp_format": "%H:%M:%S %y %b %-d"
+                            },
+                            {
                               "file_path": "c:\\cfn\\log\\cfn-init.log",
                               "log_group_name": "${local_InstanceLogGroup}",
                               "log_stream_name": "{instance_id}//c/cfn/log/cfn-init.log",
@@ -652,14 +660,14 @@ Resources:
                   -Verbose -ErrorAction Stop" || ${SignalFailure}
                 - PowershellCommand: !FindInMap [ShellCommandMap, powershell, command]
                   SignalFailure: !Sub
-                    - (${Command} --stack ${AWS::StackName} --region ${AWS::Region} && exit /b 1)
+                    - (${Command} --stack ${AWS::StackName} --region ${AWS::Region} & shutdown /s /t 120 & exit /b 1)
                     - Command: !FindInMap [CfnUtilsMap, Signal, Failure]
               waitAfterCompletion: '0'
             15-restart-cwa:
               command: !Sub
                 - net stop AmazonCloudWatchAgent && net start AmazonCloudWatchAgent || ${SignalFailure}
                 - SignalFailure: !Sub
-                    - (${Command} --stack ${AWS::StackName} --region ${AWS::Region} && exit /b 1)
+                    - (${Command} --stack ${AWS::StackName} --region ${AWS::Region} & shutdown /s /t 120 & exit /b 1)
                     - Command: !FindInMap [CfnUtilsMap, Signal, Failure]
               waitAfterCompletion: '0'
         install-updates:
@@ -676,7 +684,7 @@ Resources:
                   " || ${SignalFailure}
                 - PowershellCommand: !FindInMap [ShellCommandMap, powershell, command]
                   SignalFailure: !Sub
-                    - (${Command} --stack ${AWS::StackName} --region ${AWS::Region} && exit /b 1)
+                    - (${Command} --stack ${AWS::StackName} --region ${AWS::Region} & shutdown /s /t 120 & exit /b 1)
                     - Command: !FindInMap [CfnUtilsMap, Signal, Failure]
               waitAfterCompletion: '0'
         install-rdsh:
@@ -694,7 +702,7 @@ Resources:
                   -Verbose -ErrorAction Stop" || ${SignalFailure}
                 - PowershellCommand: !FindInMap [ShellCommandMap, powershell, command]
                   SignalFailure: !Sub
-                    - (${Command} --stack ${AWS::StackName} --region ${AWS::Region} && exit /b 1)
+                    - (${Command} --stack ${AWS::StackName} --region ${AWS::Region} & shutdown /s /t 120 & exit /b 1)
                     - Command: !FindInMap [CfnUtilsMap, Signal, Failure]
               waitAfterCompletion: '0'
             20-configure-logon-as-service:
@@ -709,7 +717,7 @@ Resources:
                   " || ${SignalFailure}
                 - PowershellCommand: !FindInMap [ShellCommandMap, powershell, command]
                   SignalFailure: !Sub
-                    - (${Command} --stack ${AWS::StackName} --region ${AWS::Region} && exit /b 1)
+                    - (${Command} --stack ${AWS::StackName} --region ${AWS::Region} & shutdown /s /t 120 & exit /b 1)
                     - Command: !FindInMap [CfnUtilsMap, Signal, Failure]
               waitAfterCompletion: '0'
             30-configure-rdsh:
@@ -728,7 +736,7 @@ Resources:
                 - PsExecCommand: !FindInMap [ShellCommandMap, psexec, command]
                   PowershellCommand: !FindInMap [ShellCommandMap, powershell, command]
                   SignalFailure: !Sub
-                    - (${Command} --stack ${AWS::StackName} --region ${AWS::Region} && exit /b 1)
+                    - (${Command} --stack ${AWS::StackName} --region ${AWS::Region} & shutdown /s /t 120 & exit /b 1)
                     - Command: !FindInMap [CfnUtilsMap, Signal, Failure]
               # Pause a bit here to let services settle...
               waitAfterCompletion: '30'
@@ -736,9 +744,18 @@ Resources:
           commands:
             10-join-domain:
               command: !Sub
-                - ${PowershellCommand} -Command Write-Verbose 'Waiting for SSM to complete domain join, which reboots the instance automatically' -Verbose
+                - >-
+                  ${PowershellCommand} -Command "
+                  $ErrorActionPreference = \"Stop\";
+                  $VerbosePreference = \"Continue\";
+                  Set-Service -Name AmazonSSMAgent -StartupType Automatic -Status Running;
+                  Write-Verbose 'Waiting for SSM to complete domain join, which reboots the instance automatically'
+                  " || ${SignalFailure}
                 - PowershellCommand: !FindInMap [ShellCommandMap, powershell, command]
-              waitAfterCompletion: forever
+                  SignalFailure: !Sub
+                    - (${Command} --stack ${AWS::StackName} --region ${AWS::Region} & shutdown /s /t 120 & exit /b 1)
+                    - Command: !FindInMap [CfnUtilsMap, Signal, Failure]
+              waitAfterCompletion: '1200'
         check-upd-path:
           commands:
             10-check-path:
@@ -749,7 +766,7 @@ Resources:
                   Invoke-RetryCommand -Command Test-Path -ArgList @{ Path='filesystem::${UserProfileDiskPath}' } -Verbose -ErrorAction Stop" || ${SignalFailure}
                 - PowershellCommand: !FindInMap [ShellCommandMap, powershell, command]
                   SignalFailure: !Sub
-                    - (${Command} --stack ${AWS::StackName} --region ${AWS::Region} && exit /b 1)
+                    - (${Command} --stack ${AWS::StackName} --region ${AWS::Region} & shutdown /s /t 120 & exit /b 1)
                     - Command: !FindInMap [CfnUtilsMap, Signal, Failure]
               waitAfterCompletion: '0'
         ps-modules:
@@ -772,7 +789,7 @@ Resources:
                   " || ${SignalFailure}
                 - PowershellCommand: !FindInMap [ShellCommandMap, powershell, command]
                   SignalFailure: !Sub
-                    - (${Command} --stack ${AWS::StackName} --region ${AWS::Region} && exit /b 1)
+                    - (${Command} --stack ${AWS::StackName} --region ${AWS::Region} & shutdown /s /t 120 & exit /b 1)
                     - Command: !FindInMap [CfnUtilsMap, Signal, Failure]
               waitAfterCompletion: '0'
         setup:
@@ -825,7 +842,7 @@ Resources:
                 - ${PowershellCommand} -Command "Restart-Computer -Force -Verbose -ErrorAction Stop" || ${SignalFailure}
                 - PowershellCommand: !FindInMap [ShellCommandMap, powershell, command]
                   SignalFailure: !Sub
-                    - (${Command} --stack ${AWS::StackName} --region ${AWS::Region} && exit /b 1)
+                    - (${Command} --stack ${AWS::StackName} --region ${AWS::Region} & shutdown /s /t 120 & exit /b 1)
                     - Command: !FindInMap [CfnUtilsMap, Signal, Failure]
               waitAfterCompletion: forever
         suspend-azrebalance:
@@ -861,11 +878,12 @@ Resources:
               if %ERRORLEVEL% equ 0 goto success
 
               :error
-              ${SignalFailure}
               echo "ERROR: cfn-init failed! Aborting!"
-              exit /b 1
+              ${SignalFailure}
+              shutdown /s /t 0
 
               :success
+              echo "cfn-init completed with success"
               </script>
             - InitConfig: !Sub
                 - ${Command} --stack ${AWS::StackName} --region ${AWS::Region}

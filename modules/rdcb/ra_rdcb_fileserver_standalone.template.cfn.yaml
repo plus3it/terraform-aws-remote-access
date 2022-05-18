@@ -515,12 +515,12 @@ Resources:
                   $disk | Update-Disk
                   $Size = (Get-Partition -DiskNumber $disk.Number -PartitionNumber 1).size
                   $SizeMax = (Get-PartitionSupportedSize -DiskNumber $disk.Number).SizeMax
-                  Write-Verbose "Disk: $($disk.Number); Current Size: $Size; Maximum Size: $SizeMax"
+                  Write-Verbose "[$(get-date -format o)]: Disk: $($disk.Number); Current Size: $Size; Maximum Size: $SizeMax"
                   if ($SizeMax -gt $Size) {
                     Resize-Partition -DiskNumber $disk.Number -PartitionNumber 1 -Size $SizeMax
-                    Write-Verbose "Extended disk $($disk.Number) partition 1"
+                    Write-Verbose "[$(get-date -format o)]: Extended disk $($disk.Number) partition 1"
                   } else {
-                    Write-Verbose "No change to disk $($disk.Number) partition 1"
+                    Write-Verbose "[$(get-date -format o)]: No change to disk $($disk.Number) partition 1"
                   }
                 }
           services:

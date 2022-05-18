@@ -51,11 +51,11 @@ Function Init-BackupJob
         if ($Force)
         {
             UnRegister-ScheduledTask -TaskName $Name -Confirm:$false
-            Write-Verbose "Force-unregistered existing job, ${Name}"
+            Write-Verbose "[$(get-date -format o)]: Force-unregistered existing job, ${Name}"
         }
         else
         {
-            throw "Task already exists, ${Name}. Use '-Force' to delete it"
+            throw "[$(get-date -format o)]: Task already exists, ${Name}. Use '-Force' to delete it"
         }
     }
     $When = (Get-Date).Date
@@ -64,9 +64,9 @@ Function Init-BackupJob
     $Principal = New-ScheduledTaskPrincipal -UserID "NT AUTHORITY\SYSTEM" -LogonType ServiceAccount -RunLevel Highest
     $Settings = New-ScheduledTaskSettingsSet -MultipleInstances Parallel
     Register-ScheduledTask -TaskName $Name -Action $Action -Trigger $Trigger -Principal $Principal -Settings $Settings
-    Write-Verbose "Created scheduled job, ${Name}"
+    Write-Verbose "[$(get-date -format o)]: Created scheduled job, ${Name}"
     Start-ScheduledTask -TaskName $Name
-    Write-Verbose "Triggered job, ${Name}"
+    Write-Verbose "[$(get-date -format o)]: Triggered job, ${Name}"
 }
 
 $Jobs = @(

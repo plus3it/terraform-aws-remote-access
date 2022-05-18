@@ -75,10 +75,10 @@ function global:Clear-RDSessionHost {
     PROCESS {
         ForEach ($instance in $SessionHost)
         {
-            Write-Verbose "Removing RD Session Host, $($instance.SessionHost), from the collection, ${CollectionName}..."
+            Write-Verbose "[$(get-date -format o)]: Removing RD Session Host, $($instance.SessionHost), from the collection, ${CollectionName}..."
             Remove-RDSessionHost -SessionHost $instance.SessionHost -ConnectionBroker $ConnectionBroker -Force
 
-            Write-Verbose "Removing ${Role} role from $($instance.SessionHost)..."
+            Write-Verbose "[$(get-date -format o)]: Removing ${Role} role from $($instance.SessionHost)..."
             Remove-RDServer -Role $Role -Server $instance.SessionHost -ConnectionBroker $ConnectionBroker -Force
         }
     }
