@@ -504,7 +504,7 @@ Resources:
                   -Verbose -ErrorAction Stop" || ${SignalFailure}
                 - PowershellCommand: !FindInMap [ShellCommandMap, powershell, command]
                   SignalFailure: !Sub
-                    - (${Command} --stack ${AWS::StackName} --region ${AWS::Region} & shutdown /s /t 0)
+                    - (${Command} --stack ${AWS::StackName} --region ${AWS::Region} & shutdown /s /t 120 & exit /b 1)
                     - Command: !FindInMap [CfnUtilsMap, Signal, Failure]
               waitAfterCompletion: '0'
           files:
@@ -660,14 +660,14 @@ Resources:
                   -Verbose -ErrorAction Stop" || ${SignalFailure}
                 - PowershellCommand: !FindInMap [ShellCommandMap, powershell, command]
                   SignalFailure: !Sub
-                    - (${Command} --stack ${AWS::StackName} --region ${AWS::Region} & shutdown /s /t 0)
+                    - (${Command} --stack ${AWS::StackName} --region ${AWS::Region} & shutdown /s /t 120 & exit /b 1)
                     - Command: !FindInMap [CfnUtilsMap, Signal, Failure]
               waitAfterCompletion: '0'
             15-restart-cwa:
               command: !Sub
                 - net stop AmazonCloudWatchAgent && net start AmazonCloudWatchAgent || ${SignalFailure}
                 - SignalFailure: !Sub
-                    - (${Command} --stack ${AWS::StackName} --region ${AWS::Region} & shutdown /s /t 0)
+                    - (${Command} --stack ${AWS::StackName} --region ${AWS::Region} & shutdown /s /t 120 & exit /b 1)
                     - Command: !FindInMap [CfnUtilsMap, Signal, Failure]
               waitAfterCompletion: '0'
         install-updates:
@@ -684,7 +684,7 @@ Resources:
                   " || ${SignalFailure}
                 - PowershellCommand: !FindInMap [ShellCommandMap, powershell, command]
                   SignalFailure: !Sub
-                    - (${Command} --stack ${AWS::StackName} --region ${AWS::Region} & shutdown /s /t 0)
+                    - (${Command} --stack ${AWS::StackName} --region ${AWS::Region} & shutdown /s /t 120 & exit /b 1)
                     - Command: !FindInMap [CfnUtilsMap, Signal, Failure]
               waitAfterCompletion: '0'
         install-rdsh:
@@ -702,7 +702,7 @@ Resources:
                   -Verbose -ErrorAction Stop" || ${SignalFailure}
                 - PowershellCommand: !FindInMap [ShellCommandMap, powershell, command]
                   SignalFailure: !Sub
-                    - (${Command} --stack ${AWS::StackName} --region ${AWS::Region} & shutdown /s /t 0)
+                    - (${Command} --stack ${AWS::StackName} --region ${AWS::Region} & shutdown /s /t 120 & exit /b 1)
                     - Command: !FindInMap [CfnUtilsMap, Signal, Failure]
               waitAfterCompletion: '0'
             20-configure-logon-as-service:
@@ -717,7 +717,7 @@ Resources:
                   " || ${SignalFailure}
                 - PowershellCommand: !FindInMap [ShellCommandMap, powershell, command]
                   SignalFailure: !Sub
-                    - (${Command} --stack ${AWS::StackName} --region ${AWS::Region} & shutdown /s /t 0)
+                    - (${Command} --stack ${AWS::StackName} --region ${AWS::Region} & shutdown /s /t 120 & exit /b 1)
                     - Command: !FindInMap [CfnUtilsMap, Signal, Failure]
               waitAfterCompletion: '0'
             30-configure-rdsh:
@@ -736,7 +736,7 @@ Resources:
                 - PsExecCommand: !FindInMap [ShellCommandMap, psexec, command]
                   PowershellCommand: !FindInMap [ShellCommandMap, powershell, command]
                   SignalFailure: !Sub
-                    - (${Command} --stack ${AWS::StackName} --region ${AWS::Region} & shutdown /s /t 0)
+                    - (${Command} --stack ${AWS::StackName} --region ${AWS::Region} & shutdown /s /t 120 & exit /b 1)
                     - Command: !FindInMap [CfnUtilsMap, Signal, Failure]
               # Pause a bit here to let services settle...
               waitAfterCompletion: '30'
@@ -753,7 +753,7 @@ Resources:
                   " || ${SignalFailure}
                 - PowershellCommand: !FindInMap [ShellCommandMap, powershell, command]
                   SignalFailure: !Sub
-                    - (${Command} --stack ${AWS::StackName} --region ${AWS::Region} & shutdown /s /t 0)
+                    - (${Command} --stack ${AWS::StackName} --region ${AWS::Region} & shutdown /s /t 120 & exit /b 1)
                     - Command: !FindInMap [CfnUtilsMap, Signal, Failure]
               waitAfterCompletion: '1200'
         check-upd-path:
@@ -766,7 +766,7 @@ Resources:
                   Invoke-RetryCommand -Command Test-Path -ArgList @{ Path='filesystem::${UserProfileDiskPath}' } -Verbose -ErrorAction Stop" || ${SignalFailure}
                 - PowershellCommand: !FindInMap [ShellCommandMap, powershell, command]
                   SignalFailure: !Sub
-                    - (${Command} --stack ${AWS::StackName} --region ${AWS::Region} & shutdown /s /t 0)
+                    - (${Command} --stack ${AWS::StackName} --region ${AWS::Region} & shutdown /s /t 120 & exit /b 1)
                     - Command: !FindInMap [CfnUtilsMap, Signal, Failure]
               waitAfterCompletion: '0'
         ps-modules:
@@ -789,7 +789,7 @@ Resources:
                   " || ${SignalFailure}
                 - PowershellCommand: !FindInMap [ShellCommandMap, powershell, command]
                   SignalFailure: !Sub
-                    - (${Command} --stack ${AWS::StackName} --region ${AWS::Region} & shutdown /s /t 0)
+                    - (${Command} --stack ${AWS::StackName} --region ${AWS::Region} & shutdown /s /t 120 & exit /b 1)
                     - Command: !FindInMap [CfnUtilsMap, Signal, Failure]
               waitAfterCompletion: '0'
         setup:
@@ -842,7 +842,7 @@ Resources:
                 - ${PowershellCommand} -Command "Restart-Computer -Force -Verbose -ErrorAction Stop" || ${SignalFailure}
                 - PowershellCommand: !FindInMap [ShellCommandMap, powershell, command]
                   SignalFailure: !Sub
-                    - (${Command} --stack ${AWS::StackName} --region ${AWS::Region} & shutdown /s /t 0)
+                    - (${Command} --stack ${AWS::StackName} --region ${AWS::Region} & shutdown /s /t 120 & exit /b 1)
                     - Command: !FindInMap [CfnUtilsMap, Signal, Failure]
               waitAfterCompletion: forever
         suspend-azrebalance:
