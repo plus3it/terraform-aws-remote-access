@@ -340,8 +340,6 @@ foreach ($Package in $ScoopPackages + @("git", "7zip")) {
     }
 }
 
-throw "testing stop action"
-
 # Install Session Manager
 $SessionManagerPluginUrl = "https://s3.amazonaws.com/session-manager-downloads/plugin/latest/windows/SessionManagerPluginSetup.exe"
 $SessionManagerInstaller = "${Env:Temp}\$(($SessionManagerPluginUrl -split('/'))[-1])"
