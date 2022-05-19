@@ -185,7 +185,7 @@ try
     catch [Microsoft.PowerShell.Commands.WriteErrorException]
     {
         Write-Verbose "[$(get-date -format o)]: RD Session Collection already exists. Adding this host to the collection..."
-        Invoke-RetryCommand -Command Add-RDSessionHost -ArgList @{CollectionName=$CollectionName; SessionHost=$SystemName; ConnectionBroker=$ConnectionBroker} -CheckExpression '$?'
+        Invoke-RetryCommand -Command Add-RDSessionHost -ArgList @{CollectionName=$CollectionName; SessionHost=$SystemName; ConnectionBroker=$ConnectionBroker} -CheckExpression '$?' -Verbose
         Write-Verbose "[$(get-date -format o)]: Added system to RD Session Collection"
         Write-Verbose "[$(get-date -format o)]: *    SessionHost=${SystemName}"
         Write-Verbose "[$(get-date -format o)]: *    CollectionName=${CollectionName}"
