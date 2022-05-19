@@ -172,6 +172,7 @@ try
     # Create new session collection, or on error add system to existing collection
     try
     {
+        Write-Verbose "[$(get-date -format o)]: Creating RD Session Collection if one does not already exist..."
         New-RDSessionCollection -CollectionName $CollectionName -ConnectionBroker $ConnectionBroker -SessionHost $SystemName  -ErrorAction Stop
         Write-Verbose "[$(get-date -format o)]: Created the RD Session Collection!"
 
@@ -183,6 +184,7 @@ try
     }
     catch [Microsoft.PowerShell.Commands.WriteErrorException]
     {
+        Write-Verbose "[$(get-date -format o)]: RD Session Collection already exists. Adding this host to the collection..."
         Invoke-RetryCommand -Command Add-RDSessionHost -ArgList @{CollectionName=$CollectionName; SessionHost=$SystemName; ConnectionBroker=$ConnectionBroker} -CheckExpression '$?'
         Write-Verbose "[$(get-date -format o)]: Added system to RD Session Collection"
         Write-Verbose "[$(get-date -format o)]: *    SessionHost=${SystemName}"
