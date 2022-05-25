@@ -806,38 +806,45 @@ Resources:
                           "collect_list" : [
                             {
                               "event_name": "System",
-                              "event_levels": ["WARNING", "ERROR", "INFORMATION"],
+                              "event_levels": ["VERBOSE", "CRITICAL", "WARNING", "ERROR", "INFORMATION"],
                               "log_group_name": "${local_InstanceLogGroup}",
                               "log_stream_name": "{instance_id}//EventLog/System",
-                              "event_format": "text"
+                              "event_format": "xml"
+                            },
+                            {
+                              "event_name": "Security",
+                              "event_levels": ["VERBOSE", "CRITICAL", "WARNING", "ERROR", "INFORMATION"],
+                              "log_group_name": "${local_InstanceLogGroup}",
+                              "log_stream_name": "{instance_id}//EventLog/Security",
+                              "event_format": "xml"
                             },
                             {
                               "event_name": "Application",
-                              "event_levels": ["WARNING", "ERROR", "INFORMATION"],
+                              "event_levels": ["VERBOSE", "CRITICAL", "WARNING", "ERROR", "INFORMATION"],
                               "log_group_name": "${local_InstanceLogGroup}",
                               "log_stream_name": "{instance_id}//EventLog/Application",
-                              "event_format": "text"
+                              "event_format": "xml"
                             },
                             {
                               "event_name": "Microsoft-Rdms-UI/Operational",
-                              "event_levels": ["WARNING", "ERROR", "INFORMATION"],
+                              "event_levels": ["VERBOSE", "CRITICAL", "WARNING", "ERROR", "INFORMATION"],
                               "log_group_name": "${local_InstanceLogGroup}",
                               "log_stream_name": "{instance_id}//EventLog/MS-Rdms-UI/Operational",
-                              "event_format": "text"
+                              "event_format": "xml"
                             },
                             {
                               "event_name": "Microsoft-Windows-TerminalServices-SessionBroker/Operational",
-                              "event_levels": ["WARNING", "ERROR", "INFORMATION"],
+                              "event_levels": ["VERBOSE", "CRITICAL", "WARNING", "ERROR", "INFORMATION"],
                               "log_group_name": "${local_InstanceLogGroup}",
                               "log_stream_name": "{instance_id}//EventLog/Microsoft-Windows-TerminalServices-SessionBroker/Operational",
-                              "event_format": "text"
+                              "event_format": "xml"
                             },
                             {
                               "event_name": "Microsoft-Rdms-UI/Admin",
-                              "event_levels": ["WARNING", "ERROR", "INFORMATION"],
+                              "event_levels": ["VERBOSE", "CRITICAL", "WARNING", "ERROR", "INFORMATION"],
                               "log_group_name": "${local_InstanceLogGroup}",
                               "log_stream_name": "{instance_id}//EventLog/MS-Rdms-UI/Admin",
-                              "event_format": "text"
+                              "event_format": "xml"
                             }
                           ]
                         }
