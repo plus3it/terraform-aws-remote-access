@@ -641,10 +641,66 @@ Resources:
                               "event_format": "xml"
                             },
                             {
+                              "event_name": "Microsoft-Windows-Folder Redirection/Operational",
+                              "event_levels": ["VERBOSE", "CRITICAL", "WARNING", "ERROR", "INFORMATION"],
+                              "log_group_name": "${local_InstanceLogGroup}",
+                              "log_stream_name": "{instance_id}//EventLog/Microsoft-Windows-Folder Redirection/Operational",
+                              "event_format": "xml"
+                            },
+                            {
+                              "event_name": "Microsoft-Windows-TerminalServices-LocalSessionManager/Admin",
+                              "event_levels": ["VERBOSE", "CRITICAL", "WARNING", "ERROR", "INFORMATION"],
+                              "log_group_name": "${local_InstanceLogGroup}",
+                              "log_stream_name": "{instance_id}//EventLog/Microsoft-Windows-TerminalServices-LocalSessionManager/Admin",
+                              "event_format": "xml"
+                            },
+                            {
+                              "event_name": "Microsoft-Windows-TerminalServices-LocalSessionManager/Operational",
+                              "event_levels": ["VERBOSE", "CRITICAL", "WARNING", "ERROR", "INFORMATION"],
+                              "log_group_name": "${local_InstanceLogGroup}",
+                              "log_stream_name": "{instance_id}//EventLog/Microsoft-Windows-TerminalServices-LocalSessionManager/Operational",
+                              "event_format": "xml"
+                            },
+                            {
+                              "event_name": "Microsoft-Windows-TerminalServices-RemoteConnectionManager/Admin",
+                              "event_levels": ["VERBOSE", "CRITICAL", "WARNING", "ERROR", "INFORMATION"],
+                              "log_group_name": "${local_InstanceLogGroup}",
+                              "log_stream_name": "{instance_id}//EventLog/Microsoft-Windows-TerminalServices-RemoteConnectionManager/Admin",
+                              "event_format": "xml"
+                            },
+                            {
+                              "event_name": "Microsoft-Windows-TerminalServices-RemoteConnectionManager/Operational",
+                              "event_levels": ["VERBOSE", "CRITICAL", "WARNING", "ERROR", "INFORMATION"],
+                              "log_group_name": "${local_InstanceLogGroup}",
+                              "log_stream_name": "{instance_id}//EventLog/Microsoft-Windows-TerminalServices-RemoteConnectionManager/Operational",
+                              "event_format": "xml"
+                            },
+                            {
+                              "event_name": "Microsoft-Windows-TerminalServices-RemoteConnectionManager/Operational",
+                              "event_levels": ["VERBOSE", "CRITICAL", "WARNING", "ERROR", "INFORMATION"],
+                              "log_group_name": "${local_InstanceLogGroup}",
+                              "log_stream_name": "{instance_id}//EventLog/Microsoft-Windows-TerminalServices-RemoteConnectionManager/Operational",
+                              "event_format": "xml"
+                            },
+                            {
+                              "event_name": "Microsoft-Windows-TerminalServices-SessionBroker-Client/Admin",
+                              "event_levels": ["VERBOSE", "CRITICAL", "WARNING", "ERROR", "INFORMATION"],
+                              "log_group_name": "${local_InstanceLogGroup}",
+                              "log_stream_name": "{instance_id}//EventLog/Microsoft-Windows-TerminalServices-SessionBroker-Client/Admin",
+                              "event_format": "xml"
+                            },
+                            {
                               "event_name": "Microsoft-Windows-TerminalServices-SessionBroker-Client/Operational",
                               "event_levels": ["VERBOSE", "CRITICAL", "WARNING", "ERROR", "INFORMATION"],
                               "log_group_name": "${local_InstanceLogGroup}",
                               "log_stream_name": "{instance_id}//EventLog/Microsoft-Windows-TerminalServices-SessionBroker-Client/Operational",
+                              "event_format": "xml"
+                            },
+                            {
+                              "event_name": "Microsoft-Windows-User Profile Service/Operational",
+                              "event_levels": ["VERBOSE", "CRITICAL", "WARNING", "ERROR", "INFORMATION"],
+                              "log_group_name": "${local_InstanceLogGroup}",
+                              "log_stream_name": "{instance_id}//EventLog/Microsoft-Windows-User Profile Service/Operational",
                               "event_format": "xml"
                             }
                           ]
