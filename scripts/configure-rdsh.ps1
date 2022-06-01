@@ -322,8 +322,7 @@ $ScoopPackages = @(
     "putty",
     "python",
     "shellcheck",
-    "slack",
-    "vscode"
+    "slack"
 )
 
 # Deps needed for python. Need to silence output from lessmsi since it has non-ASCII characters
