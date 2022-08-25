@@ -344,6 +344,13 @@ foreach ($Package in $ScoopPackages + @("git", "7zip")) {
     }
 }
 
+# Fix Notepad++ so it uses %APPDATA% for config data
+# See: <https://npp-user-manual.org/docs/config-files/#configuration-files-location>
+$NppLocalConf = "${Env:ProgramData}\scoop\apps\notepadplusplus\current\doLocalConf.xml"
+if (Test-Path $NppLocalConf) {
+    Remove-Item $NppLocalConf
+}
+
 # Install Session Manager
 $SessionManagerPluginUrl = "https://s3.amazonaws.com/session-manager-downloads/plugin/latest/windows/SessionManagerPluginSetup.exe"
 $SessionManagerInstaller = "${Env:Temp}\$(($SessionManagerPluginUrl -split('/'))[-1])"
