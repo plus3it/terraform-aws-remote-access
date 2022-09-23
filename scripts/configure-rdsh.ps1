@@ -349,6 +349,25 @@ foreach ($Package in $ScoopPackages + @("git", "7zip")) {
 $NppLocalConf = "${Env:ProgramData}\scoop\apps\notepadplusplus\current\doLocalConf.xml"
 if (Test-Path $NppLocalConf) {
     Remove-Item $NppLocalConf
+    Write-Verbose "[$(get-date -format o)]: Removed Notepad++ local conf file: ${NppLocalConf}"
+  }
+
+# Fix MobaXterm permissions so config ends up in %MyDocuments%
+# See: <https://blog.mobatek.net/post/mobaxterm-configuration-settings>
+$MobaDir = "${Env:ProgramData}\scoop\apps\mobaxterm"
+if (Test-Path $MobaDir) {
+  $MobaAcl = Get-Acl $MobaDir
+  $MobaAcl.SetAccessRuleProtection($True, $False)
+  $MobaRule = New-Object System.Security.AccessControl.FileSystemAccessRule('CREATOR OWNER', 'FullControl', 'ContainerInherit, ObjectInherit', 'InheritOnly', 'Allow')
+  $MobaAcl.AddAccessRule($MobaRule)
+  $MobaRule = New-Object System.Security.AccessControl.FileSystemAccessRule('SYSTEM', 'FullControl', 'ContainerInherit, ObjectInherit', 'None', 'Allow')
+  $MobaAcl.AddAccessRule($MobaRule)
+  $MobaRule = New-Object System.Security.AccessControl.FileSystemAccessRule('Administrators', 'FullControl', 'ContainerInherit, ObjectInherit', 'None', 'Allow')
+  $MobaAcl.AddAccessRule($MobaRule)
+  $MobaRule = New-Object System.Security.AccessControl.FileSystemAccessRule('Users', 'ReadAndExecute, Synchronize', 'ContainerInherit, ObjectInherit', 'None', 'Allow')
+  $MobaAcl.AddAccessRule($MobaRule)
+  Set-Acl $MobaDir $MobaAcl -ErrorAction Stop
+  Write-Verbose "[$(get-date -format o)]: Restricted permissions on MobaXterm directory: ${MobaDir}"
 }
 
 # Install Session Manager
