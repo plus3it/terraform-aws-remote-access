@@ -60,7 +60,7 @@
 | <a name="input_ScaleUpSchedule"></a> [ScaleUpSchedule](#input\_ScaleUpSchedule) | (Optional) Scheduled Action in cron-format (UTC) to scale up to the Desired Capacity; ignored if empty or ScaleDownSchedule is unset (E.g. '0 10 * * Mon-Fri') | `string` | `""` | no |
 | <a name="input_SubnetIDs"></a> [SubnetIDs](#input\_SubnetIDs) | List of Subnet IDs where the RDSH instances and ELB will be launched | `list(string)` | `[]` | no |
 | <a name="input_UpdateSchedule"></a> [UpdateSchedule](#input\_UpdateSchedule) | (Optional) Time interval between auto stack updates. Refer to the AWS documentation for valid input syntax: https://docs.aws.amazon.com/AmazonCloudWatch/latest/events/ScheduledEvents.html | `string` | `""` | no |
-| <a name="input_UserProfileDiskPath"></a> [UserProfileDiskPath](#input\_UserProfileDiskPath) | Path to a CIFS share where User Profile Disks are stored, e.g. [ "home.example.com", "Profiles$" ] eq "\\home.example.com\Profiles$" | `list(string)` | <pre>[<br>  "home.example.com",<br>  "Profiles$"<br>]</pre> | no |
+| <a name="input_UserProfileDiskPath"></a> [UserProfileDiskPath](#input\_UserProfileDiskPath) | Path to a CIFS share where User Profile Disks are stored, e.g. [ "home.example.com", "Profiles$" ] eq "\\\home.example.com\Profiles$" | `list(string)` | <pre>[<br>  "home.example.com",<br>  "Profiles$"<br>]</pre> | no |
 | <a name="input_UtilityScriptsUrl"></a> [UtilityScriptsUrl](#input\_UtilityScriptsUrl) | URL prefix where the repo scripts can be retrieved | `string` | `"https://raw.githubusercontent.com/plus3it/utils/master"` | no |
 
 ## Outputs
