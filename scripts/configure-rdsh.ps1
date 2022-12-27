@@ -344,6 +344,25 @@ foreach ($Package in $ScoopPackages + @("git", "7zip")) {
     }
 }
 
+# Fix Chrome Shim so it uses %APPDATA% for user data
+# See: <https://github.com/ScoopInstaller/Extras/blob/8b5a9d7539c1f5f0c0bd1876d61c7754fe65f07c/bucket/googlechrome.json#L22-L28>
+$ChromeShim = "${Env:ProgramData}\scoop\shims\chrome.shim"
+if (Test-Path $ChromeShim) {
+  "path = `"${Env:ProgramData}\scoop\apps\googlechrome\current\chrome.exe`"" | Out-File $ChromeShim -Force -Encoding oem
+  Write-Verbose "[$(get-date -format o)]: Updated the scoop shim for Google Chrome"
+}
+
+# Fix Chrome Shortcut so it uses %APPDATA% for user data
+# See: <https://github.com/ScoopInstaller/Extras/blob/8b5a9d7539c1f5f0c0bd1876d61c7754fe65f07c/bucket/googlechrome.json#L29-L35>
+$ChromeShortcutPath = "${Env:ProgramData}\Microsoft\Windows\Start Menu\Programs\Scoop Apps\Google Chrome.lnk"
+if (Test-Path $ChromeShortcutPath) {
+  $ChromeShortcut = (New-Object -ComObject WScript.Shell).CreateShortcut("${ChromeShortcutPath}")
+  $ChromeShortcut.TargetPath = "${Env:ProgramData}\scoop\apps\googlechrome\current\chrome.exe"
+  $ChromeShortcut.Arguments = ""
+  $ChromeShortcut.Save()
+  Write-Verbose "[$(get-date -format o)]: Updated the scoop shortcut for Google Chrome"
+}
+
 # Fix Notepad++ so it uses %APPDATA% for config data
 # See: <https://npp-user-manual.org/docs/config-files/#configuration-files-location>
 $NppLocalConf = "${Env:ProgramData}\scoop\apps\notepadplusplus\current\doLocalConf.xml"
