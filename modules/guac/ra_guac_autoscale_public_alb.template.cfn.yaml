@@ -39,6 +39,7 @@ Conditions:
       - !Equals
         - !Ref Route53HostedZoneId
         - ''
+    - Condition: UseGlobalAccelerator
   UseLdap: !Not
     - !And
       - !Equals
@@ -113,6 +114,7 @@ Outputs:
     Description: Security Group ID for Guacamole instances
     Value: !Ref Ec2SecurityGroup
   GlobalAcceleratorDnsName:
+    Condition: UseGlobalAccelerator
     Description: DNS name for the GlobalAccelerator
     Value: !Sub ${GlobalAccelerator.DnsName}
   LoadBalancerDns:
