@@ -28,8 +28,8 @@ Conditions:
       - !Ref ExtensionPriority
       - ''
   UseGlobalAccelerator: !Equals
-      - !Ref CreateGlobalAccelerator
-      - 'true'
+    - !Ref CreateGlobalAccelerator
+    - 'true'
   UseRoute53DnsRecord: !And
     - !Not
       - !Equals
@@ -303,11 +303,11 @@ Parameters:
     Type: String
   SamlCallbackUrl:
     Default: ''
-    Description:  URL SAML identity provider will use after a successful authentication to respond to Guacamole
+    Description: URL SAML identity provider will use after a successful authentication to respond to Guacamole
     Type: String
   SamlEntityId:
     Default: ''
-    Description:  Entity ID of the Guacamole SAML client. Required if either SamlIdpMetadataUrl is not provided or ID is not in metadata file
+    Description: Entity ID of the Guacamole SAML client. Required if either SamlIdpMetadataUrl is not provided or ID is not in metadata file
     Type: String
   SamlGroupAttribute:
     Default: ''
@@ -561,7 +561,7 @@ Resources:
   GlobalAccelerator:
     Condition: UseGlobalAccelerator
     Properties:
-      Enabled: True
+      Enabled: true
       IpAddressType: IPV4
       Name: !Ref AWS::StackName
       Tags:
@@ -744,7 +744,7 @@ Resources:
                 - local_UseLdapGuacBaseDN: !If [UseLdap, !Sub '-C "${GuacBaseDN}"', '']
                   local_UseLdapDN: !If [UseLdap, !Sub '-D "${LdapDN}"', '']
                   local_UseLdapServer: !If [UseLdap, !Sub '-H "${LdapServer}"', '']
-                  local_UseMySqlAutoCreateAccounts: !If [UseSaml, !Sub '-K "${MySqlAutoCreateAccounts}"' , '']
+                  local_UseMySqlAutoCreateAccounts: !If [UseSaml, !Sub '-K "${MySqlAutoCreateAccounts}"', '']
                   local_UseMySqlDatabaseName: !If [UseSaml, !Sub '-f "${MySqlDatabaseName}"', '']
                   local_UseMySqlHostName: !If [UseSaml, !Sub '-E "${MySqlHostName}"', '']
                   local_UseMySqlPassword: !If [UseSaml, !Sub '-g "${MySqlPassword}"', '']
@@ -921,7 +921,7 @@ Resources:
       RecordSets:
         - AliasTarget:
             DNSName: !Sub ${GlobalAccelerator.DnsName}
-            EvaluateTargetHealth: True
+            EvaluateTargetHealth: true
             HostedZoneId: Z2BJ6XQ5FK7U4H
           Name: !Ref Route53DnsName
           Type: A
