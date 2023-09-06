@@ -412,7 +412,7 @@ Resources:
     Type: AWS::EC2::SecurityGroup
   GlobalAccelerator:
     Properties:
-      Enabled: True
+      Enabled: true
       IpAddressType: IPV4
       Name: !Ref AWS::StackName
       Tags:
@@ -857,7 +857,7 @@ Resources:
       RecordSets:
         - AliasTarget:
             DNSName: !Sub ${GlobalAccelerator.DnsName}
-            EvaluateTargetHealth: True
+            EvaluateTargetHealth: true
             HostedZoneId: Z2BJ6XQ5FK7U4H
           Name: !Ref Route53DnsName
           Type: A

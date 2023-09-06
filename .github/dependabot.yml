@@ -1,31 +1,31 @@
 version: 2
 updates:
-- package-ecosystem: github-actions
-  directory: /
-  schedule:
-    interval: weekly
-- package-ecosystem: docker
-  directory: "/"
-  schedule:
-    interval: daily
-  open-pull-requests-limit: 10
-- package-ecosystem: terraform
-  directory: "/modules/rdcb"
-  schedule:
-    interval: daily
-  open-pull-requests-limit: 10
-- package-ecosystem: terraform
-  directory: "/modules/rdgw"
-  schedule:
-    interval: daily
-  open-pull-requests-limit: 10
-- package-ecosystem: terraform
-  directory: "/modules/rdsh"
-  schedule:
-    interval: daily
-  open-pull-requests-limit: 10
-- package-ecosystem: terraform
-  directory: "/tests/example_testcase"
-  schedule:
-    interval: daily
-  open-pull-requests-limit: 10
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+  - package-ecosystem: docker
+    directory: "/"
+    schedule:
+      interval: daily
+    open-pull-requests-limit: 10
+  - package-ecosystem: terraform
+    directory: "/modules/rdcb"
+    schedule:
+      interval: daily
+    open-pull-requests-limit: 10
+  - package-ecosystem: terraform
+    directory: "/modules/rdgw"
+    schedule:
+      interval: daily
+    open-pull-requests-limit: 10
+  - package-ecosystem: terraform
+    directory: "/modules/rdsh"
+    schedule:
+      interval: daily
+    open-pull-requests-limit: 10
+  - package-ecosystem: terraform
+    directory: "/tests/example_testcase"
+    schedule:
+      interval: daily
+    open-pull-requests-limit: 10
