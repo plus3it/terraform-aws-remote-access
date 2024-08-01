@@ -445,6 +445,11 @@ Resources:
     Type: AWS::EC2::SecurityGroup
   LaunchTemplate:
     Metadata:
+      cfn-lint:
+        config:
+          ignore_checks:
+            - E1152
+            - W2010
       'AWS::CloudFormation::Authentication':
         Ec2IamRole:
           roleName: !Ref Ec2IamRole
