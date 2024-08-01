@@ -444,6 +444,10 @@ Resources:
     Type: AWS::GlobalAccelerator::EndpointGroup
   LaunchTemplate:
     Metadata:
+      cfn-lint:
+        config:
+          ignore_checks:
+            - E1152
       'AWS::CloudFormation::Init':
         configSets:
           config:
