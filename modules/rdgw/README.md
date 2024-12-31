@@ -32,9 +32,9 @@
 | <a name="input_S3Bucket"></a> [S3Bucket](#input\_S3Bucket) | n/a | `any` | n/a | yes |
 | <a name="input_StackName"></a> [StackName](#input\_StackName) | CloudFormation Stack Name.  Must be less than 10 characters | `string` | n/a | yes |
 | <a name="input_VpcId"></a> [VpcId](#input\_VpcId) | VPC to deploy instance into | `string` | n/a | yes |
-| <a name="input_AmiFilters"></a> [AmiFilters](#input\_AmiFilters) | List of maps with additional ami search filters | <pre>list(object(<br>    {<br>      Name   = string,<br>      Values = list(string)<br>    }<br>  ))</pre> | <pre>[<br>  {<br>    "Name": "name",<br>    "Values": [<br>      "Windows_Server-2016-English-Full-Base-*"<br>    ]<br>  }<br>]</pre> | no |
+| <a name="input_AmiFilters"></a> [AmiFilters](#input\_AmiFilters) | List of maps with additional ami search filters | <pre>list(object(<br/>    {<br/>      Name   = string,<br/>      Values = list(string)<br/>    }<br/>  ))</pre> | <pre>[<br/>  {<br/>    "Name": "name",<br/>    "Values": [<br/>      "Windows_Server-2016-English-Full-Base-*"<br/>    ]<br/>  }<br/>]</pre> | no |
 | <a name="input_AmiId"></a> [AmiId](#input\_AmiId) | (Optional) AMI ID -- will supersede Lambda-based AMI lookup using AmiNameSearchString | `string` | `""` | no |
-| <a name="input_AmiOwners"></a> [AmiOwners](#input\_AmiOwners) | List of owners to filter ami search results against | `list(string)` | <pre>[<br>  "amazon"<br>]</pre> | no |
+| <a name="input_AmiOwners"></a> [AmiOwners](#input\_AmiOwners) | List of owners to filter ami search results against | `list(string)` | <pre>[<br/>  "amazon"<br/>]</pre> | no |
 | <a name="input_AuthenticationMethod"></a> [AuthenticationMethod](#input\_AuthenticationMethod) | Configures the RDGW for either Password or Smartcard authentication | `string` | `"Password"` | no |
 | <a name="input_CloudWatchAgentUrl"></a> [CloudWatchAgentUrl](#input\_CloudWatchAgentUrl) | (Optional) S3 URL to CloudWatch Agent MSI. Example: s3://amazoncloudwatch-agent/windows/amd64/latest/amazon-cloudwatch-agent.msi | `string` | `""` | no |
 | <a name="input_DesiredCapacity"></a> [DesiredCapacity](#input\_DesiredCapacity) | The number of instances the autoscale group will spin up initially | `string` | `"1"` | no |
