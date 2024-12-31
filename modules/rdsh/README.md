@@ -32,9 +32,9 @@
 | <a name="input_RdpPrivateKeyPfx"></a> [RdpPrivateKeyPfx](#input\_RdpPrivateKeyPfx) | S3 bucket and path to a private key for the RDP certificate, e.g. '<bucket>/path/to/key.pfx' | `string` | n/a | yes |
 | <a name="input_StackName"></a> [StackName](#input\_StackName) | CloudFormation Stack Name.  Must be less than 10 characters | `string` | n/a | yes |
 | <a name="input_VpcId"></a> [VpcId](#input\_VpcId) | VPC to deploy instance(s) into | `string` | n/a | yes |
-| <a name="input_AmiFilters"></a> [AmiFilters](#input\_AmiFilters) | List of maps with additional ami search filters | <pre>list(object(<br>    {<br>      Name   = string,<br>      Values = list(string)<br>    }<br>  ))</pre> | <pre>[<br>  {<br>    "Name": "name",<br>    "Values": [<br>      "Windows_Server-2016-English-Full-Base-*"<br>    ]<br>  }<br>]</pre> | no |
+| <a name="input_AmiFilters"></a> [AmiFilters](#input\_AmiFilters) | List of maps with additional ami search filters | <pre>list(object(<br/>    {<br/>      Name   = string,<br/>      Values = list(string)<br/>    }<br/>  ))</pre> | <pre>[<br/>  {<br/>    "Name": "name",<br/>    "Values": [<br/>      "Windows_Server-2016-English-Full-Base-*"<br/>    ]<br/>  }<br/>]</pre> | no |
 | <a name="input_AmiId"></a> [AmiId](#input\_AmiId) | (Optional) AMI ID -- will supersede Lambda-based AMI lookup using AmiNameSearchString | `string` | `""` | no |
-| <a name="input_AmiOwners"></a> [AmiOwners](#input\_AmiOwners) | List of owners to filter ami search results against | `list(string)` | <pre>[<br>  "amazon"<br>]</pre> | no |
+| <a name="input_AmiOwners"></a> [AmiOwners](#input\_AmiOwners) | List of owners to filter ami search results against | `list(string)` | <pre>[<br/>  "amazon"<br/>]</pre> | no |
 | <a name="input_CloudWatchAgentUrl"></a> [CloudWatchAgentUrl](#input\_CloudWatchAgentUrl) | (Optional) S3 URL to CloudWatch Agent MSI. Example: s3://amazoncloudwatch-agent/windows/amd64/latest/amazon-cloudwatch-agent.msi | `string` | `""` | no |
 | <a name="input_ConnectionBrokerFqdn"></a> [ConnectionBrokerFqdn](#input\_ConnectionBrokerFqdn) | Fully qualified domain name (FQDN) of the primary Connection Broker, e.g. 'cb.example.com' | `string` | `""` | no |
 | <a name="input_DesiredCapacity"></a> [DesiredCapacity](#input\_DesiredCapacity) | The number of instances the autoscale group will spin up initially | `string` | `"1"` | no |
@@ -50,7 +50,7 @@
 | <a name="input_LdapContainerOU"></a> [LdapContainerOU](#input\_LdapContainerOU) | DN of the LDAP container or OU in which the RDSH instance will be placed | `string` | `"OU=Users,DC=example,DC=com"` | no |
 | <a name="input_MaxCapacity"></a> [MaxCapacity](#input\_MaxCapacity) | The maximum number of instances for the autoscale group | `string` | `"2"` | no |
 | <a name="input_MinCapacity"></a> [MinCapacity](#input\_MinCapacity) | The minimum number of instances for the autoscale group | `string` | `"0"` | no |
-| <a name="input_NlbZones"></a> [NlbZones](#input\_NlbZones) | Map of NLB Zones | `map(string)` | <pre>{<br>  "us-east-1": "Z26RNL4JYFTOTI",<br>  "us-east-2": "ZLMOA37VPKANP",<br>  "us-west-1": "Z24FKFUX50B4VW",<br>  "us-west-2": "Z18D5FSROUN65G"<br>}</pre> | no |
+| <a name="input_NlbZones"></a> [NlbZones](#input\_NlbZones) | Map of NLB Zones | `map(string)` | <pre>{<br/>  "us-east-1": "Z26RNL4JYFTOTI",<br/>  "us-east-2": "ZLMOA37VPKANP",<br/>  "us-west-1": "Z24FKFUX50B4VW",<br/>  "us-west-2": "Z18D5FSROUN65G"<br/>}</pre> | no |
 | <a name="input_PrivateDnszoneId"></a> [PrivateDnszoneId](#input\_PrivateDnszoneId) | ZoneId where DNS record will be created for the RDSH nodes | `string` | `""` | no |
 | <a name="input_RdpPrivateKeyS3Endpoint"></a> [RdpPrivateKeyS3Endpoint](#input\_RdpPrivateKeyS3Endpoint) | S3 endpoint URL hosting the bucket where the RDP certificate private key is stored | `string` | `"https://s3.amazonaws.com"` | no |
 | <a name="input_RemoteAccessScriptsUrl"></a> [RemoteAccessScriptsUrl](#input\_RemoteAccessScriptsUrl) | URL prefix where the repo scripts can be retrieved | `string` | `"https://raw.githubusercontent.com/plus3it/terraform-aws-remote-access/master"` | no |
@@ -60,7 +60,7 @@
 | <a name="input_ScaleUpSchedule"></a> [ScaleUpSchedule](#input\_ScaleUpSchedule) | (Optional) Scheduled Action in cron-format (UTC) to scale up to the Desired Capacity; ignored if empty or ScaleDownSchedule is unset (E.g. '0 10 * * Mon-Fri') | `string` | `""` | no |
 | <a name="input_SubnetIDs"></a> [SubnetIDs](#input\_SubnetIDs) | List of Subnet IDs where the RDSH instances and ELB will be launched | `list(string)` | `[]` | no |
 | <a name="input_UpdateSchedule"></a> [UpdateSchedule](#input\_UpdateSchedule) | (Optional) Time interval between auto stack updates. Refer to the AWS documentation for valid input syntax: https://docs.aws.amazon.com/AmazonCloudWatch/latest/events/ScheduledEvents.html | `string` | `""` | no |
-| <a name="input_UserProfileDiskPath"></a> [UserProfileDiskPath](#input\_UserProfileDiskPath) | Path to a CIFS share where User Profile Disks are stored, e.g. [ "home.example.com", "Profiles$" ] eq "\\\home.example.com\Profiles$" | `list(string)` | <pre>[<br>  "home.example.com",<br>  "Profiles$"<br>]</pre> | no |
+| <a name="input_UserProfileDiskPath"></a> [UserProfileDiskPath](#input\_UserProfileDiskPath) | Path to a CIFS share where User Profile Disks are stored, e.g. [ "home.example.com", "Profiles$" ] eq "\\\home.example.com\Profiles$" | `list(string)` | <pre>[<br/>  "home.example.com",<br/>  "Profiles$"<br/>]</pre> | no |
 | <a name="input_UtilityScriptsUrl"></a> [UtilityScriptsUrl](#input\_UtilityScriptsUrl) | URL prefix where the repo scripts can be retrieved | `string` | `"https://raw.githubusercontent.com/plus3it/utils/master"` | no |
 
 ## Outputs
