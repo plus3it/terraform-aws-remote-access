@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/) and this project adheres to [Semantic Versioning](http://semver.org/).
 
+### [0.9.0](https://github.com/plus3it/terraform-aws-tardigrade-ebs-encryption/releases/tag/0.9.0)
+
+**Released**: 2025.12.30
+
+**Summary**:
+
+*   Addresses deprecation warning for aws_region "name" attribute
+
 ### 0.6.0
 
 **Released**: 2020.04.10
