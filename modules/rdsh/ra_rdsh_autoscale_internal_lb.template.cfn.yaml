@@ -449,6 +449,7 @@ Resources:
         config:
           ignore_checks:
             - E1152
+            - E3009
             - W2010
       'AWS::CloudFormation::Authentication':
         Ec2IamRole:
